@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MyHospital – Compassionate Care, Modern Medicine</title>
+  <meta name="description" content="MyHospital provides world-class healthcare services including ambulance, blood bank, laboratory, consultancy, pharmacy, and scanning services." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ─────────────────────────────────────────
+       CSS Reset & Variables
+    ───────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --teal:        #0B7B6E;
+      --teal-dark:   #075F55;
+      --teal-light:  #E6F5F3;
+      --teal-mid:    #12A898;
+      --accent:      #E8545A;
+      --accent-soft: #FFF0F1;
+      --text-dark:   #1A1F2E;
+      --text-mid:    #4A5568;
+      --text-soft:   #8A93A8;
+      --white:       #FFFFFF;
+      --bg:          #F8FAFA;
+      --border:      #E2E8F0;
+      --shadow-sm:   0 2px 8px rgba(11,123,110,0.08);
+      --shadow-md:   0 8px 30px rgba(11,123,110,0.12);
+      --shadow-lg:   0 20px 60px rgba(11,123,110,0.15);
+      --radius-sm:   10px;
+      --radius-md:   18px;
+      --radius-lg:   28px;
+      --transition:  0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--white);
+      color: var(--text-dark);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ─────────────────────────────────────────
+       TOPBAR
+    ───────────────────────────────────────── */
+    .topbar {
+      background: var(--teal-dark);
+      color: rgba(255,255,255,0.88);
+      font-size: 0.78rem;
+      letter-spacing: 0.02em;
+      padding: 8px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .topbar-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .topbar-item svg { opacity: 0.75; flex-shrink: 0; }
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .topbar-link {
+      color: rgba(255,255,255,0.8);
+      text-decoration: none;
+      transition: color var(--transition);
+      font-weight: 500;
+    }
+    .topbar-link:hover { color: #fff; }
+    .emergency-badge {
+      background: var(--accent);
+      color: #fff;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.76rem;
+      letter-spacing: 0.03em;
+      animation: pulse-badge 2s ease-in-out infinite;
+    }
+    @keyframes pulse-badge {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(232,84,90,0.5); }
+      50% { box-shadow: 0 0 0 6px rgba(232,84,90,0); }
+    }
+
+    /* ─────────────────────────────────────────
+       NAVBAR
+    ───────────────────────────────────────── */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.96);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 70px;
+      transition: box-shadow var(--transition);
+    }
+    .navbar.scrolled { box-shadow: var(--shadow-md); }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      list-style: none;
+    }
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text-mid);
+      font-size: 0.9rem;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      transition: all var(--transition);
+      position: relative;
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: 2px; left: 50%; right: 50%;
+      height: 2px;
+      background: var(--teal);
+      border-radius: 2px;
+      transition: all var(--transition);
+    }
+    .nav-links a:hover { color: var(--teal); background: var(--teal-light); }
+    .nav-links a:hover::after { left: 14px; right: 14px; }
+
+    /* Profile / Logo on right */
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .btn-appt {
+      background: var(--teal);
+      color: #fff;
+      border: none;
+      padding: 9px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 0.87rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      letter-spacing: 0.02em;
+    }
+    .btn-appt:hover { background: var(--teal-dark); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+
+    /* Logo + Profile Dropdown (right side) */
+    .logo-profile {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: var(--radius-md);
+      transition: background var(--transition);
+    }
+    .logo-profile:hover { background: var(--teal-light); }
+    .logo-img {
+      width: 38px;
+      height: 38px;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+    .logo-text-block { line-height: 1.2; }
+    .logo-name {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--teal-dark);
+      letter-spacing: -0.02em;
+    }
+    .logo-tagline { font-size: 0.65rem; color: var(--text-soft); font-weight: 400; }
+
+    /* Dropdown */
+    .profile-dropdown {
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      width: 220px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-8px);
+      transition: all var(--transition);
+      z-index: 200;
+    }
+    .logo-profile:hover .profile-dropdown,
+    .logo-profile:focus-within .profile-dropdown {
+      opacity: 1;
+      pointer-events: all;
+      transform: translateY(0);
+    }
+    .dropdown-header {
+      padding: 16px;
+      background: var(--teal-light);
+      border-bottom: 1px solid var(--border);
+    }
+    .dropdown-avatar {
+      width: 44px; height: 44px;
+      background: var(--teal);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 700; font-size: 1.1rem;
+      margin-bottom: 8px;
+    }
+    .dropdown-name { font-weight: 600; font-size: 0.92rem; color: var(--text-dark); }
+    .dropdown-email { font-size: 0.75rem; color: var(--text-soft); }
+    .dropdown-items { padding: 8px; }
+    .dropdown-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      color: var(--text-mid);
+      font-size: 0.87rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition);
+      text-decoration: none;
+    }
+    .dropdown-item:hover { background: var(--teal-light); color: var(--teal); }
+    .dropdown-item svg { opacity: 0.6; }
+    .dropdown-item:hover svg { opacity: 1; }
+    .dropdown-divider { height: 1px; background: var(--border); margin: 6px 8px; }
+    .dropdown-item.logout { color: var(--accent); }
+    .dropdown-item.logout:hover { background: var(--accent-soft); }
+
+    /* ─────────────────────────────────────────
+       HERO
+    ───────────────────────────────────────── */
+    .hero {
+      position: relative;
+      min-height: 560px;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      background: linear-gradient(135deg, var(--teal-light) 0%, #fff 60%);
+    }
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background-image: url('hero_medical.png');
+      background-size: cover;
+      background-position: center;
+      opacity: 0.10;
+    }
+    .hero-decorations {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .hero-circle {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(11,123,110,0.06) 0%, transparent 70%);
+    }
+    .hero-circle-1 { width: 600px; height: 600px; top: -200px; right: -100px; }
+    .hero-circle-2 { width: 300px; height: 300px; bottom: -100px; left: 100px; }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 80px 40px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+      width: 100%;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--teal-light);
+      border: 1px solid rgba(11,123,110,0.2);
+      color: var(--teal);
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .hero-badge-dot {
+      width: 6px; height: 6px;
+      background: var(--teal-mid);
+      border-radius: 50%;
+      animation: blink 1.5s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      font-weight: 700;
+      line-height: 1.15;
+      color: var(--text-dark);
+      margin-bottom: 20px;
+    }
+    .hero-title .highlight { color: var(--teal); }
+    .hero-desc {
+      font-size: 1rem;
+      color: var(--text-mid);
+      margin-bottom: 32px;
+      max-width: 460px;
+      line-height: 1.75;
+    }
+    .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+    .btn-primary {
+      background: var(--teal);
+      color: #fff;
+      padding: 13px 28px;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 0.95rem;
+      border: none;
+      cursor: pointer;
+      transition: all var(--transition);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary:hover { background: var(--teal-dark); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(11,123,110,0.3); }
+    .btn-outline {
+      background: transparent;
+      color: var(--teal);
+      padding: 13px 28px;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 0.95rem;
+      border: 2px solid var(--teal);
+      cursor: pointer;
+      transition: all var(--transition);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-outline:hover { background: var(--teal-light); transform: translateY(-2px); }
+
+    /* Hero Stats */
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      margin-top: 40px;
+      box-shadow: var(--shadow-sm);
+    }
+    .stat-item {
+      background: #fff;
+      padding: 20px 16px;
+      text-align: center;
+    }
+    .stat-number {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--teal);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .stat-label { font-size: 0.75rem; color: var(--text-soft); font-weight: 500; }
+
+    /* Hero Right – Quick Access */
+    .hero-right {
+      background: #fff;
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border);
+    }
+    .quick-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 6px;
+    }
+    .quick-sub { font-size: 0.82rem; color: var(--text-soft); margin-bottom: 22px; }
+    .quick-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .quick-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 18px 10px;
+      border-radius: var(--radius-md);
+      border: 1.5px solid var(--border);
+      background: var(--bg);
+      cursor: pointer;
+      transition: all var(--transition);
+      text-align: center;
+      text-decoration: none;
+      color: var(--text-dark);
+    }
+    .quick-card:hover {
+      border-color: var(--teal);
+      background: var(--teal-light);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+    }
+    .quick-card-icon {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+    }
+    .quick-card-label { font-size: 0.8rem; font-weight: 600; }
+
+    /* ─────────────────────────────────────────
+       SEARCH BAR
+    ───────────────────────────────────────── */
+    .search-section {
+      background: var(--teal);
+      padding: 28px 40px;
+    }
+    .search-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .search-label {
+      color: rgba(255,255,255,0.85);
+      font-size: 0.88rem;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .search-box {
+      flex: 1;
+      display: flex;
+      background: #fff;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+    }
+    .search-box input {
+      flex: 1;
+      border: none;
+      outline: none;
+      padding: 13px 18px;
+      font-size: 0.92rem;
+      font-family: 'Inter', sans-serif;
+      color: var(--text-dark);
+    }
+    .search-box select {
+      border: none;
+      border-left: 1px solid var(--border);
+      outline: none;
+      padding: 13px 14px;
+      font-size: 0.88rem;
+      font-family: 'Inter', sans-serif;
+      color: var(--text-mid);
+      background: #fff;
+      cursor: pointer;
+    }
+    .search-btn {
+      background: var(--teal-dark);
+      color: #fff;
+      border: none;
+      padding: 13px 22px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .search-btn:hover { background: #053f38; }
+
+    /* ─────────────────────────────────────────
+       SECTION TITLES
+    ───────────────────────────────────────── */
+    .section-header {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+    .section-eyebrow {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 10px;
+    }
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 12px;
+    }
+    .section-desc {
+      font-size: 0.97rem;
+      color: var(--text-mid);
+      max-width: 540px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+    .section-rule {
+      width: 50px; height: 3px;
+      background: var(--teal);
+      border-radius: 2px;
+      margin: 14px auto 0;
+    }
+
+    /* ─────────────────────────────────────────
+       SERVICES SECTION
+    ───────────────────────────────────────── */
+    .services-section {
+      padding: 80px 40px;
+      background: var(--bg);
+    }
+    .services-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 24px;
+    }
+    .service-card {
+      background: #fff;
+      border-radius: var(--radius-md);
+      padding: 32px 28px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    .service-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--teal), var(--teal-mid));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform var(--transition);
+    }
+    .service-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); border-color: transparent; }
+    .service-card:hover::before { transform: scaleX(1); }
+
+    .service-icon-wrap {
+      width: 60px; height: 60px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      font-size: 1.6rem;
+      transition: transform var(--transition);
+    }
+    .service-card:hover .service-icon-wrap { transform: scale(1.1) rotate(-3deg); }
+
+    .service-name {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 10px;
+    }
+    .service-desc {
+      font-size: 0.875rem;
+      color: var(--text-mid);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+    .service-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+    .status-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+    }
+    .status-available { background: #E6FAF0; color: #1A7A4C; }
+    .status-dot.available { background: #22C55E; animation: blink 1.5s infinite; }
+    .status-busy { background: #FFF8E6; color: #B36F00; }
+    .status-dot.busy { background: #F59E0B; }
+
+    .service-link {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 18px;
+      color: var(--teal);
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: gap var(--transition);
+    }
+    .service-link:hover { gap: 10px; }
+
+    /* Icon colors */
+    .ic-red    { background: #FFF0F1; }
+    .ic-teal   { background: var(--teal-light); }
+    .ic-blue   { background: #EFF6FF; }
+    .ic-purple { background: #F5F0FF; }
+    .ic-green  { background: #EDFDF4; }
+    .ic-orange { background: #FFF7ED; }
+
+    /* ─────────────────────────────────────────
+       WHY CHOOSE US
+    ───────────────────────────────────────── */
+    .why-section {
+      padding: 80px 40px;
+      background: #fff;
+    }
+    .why-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+    .why-image-wrap {
+      position: relative;
+    }
+    .why-image {
+      width: 100%;
+      border-radius: var(--radius-lg);
+      object-fit: cover;
+      height: 480px;
+    }
+    .why-badge-float {
+      position: absolute;
+      background: #fff;
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .wbf-1 { bottom: 30px; right: -20px; }
+    .wbf-2 { top: 30px; left: -20px; }
+    .wbf-icon {
+      width: 42px; height: 42px;
+      background: var(--teal-light);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+    }
+    .wbf-num { font-size: 1.4rem; font-weight: 800; color: var(--teal); line-height: 1; }
+    .wbf-txt { font-size: 0.73rem; color: var(--text-soft); font-weight: 500; }
+
+    .why-features { display: flex; flex-direction: column; gap: 22px; }
+    .why-feature {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      padding: 20px;
+      border-radius: var(--radius-md);
+      transition: background var(--transition);
+    }
+    .why-feature:hover { background: var(--teal-light); }
+    .why-feat-icon {
+      width: 48px; height: 48px;
+      background: var(--teal-light);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+    .why-feat-title { font-size: 0.97rem; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; }
+    .why-feat-desc { font-size: 0.85rem; color: var(--text-mid); line-height: 1.6; }
+
+    /* ─────────────────────────────────────────
+       ANNOUNCEMENT TICKER
+    ───────────────────────────────────────── */
+    .ticker-bar {
+      background: #fff;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 0;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+    .ticker-label {
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 6px 16px;
+      border-radius: 0 20px 20px 0;
+      margin-right: 20px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .ticker-track {
+      display: flex;
+      gap: 60px;
+      animation: ticker 30s linear infinite;
+      white-space: nowrap;
+    }
+    .ticker-track:hover { animation-play-state: paused; }
+    .ticker-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: var(--text-mid);
+      flex-shrink: 0;
+    }
+    .ticker-item span { font-weight: 600; color: var(--text-dark); }
+    @keyframes ticker {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* ─────────────────────────────────────────
+       DOCTOR APPOINTMENT BANNER
+    ───────────────────────────────────────── */
+    .appt-banner {
+      background: linear-gradient(135deg, var(--teal-dark) 0%, var(--teal-mid) 100%);
+      padding: 60px 40px;
+    }
+    .appt-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 40px;
+      align-items: center;
+    }
+    .appt-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+    .appt-desc { color: rgba(255,255,255,0.8); font-size: 0.95rem; max-width: 480px; }
+    .appt-form {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-width: 300px;
+    }
+    .appt-form-title {
+      font-weight: 700;
+      color: #fff;
+      font-size: 1rem;
+      margin-bottom: 4px;
+    }
+    .appt-input {
+      background: rgba(255,255,255,0.9);
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 11px 14px;
+      font-size: 0.875rem;
+      font-family: 'Inter', sans-serif;
+      color: var(--text-dark);
+      outline: none;
+      transition: background var(--transition);
+    }
+    .appt-input:focus { background: #fff; }
+    .appt-submit {
+      background: #fff;
+      color: var(--teal-dark);
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+      transition: all var(--transition);
+      font-family: 'Inter', sans-serif;
+    }
+    .appt-submit:hover { background: var(--teal-light); transform: translateY(-1px); }
+
+    /* ─────────────────────────────────────────
+       NOTICES / INFO CARDS
+    ───────────────────────────────────────── */
+    .info-section {
+      padding: 80px 40px;
+      background: var(--bg);
+    }
+    .info-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+    }
+    .info-card {
+      background: #fff;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      transition: all var(--transition);
+    }
+    .info-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+    .info-card-top {
+      padding: 20px 20px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .info-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .info-card-title { font-size: 0.97rem; font-weight: 700; color: var(--text-dark); }
+    .info-card-body { padding: 16px 20px; }
+    .info-card-body p { font-size: 0.84rem; color: var(--text-mid); line-height: 1.65; }
+    .info-card-body .info-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 12px;
+      color: var(--teal);
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: gap var(--transition);
+    }
+    .info-card-body .info-link:hover { gap: 9px; }
+
+    /* ─────────────────────────────────────────
+       RESPONSIVE
+    ───────────────────────────────────────── */
+    @media (max-width: 1024px) {
+      .hero-content { grid-template-columns: 1fr; gap: 40px; }
+      .hero-right { max-width: 500px; }
+      .why-inner { grid-template-columns: 1fr; }
+      .why-image { height: 300px; }
+      .appt-inner { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      .topbar { padding: 8px 20px; font-size: 0.72rem; }
+      .topbar-left { gap: 12px; }
+      .navbar { padding: 0 20px; }
+      .nav-links { display: none; }
+      .hero-content { padding: 60px 20px; }
+      .services-section, .why-section, .info-section { padding: 60px 20px; }
+      .search-section { padding: 20px; }
+      .search-inner { flex-direction: column; align-items: stretch; }
+      .appt-banner { padding: 40px 20px; }
+      .hero-stats { grid-template-columns: 1fr 1fr 1fr; }
+      .quick-grid { grid-template-columns: 1fr 1fr 1fr; }
+    }
+
+    /* ─────────────────────────────────────────
+       SCROLL ANIMATION
+    ───────────────────────────────────────── */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ▌TOPBAR ▌ -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-item">
+        <!-- map pin -->
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span>12, MG Road, Bengaluru – 560001, Karnataka</span>
+      </div>
+      <div class="topbar-item">
+        <!-- phone -->
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.16 6.16l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2z"/></svg>
+        <span>+91 80 4567 8900</span>
+      </div>
+      <div class="topbar-item">
+        <!-- clock -->
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>OPD: Mon–Sat, 8 AM – 8 PM</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <a href="#" class="topbar-link">Patient Portal</a>
+      <a href="#" class="topbar-link">Careers</a>
+      <span class="emergency-badge">🚨 Emergency: 108</span>
+    </div>
+  </div>
+
+  <!-- ▌NAVBAR ▌ -->
+  <nav class="navbar" id="mainNav" role="navigation" aria-label="Main navigation">
+    <div class="nav-left">
+      <ul class="nav-links">
+        <li><a href="#services">Services</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#appointment">Appointment</a></li>
+        <li><a href="#notices">Notices</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </div>
+    <div class="nav-right">
+      <button class="btn-appt" id="bookApptBtn" onclick="document.getElementById('appointment').scrollIntoView({behavior:'smooth'})">
+        Book Appointment
+      </button>
+      <!-- LOGO + PROFILE DROPDOWN (top-right corner) -->
+      <div class="logo-profile" tabindex="0" role="button" aria-label="Profile menu" aria-haspopup="true">
+        <img src="hospital_logo.png" alt="MyHospital Logo" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.background='var(--teal)'; this.nextElementSibling.innerHTML='<svg width=22 height=22 viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'white\' stroke-width=2><path d=\'M12 2L2 7l10 5 10-5-10-5M2 17l10 5 10-5M2 12l10 5 10-5\'/></svg>';" />
+        <div class="logo-text-block">
+          <div class="logo-name">MyHospital</div>
+          <div class="logo-tagline">Compassionate Care</div>
+        </div>
+        <!-- Dropdown -->
+        <div class="profile-dropdown" role="menu">
+          <div class="dropdown-header">
+            <div class="dropdown-avatar">JD</div>
+            <div class="dropdown-name">John Doe</div>
+            <div class="dropdown-email">john.doe@email.com</div>
+          </div>
+          <div class="dropdown-items">
+            <a href="#" class="dropdown-item" role="menuitem">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              My Profile
+            </a>
+            <a href="#" class="dropdown-item" role="menuitem">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              My Appointments
+            </a>
+            <a href="#" class="dropdown-item" role="menuitem">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Medical Records
+            </a>
+            <a href="#" class="dropdown-item" role="menuitem">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Prescriptions
+            </a>
+            <a href="#" class="dropdown-item" role="menuitem">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+              Settings
+            </a>
+            <div class="dropdown-divider"></div>
+            <a href="#" class="dropdown-item logout" role="menuitem">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Sign Out
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ▌HERO ▌ -->
+  <section class="hero" aria-label="Hero">
+    <div class="hero-bg" aria-hidden="true"></div>
+    <div class="hero-decorations" aria-hidden="true">
+      <div class="hero-circle hero-circle-1"></div>
+      <div class="hero-circle hero-circle-2"></div>
+    </div>
+    <div class="hero-content">
+      <!-- Left -->
+      <div class="hero-left fade-up">
+        <div class="hero-badge"><div class="hero-badge-dot"></div>NABH Accredited Hospital</div>
+        <h1 class="hero-title">Your Health is Our <span class="highlight">Top Priority</span></h1>
+        <p class="hero-desc">Delivering compassionate, patient-centred care with state-of-the-art medical technology. Trusted by 50,000+ patients across Karnataka.</p>
+        <div class="hero-actions">
+          <a href="#appointment" class="btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Book Appointment
+          </a>
+          <a href="#services" class="btn-outline">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 16 16 12 12 8"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            Explore Services
+          </a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-item"><div class="stat-number">50K+</div><div class="stat-label">Happy Patients</div></div>
+          <div class="stat-item"><div class="stat-number">120+</div><div class="stat-label">Specialists</div></div>
+          <div class="stat-item"><div class="stat-number">24/7</div><div class="stat-label">Emergency Care</div></div>
+        </div>
+      </div>
+      <!-- Right -->
+      <div class="hero-right fade-up" style="transition-delay:0.15s">
+        <div class="quick-title">Quick Access</div>
+        <div class="quick-sub">Tap a service to get started</div>
+        <div class="quick-grid">
+          <a href="#ambulance" class="quick-card">
+            <div class="quick-card-icon ic-red">🚑</div>
+            <span class="quick-card-label">Ambulance</span>
+          </a>
+          <a href="#bloodbank" class="quick-card">
+            <div class="quick-card-icon ic-red">🩸</div>
+            <span class="quick-card-label">Blood Bank</span>
+          </a>
+          <a href="#laboratory" class="quick-card">
+            <div class="quick-card-icon ic-blue">🔬</div>
+            <span class="quick-card-label">Laboratory</span>
+          </a>
+          <a href="#consultancy" class="quick-card">
+            <div class="quick-card-icon ic-teal">👨‍⚕️</div>
+            <span class="quick-card-label">Consultancy</span>
+          </a>
+          <a href="#pharmacy" class="quick-card">
+            <div class="quick-card-icon ic-green">💊</div>
+            <span class="quick-card-label">Pharmacy</span>
+          </a>
+          <a href="#scanning" class="quick-card">
+            <div class="quick-card-icon ic-purple">🩻</div>
+            <span class="quick-card-label">Scanning</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ▌SEARCH BAR ▌ -->
+  <div class="search-section" aria-label="Service search">
+    <div class="search-inner">
+      <span class="search-label">Find a Service</span>
+      <div class="search-box">
+        <input type="text" id="serviceSearch" placeholder="Search doctors, departments, or services…" aria-label="Search services" />
+        <select aria-label="Select department" id="deptSelect">
+          <option value="">All Departments</option>
+          <option>Ambulance</option>
+          <option>Blood Bank</option>
+          <option>Laboratory</option>
+          <option>Consultancy</option>
+          <option>Pharmacy</option>
+          <option>Scanning</option>
+        </select>
+        <button class="search-btn" id="searchBtn" aria-label="Search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Search
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ▌ANNOUNCEMENT TICKER ▌ -->
+  <div class="ticker-bar" aria-label="Hospital announcements">
+    <div class="ticker-label">📢 Notices</div>
+    <div class="ticker-track" aria-live="polite">
+      <div class="ticker-item">🩺 <span>Free Health Camp</span> – 28 July 2026, Hall A</div>
+      <div class="ticker-item">💉 <span>COVID Vaccination</span> – Available all days, Immunisation Ward</div>
+      <div class="ticker-item">🏥 <span>New ICU Wing</span> inaugurated with 40 beds</div>
+      <div class="ticker-item">📞 <span>24/7 Tele-Consultation</span> – Now available on the Patient App</div>
+      <div class="ticker-item">🩸 <span>Blood Donation Drive</span> – Every Saturday, 10 AM – 4 PM</div>
+      <div class="ticker-item">📋 <span>Online Lab Reports</span> – Download instantly via Patient Portal</div>
+      <!-- duplicate for infinite loop -->
+      <div class="ticker-item">🩺 <span>Free Health Camp</span> – 28 July 2026, Hall A</div>
+      <div class="ticker-item">💉 <span>COVID Vaccination</span> – Available all days, Immunisation Ward</div>
+      <div class="ticker-item">🏥 <span>New ICU Wing</span> inaugurated with 40 beds</div>
+      <div class="ticker-item">📞 <span>24/7 Tele-Consultation</span> – Now available on the Patient App</div>
+      <div class="ticker-item">🩸 <span>Blood Donation Drive</span> – Every Saturday, 10 AM – 4 PM</div>
+      <div class="ticker-item">📋 <span>Online Lab Reports</span> – Download instantly via Patient Portal</div>
+    </div>
+  </div>
+
+  <!-- ▌SERVICES ▌ -->
+  <section class="services-section" id="services" aria-label="Our Services">
+    <div class="section-header fade-up">
+      <span class="section-eyebrow">What We Offer</span>
+      <h2 class="section-title">Comprehensive Medical Services</h2>
+      <p class="section-desc">Everything you need under one roof — from emergency response to preventive care.</p>
+      <div class="section-rule"></div>
+    </div>
+    <div class="services-grid">
+
+      <!-- Ambulance -->
+      <article class="service-card fade-up" id="ambulance">
+        <div class="service-icon-wrap ic-red">🚑</div>
+        <h3 class="service-name">Ambulance Services</h3>
+        <p class="service-desc">Round-the-clock emergency ambulance fleet with trained paramedics, advanced life support (ALS) and basic life support (BLS) vehicles ready for rapid response across the city.</p>
+        <span class="service-status status-available"><span class="status-dot available"></span>Available 24/7</span>
+        <a href="#" class="service-link">Request Ambulance <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></a>
+      </article>
+
+      <!-- Blood Bank -->
+      <article class="service-card fade-up" id="bloodbank" style="transition-delay:0.05s">
+        <div class="service-icon-wrap ic-red">🩸</div>
+        <h3 class="service-name">Blood Bank</h3>
+        <p class="service-desc">Fully equipped blood bank with all blood groups including rare types. Voluntary donation drives conducted weekly. Instant availability for surgical and emergency requirements.</p>
+        <span class="service-status status-available"><span class="status-dot available"></span>All Groups Available</span>
+        <a href="#" class="service-link">Check Availability <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></a>
+      </article>
+
+      <!-- Laboratory -->
+      <article class="service-card fade-up" id="laboratory" style="transition-delay:0.1s">
+        <div class="service-icon-wrap ic-blue">🔬</div>
+        <h3 class="service-name">Laboratory & Diagnostics</h3>
+        <p class="service-desc">NABL-accredited pathology lab offering 500+ tests. CBC, LFT, KFT, thyroid, hormonal assays, culture & sensitivity, and rapid point-of-care tests. Reports in 4–6 hours.</p>
+        <span class="service-status status-available"><span class="status-dot available"></span>Reports in 4–6 hrs</span>
+        <a href="#" class="service-link">Book a Test <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></a>
+      </article>
+
+      <!-- Consultancy -->
+      <article class="service-card fade-up" id="consultancy" style="transition-delay:0.15s">
+        <div class="service-icon-wrap ic-teal">👨‍⚕️</div>
+        <h3 class="service-name">Medical Consultancy</h3>
+        <p class="service-desc">120+ specialist doctors across 30+ departments including Cardiology, Neurology, Orthopaedics, Oncology, and Paediatrics. In-person and tele-consultation available.</p>
+        <span class="service-status status-available"><span class="status-dot available"></span>Slots Available Today</span>
+        <a href="#" class="service-link">Meet Our Doctors <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></a>
+      </article>
+
+      <!-- Pharmacy -->
+      <article class="service-card fade-up" id="pharmacy" style="transition-delay:0.2s">
+        <div class="service-icon-wrap ic-green">💊</div>
+        <h3 class="service-name">In-House Pharmacy</h3>
+        <p class="service-desc">Stocked with 10,000+ generic and branded medicines, surgical supplies, and health supplements. Prescription upload & home delivery available. Open 24 hours.</p>
+        <span class="service-status status-available"><span class="status-dot available"></span>Open 24 Hours</span>
+        <a href="#" class="service-link">Order Medicines <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></a>
+      </article>
+
+      <!-- Scanning -->
+      <article class="service-card fade-up" id="scanning" style="transition-delay:0.25s">
+        <div class="service-icon-wrap ic-purple">🩻</div>
+        <h3 class="service-name">Imaging & Scanning</h3>
+        <p class="service-desc">State-of-the-art 3T MRI, 128-slice CT, digital X-ray, 4D Ultrasound, PET scan, mammography, and DEXA scan. Radiologist reports within 2 hours for urgent cases.</p>
+        <span class="service-status status-busy"><span class="status-dot busy"></span>Moderate Wait – Book Ahead</span>
+        <a href="#" class="service-link">Schedule Scan <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></a>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ▌WHY CHOOSE US ▌ -->
+  <section class="why-section" id="about" aria-label="Why Choose MyHospital">
+    <div class="why-inner">
+      <div class="why-image-wrap fade-up">
+        <img src="hero_medical.png" alt="Modern hospital facility" class="why-image" />
+        <div class="why-badge-float wbf-1">
+          <div class="wbf-icon">🏆</div>
+          <div>
+            <div class="wbf-num">NABH</div>
+            <div class="wbf-txt">Accredited since 2010</div>
+          </div>
+        </div>
+        <div class="why-badge-float wbf-2">
+          <div class="wbf-icon">⭐</div>
+          <div>
+            <div class="wbf-num">4.9/5</div>
+            <div class="wbf-txt">Patient Satisfaction</div>
+          </div>
+        </div>
+      </div>
+      <div class="fade-up" style="transition-delay:0.1s">
+        <span class="section-eyebrow">Why MyHospital</span>
+        <h2 class="section-title" style="text-align:left;">Care You Can <span style="color:var(--teal)">Trust</span></h2>
+        <div class="section-rule" style="margin:14px 0 30px;"></div>
+        <div class="why-features">
+          <div class="why-feature">
+            <div class="why-feat-icon">🏥</div>
+            <div>
+              <div class="why-feat-title">Advanced Infrastructure</div>
+              <div class="why-feat-desc">6 operation theatres, 40-bed ICU, HDU, and 300-bed capacity with cutting-edge medical equipment.</div>
+            </div>
+          </div>
+          <div class="why-feature">
+            <div class="why-feat-icon">🩺</div>
+            <div>
+              <div class="why-feat-title">Expert Medical Team</div>
+              <div class="why-feat-desc">Super-specialists with international training and decades of combined clinical experience.</div>
+            </div>
+          </div>
+          <div class="why-feature">
+            <div class="why-feat-icon">📱</div>
+            <div>
+              <div class="why-feat-title">Digital Patient Experience</div>
+              <div class="why-feat-desc">Online appointments, digital prescriptions, tele-consult, and e-reports – healthcare at your fingertips.</div>
+            </div>
+          </div>
+          <div class="why-feature">
+            <div class="why-feat-icon">💳</div>
+            <div>
+              <div class="why-feat-title">Cashless & Insurance</div>
+              <div class="why-feat-desc">Empanelled with 50+ insurance companies and all major TPAs. CGHS & ECHS approved facility.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ▌APPOINTMENT BANNER ▌ -->
+  <section class="appt-banner" id="appointment" aria-label="Book Appointment">
+    <div class="appt-inner">
+      <div class="fade-up">
+        <h2 class="appt-title">Book Your Appointment Today</h2>
+        <p class="appt-desc">Connect with our specialists in just 60 seconds. Same-day appointments available for urgent consultations.</p>
+      </div>
+      <div class="appt-form fade-up" style="transition-delay:0.1s">
+        <div class="appt-form-title">📅 Schedule a Visit</div>
+        <input type="text" class="appt-input" id="patientName" placeholder="Your Full Name" aria-label="Patient name" />
+        <input type="tel" class="appt-input" id="patientPhone" placeholder="Mobile Number" aria-label="Mobile number" />
+        <select class="appt-input" id="apptDept" aria-label="Select department">
+          <option value="" disabled selected>Select Department</option>
+          <option>Ambulance</option>
+          <option>Blood Bank</option>
+          <option>Laboratory</option>
+          <option>Consultancy</option>
+          <option>Pharmacy</option>
+          <option>Scanning</option>
+          <option>Emergency</option>
+          <option>General OPD</option>
+        </select>
+        <input type="date" class="appt-input" id="apptDate" aria-label="Appointment date" />
+        <button class="appt-submit" id="submitAppt">Confirm Appointment →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ▌INFO CARDS ▌ -->
+  <section class="info-section" id="notices" aria-label="Notices and Information">
+    <div class="section-header fade-up">
+      <span class="section-eyebrow">Information</span>
+      <h2 class="section-title">Patient Resources & Notices</h2>
+      <div class="section-rule"></div>
+    </div>
+    <div class="info-grid">
+      <div class="info-card fade-up">
+        <div class="info-card-top">
+          <div class="info-icon ic-teal">📋</div>
+          <div class="info-card-title">OPD Timings</div>
+        </div>
+        <div class="info-card-body">
+          <p>Morning: 8:00 AM – 1:00 PM<br>Evening: 4:00 PM – 8:00 PM<br>Saturday: 8:00 AM – 2:00 PM<br>Sunday: Closed (Emergency Only)</p>
+          <a href="#" class="info-link">Full Schedule <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></a>
+        </div>
+      </div>
+      <div class="info-card fade-up" style="transition-delay:0.05s">
+        <div class="info-card-top">
+          <div class="info-icon ic-blue">📞</div>
+          <div class="info-card-title">Important Contacts</div>
+        </div>
+        <div class="info-card-body">
+          <p>Emergency: <strong>108</strong><br>Reception: +91 80 4567 8900<br>Billing: +91 80 4567 8910<br>Lab Reports: +91 80 4567 8920</p>
+          <a href="#" class="info-link">All Contacts <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></a>
+        </div>
+      </div>
+      <div class="info-card fade-up" style="transition-delay:0.1s">
+        <div class="info-card-top">
+          <div class="info-icon ic-red">🚨</div>
+          <div class="info-card-title">Emergency Protocols</div>
+        </div>
+        <div class="info-card-body">
+          <p>Our emergency department operates 24/7. Triage team available at entry. Please carry government ID and past medical records if possible.</p>
+          <a href="#" class="info-link">Learn More <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></a>
+        </div>
+      </div>
+      <div class="info-card fade-up" style="transition-delay:0.15s">
+        <div class="info-card-top">
+          <div class="info-icon ic-purple">🏛️</div>
+          <div class="info-card-title">Insurance & Billing</div>
+        </div>
+        <div class="info-card-body">
+          <p>Cashless facility available for 50+ insurers. Ayushman Bharat, CGHS, ESI accepted. Billing counter open daily 7 AM – 9 PM.</p>
+          <a href="#" class="info-link">Check Coverage <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ▌CONTACT STRIP ▌ -->
+  <section id="contact" style="background:#fff; padding:40px; border-top:1px solid var(--border);" aria-label="Contact information">
+    <div style="max-width:1200px; margin:0 auto; display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:30px; text-align:center;">
+      <div class="fade-up">
+        <div style="font-size:1.8rem;margin-bottom:8px;">📍</div>
+        <div style="font-weight:700;color:var(--text-dark);margin-bottom:4px;">Address</div>
+        <div style="font-size:0.85rem;color:var(--text-mid);">12, MG Road, Bengaluru – 560001<br>Karnataka, India</div>
+      </div>
+      <div class="fade-up" style="transition-delay:0.05s">
+        <div style="font-size:1.8rem;margin-bottom:8px;">📞</div>
+        <div style="font-weight:700;color:var(--text-dark);margin-bottom:4px;">Phone</div>
+        <div style="font-size:0.85rem;color:var(--text-mid);">+91 80 4567 8900<br>Emergency: 108</div>
+      </div>
+      <div class="fade-up" style="transition-delay:0.1s">
+        <div style="font-size:1.8rem;margin-bottom:8px;">✉️</div>
+        <div style="font-weight:700;color:var(--text-dark);margin-bottom:4px;">Email</div>
+        <div style="font-size:0.85rem;color:var(--text-mid);">care@myhospital.in<br>support@myhospital.in</div>
+      </div>
+      <div class="fade-up" style="transition-delay:0.15s">
+        <div style="font-size:1.8rem;margin-bottom:8px;">🕐</div>
+        <div style="font-weight:700;color:var(--text-dark);margin-bottom:4px;">Hours</div>
+        <div style="font-size:0.85rem;color:var(--text-mid);">OPD: Mon–Sat 8AM–8PM<br>Emergency: 24 × 7 × 365</div>
+      </div>
+    </div>
+    <!-- Bottom bar -->
+    <div style="max-width:1200px;margin:30px auto 0;padding-top:24px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+      <p style="font-size:0.78rem;color:var(--text-soft);">© 2026 MyHospital. All rights reserved. | NABH Accredited | ISO 9001:2015 Certified</p>
+      <div style="display:flex;gap:16px;">
+        <a href="#" style="font-size:0.78rem;color:var(--text-soft);text-decoration:none;transition:color var(--transition);" onmouseover="this.style.color='var(--teal)'" onmouseout="this.style.color='var(--text-soft)'">Privacy Policy</a>
+        <a href="#" style="font-size:0.78rem;color:var(--text-soft);text-decoration:none;transition:color var(--transition);" onmouseover="this.style.color='var(--teal)'" onmouseout="this.style.color='var(--text-soft)'">Terms of Use</a>
+        <a href="#" style="font-size:0.78rem;color:var(--text-soft);text-decoration:none;transition:color var(--transition);" onmouseover="this.style.color='var(--teal)'" onmouseout="this.style.color='var(--text-soft)'">Sitemap</a>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // ── Sticky navbar shadow
+    const nav = document.getElementById('mainNav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 10);
+    });
+
+    // ── Intersection Observer for fade-up
+    const fadeEls = document.querySelectorAll('.fade-up');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(el => {
+        if (el.isIntersecting) { el.target.classList.add('visible'); observer.unobserve(el.target); }
+      });
+    }, { threshold: 0.12 });
+    fadeEls.forEach(el => observer.observe(el));
+
+    // ── Appointment submit
+    document.getElementById('submitAppt').addEventListener('click', function () {
+      const name = document.getElementById('patientName').value.trim();
+      const phone = document.getElementById('patientPhone').value.trim();
+      const dept = document.getElementById('apptDept').value;
+      const date = document.getElementById('apptDate').value;
+      if (!name || !phone || !dept || !date) {
+        this.textContent = '⚠️ Please fill all fields';
+        this.style.background = '#FFF0F1';
+        this.style.color = 'var(--accent)';
+        setTimeout(() => {
+          this.textContent = 'Confirm Appointment →';
+          this.style.background = '';
+          this.style.color = '';
+        }, 2000);
+        return;
+      }
+      this.textContent = '✅ Appointment Confirmed!';
+      this.style.background = '#E6FAF0';
+      this.style.color = '#1A7A4C';
+      setTimeout(() => {
+        this.textContent = 'Confirm Appointment →';
+        this.style.background = '';
+        this.style.color = '';
+        ['patientName','patientPhone','apptDept','apptDate'].forEach(id => document.getElementById(id).value = '');
+      }, 3000);
+    });
+
+    // ── Set min date for appointment
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('apptDate').setAttribute('min', today);
+  </script>
+
+</body>
+</html>

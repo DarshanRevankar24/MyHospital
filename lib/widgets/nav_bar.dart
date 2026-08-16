@@ -38,7 +38,9 @@ class NavBar extends StatelessWidget {
             ],
             const Spacer(),
 
-            // ── Right: Book Button + Logo/Profile
+            // ── Right: Sign Up + Book Button + Logo/Profile
+            _SignUpButton(),
+            const SizedBox(width: 10),
             _BookButton(onTap: onAppointmentPressed),
             const SizedBox(width: 12),
             const _LogoProfileMenu(),
@@ -82,6 +84,48 @@ class _NavLinkState extends State<_NavLink> {
               fontSize: 14,
               fontWeight: FontWeight.w500,
               color: _hovered ? AppColors.teal : AppColors.textMid,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SignUpButton extends StatefulWidget {
+  const _SignUpButton();
+
+  @override
+  State<_SignUpButton> createState() => _SignUpButtonState();
+}
+
+class _SignUpButtonState extends State<_SignUpButton> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        onTap: () => Navigator.of(context).pushNamed('/signup'),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+          decoration: BoxDecoration(
+            color: _hovered ? AppColors.blueLight : Colors.transparent,
+            border: Border.all(
+              color: _hovered ? AppColors.blue : AppColors.border,
+              width: 1.5,
+            ),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Text(
+            'Sign Up',
+            style: GoogleFonts.inter(
+              color: _hovered ? AppColors.blue : AppColors.textMid,
+              fontSize: 13.5,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),

@@ -12,56 +12,36 @@ class AppointmentSection extends StatefulWidget {
 class _AppointmentSectionState extends State<AppointmentSection> {
   final _nameCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
-  String? _selectedDept;
-  DateTime? _selectedDate;
-  String _btnText = 'Confirm Appointment →';
+  String? _selectedSpecialty;
+  String _btnText = 'Find Doctors Now →';
   bool _success = false;
   bool _error = false;
 
-  static const _depts = [
-    'Ambulance', 'Blood Bank', 'Laboratory', 'Consultancy',
-    'Pharmacy', 'Scanning', 'Emergency', 'General OPD',
+  static const _specialties = [
+    'General Physician', 'Cardiologist', 'Dermatologist', 'Gynaecologist',
+    'Orthopaedic', 'Neurologist', 'Paediatrician', 'Psychiatrist',
+    'Ophthalmologist', 'ENT Specialist', 'Diabetologist', 'Urologist',
   ];
-
-  Future<void> _pickDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now().add(const Duration(days: 1)),
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
-      builder: (ctx, child) => Theme(
-        data: Theme.of(ctx).copyWith(
-          colorScheme: const ColorScheme.light(primary: AppColors.teal),
-        ),
-        child: child!,
-      ),
-    );
-    if (picked != null) setState(() => _selectedDate = picked);
-  }
 
   void _submit() {
     if (_nameCtrl.text.trim().isEmpty ||
         _phoneCtrl.text.trim().isEmpty ||
-        _selectedDept == null ||
-        _selectedDate == null) {
+        _selectedSpecialty == null) {
       setState(() { _error = true; _btnText = '⚠️  Please fill all fields'; });
       Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) setState(() { _error = false; _btnText = 'Confirm Appointment →'; });
+        if (mounted) setState(() { _error = false; _btnText = 'Find Doctors Now →'; });
       });
       return;
     }
-    setState(() { _success = true; _btnText = '✅  Appointment Confirmed!'; });
+    setState(() { _success = true; _btnText = '✅  Request Sent!'; });
     Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) {
-        setState(() {
-          _success = false;
-          _btnText = 'Confirm Appointment →';
-          _nameCtrl.clear();
-          _phoneCtrl.clear();
-          _selectedDept = null;
-          _selectedDate = null;
-        });
-      }
+      if (mounted) setState(() {
+        _success = false;
+        _btnText = 'Find Doctors Now →';
+        _nameCtrl.clear();
+        _phoneCtrl.clear();
+        _selectedSpecialty = null;
+      });
     });
   }
 
@@ -82,123 +62,238 @@ class _AppointmentSectionState extends State<AppointmentSection> {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [AppColors.tealDark, AppColors.tealMid],
+          colors: [AppColors.navyDark, AppColors.navy, Color(0xFF1A2C4A)],
+          stops: [0.0, 0.6, 1.0],
         ),
       ),
-      padding: EdgeInsets.symmetric(horizontal: isWide ? 60 : 24, vertical: 64),
-      child: isWide
-          ? Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(child: _LeftContent()),
-                const SizedBox(width: 48),
-                SizedBox(width: 340, child: _FormCard(
+      padding: EdgeInsets.symmetric(horizontal: isWide ? 64 : 24, vertical: 80),
+      child: Column(children: [
+        // Section header
+        _SectionHeader(),
+        const SizedBox(height: 56),
+
+        // How it works steps
+        isWide
+            ? Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Expanded(child: _StepsColumn()),
+                const SizedBox(width: 56),
+                SizedBox(width: 360, child: _QuickConsultCard(
                   nameCtrl: _nameCtrl,
                   phoneCtrl: _phoneCtrl,
-                  selectedDept: _selectedDept,
-                  selectedDate: _selectedDate,
-                  onDeptChanged: (v) => setState(() => _selectedDept = v),
-                  onPickDate: _pickDate,
+                  selectedSpecialty: _selectedSpecialty,
+                  onSpecialtyChanged: (v) => setState(() => _selectedSpecialty = v),
                   onSubmit: _submit,
                   btnText: _btnText,
                   success: _success,
                   error: _error,
+                  specialties: _specialties,
                 )),
-              ],
-            )
-          : Column(
-              children: [
-                _LeftContent(),
-                const SizedBox(height: 36),
-                _FormCard(
+              ])
+            : Column(children: [
+                _StepsColumn(),
+                const SizedBox(height: 40),
+                _QuickConsultCard(
                   nameCtrl: _nameCtrl,
                   phoneCtrl: _phoneCtrl,
-                  selectedDept: _selectedDept,
-                  selectedDate: _selectedDate,
-                  onDeptChanged: (v) => setState(() => _selectedDept = v),
-                  onPickDate: _pickDate,
+                  selectedSpecialty: _selectedSpecialty,
+                  onSpecialtyChanged: (v) => setState(() => _selectedSpecialty = v),
                   onSubmit: _submit,
                   btnText: _btnText,
                   success: _success,
                   error: _error,
+                  specialties: _specialties,
                 ),
-              ],
-            ),
+              ]),
+      ]),
     );
   }
 }
 
-class _LeftContent extends StatelessWidget {
+class _SectionHeader extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(children: [
+      Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        decoration: BoxDecoration(
+          color: AppColors.blue.withValues(alpha: 0.18),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppColors.blue.withValues(alpha: 0.3)),
+        ),
+        child: Text('HOW IT WORKS',
+            style: GoogleFonts.inter(
+                fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white70, letterSpacing: 1.1)),
+      ),
+      const SizedBox(height: 14),
+      RichText(
+        textAlign: TextAlign.center,
+        text: TextSpan(
+          style: GoogleFonts.playfairDisplay(fontSize: 34, fontWeight: FontWeight.w700, color: Colors.white, height: 1.2),
+          children: const [
+            TextSpan(text: 'Healthcare in\n'),
+            TextSpan(text: '3 Simple Steps', style: TextStyle(color: AppColors.blueMid)),
+          ],
+        ),
+      ),
+      const SizedBox(height: 14),
+      ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 560),
+        child: Text(
+          'Whether you need a doctor, a lab test or medicines — we connect you instantly with the best partners near you.',
+          textAlign: TextAlign.center,
+          style: GoogleFonts.inter(fontSize: 15, color: Colors.white60, height: 1.7),
+        ),
+      ),
+    ]);
+  }
+}
+
+class _StepsColumn extends StatelessWidget {
+  static const _steps = [
+    _Step(
+      number: '01',
+      emoji: '🔍',
+      title: 'Search & Discover',
+      desc: 'Search for doctors by specialty, labs by test name, or medicines by brand. Filter by location, ratings, price and availability.',
+      color: AppColors.blueMid,
+    ),
+    _Step(
+      number: '02',
+      emoji: '📅',
+      title: 'Book or Order',
+      desc: 'Pick a consultation slot, schedule a home lab collection, or place your medicine order — all in under 60 seconds.',
+      color: Color(0xFF4ADE80),
+    ),
+    _Step(
+      number: '03',
+      emoji: '✅',
+      title: 'Track & Manage',
+      desc: 'Track your doctor in real time, get digital lab reports, reorder medicines with one tap, and manage all your health records.',
+      color: Color(0xFFFBBF24),
+    ),
+  ];
+
+  const _StepsColumn();
+
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Book Your Appointment Today',
-            style: GoogleFonts.playfairDisplay(
-                fontSize: 34, fontWeight: FontWeight.w700, color: Colors.white, height: 1.2)),
-        const SizedBox(height: 14),
-        Text(
-          'Connect with our specialists in just 60 seconds.\nSame-day appointments available for urgent consultations.',
-          style: GoogleFonts.inter(fontSize: 15, color: Colors.white70, height: 1.7),
-        ),
-        const SizedBox(height: 28),
-        _InfoChip(icon: Icons.check_circle_outline, text: 'NABH Accredited Facility'),
-        const SizedBox(height: 10),
-        _InfoChip(icon: Icons.check_circle_outline, text: '120+ Specialist Doctors'),
-        const SizedBox(height: 10),
-        _InfoChip(icon: Icons.check_circle_outline, text: 'Cashless Treatment Available'),
-      ],
+      children: List.generate(_steps.length, (i) {
+        final s = _steps[i];
+        return _StepItem(step: s, isLast: i == _steps.length - 1);
+      }),
     );
   }
 }
 
-class _InfoChip extends StatelessWidget {
-  final IconData icon;
-  final String text;
-  const _InfoChip({required this.icon, required this.text});
+class _Step {
+  final String number;
+  final String emoji;
+  final String title;
+  final String desc;
+  final Color color;
+  const _Step({required this.number, required this.emoji, required this.title, required this.desc, required this.color});
+}
+
+class _StepItem extends StatefulWidget {
+  final _Step step;
+  final bool isLast;
+  const _StepItem({required this.step, required this.isLast});
+  @override
+  State<_StepItem> createState() => _StepItemState();
+}
+
+class _StepItemState extends State<_StepItem> {
+  bool _hovered = false;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 18, color: Colors.white60),
-        const SizedBox(width: 8),
-        Text(text, style: GoogleFonts.inter(fontSize: 13.5, color: Colors.white70, fontWeight: FontWeight.w500)),
-      ],
-    );
+    final s = widget.step;
+    return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      // Left: number + connector line
+      Column(children: [
+        MouseRegion(
+          onEnter: (_) => setState(() => _hovered = true),
+          onExit: (_) => setState(() => _hovered = false),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: 56, height: 56,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: _hovered ? s.color : s.color.withValues(alpha: 0.15),
+              border: Border.all(color: s.color.withValues(alpha: 0.5), width: 1.5),
+              boxShadow: _hovered ? [BoxShadow(color: s.color.withValues(alpha: 0.35), blurRadius: 16, offset: const Offset(0, 4))] : [],
+            ),
+            child: Center(
+              child: Text(s.emoji, style: const TextStyle(fontSize: 22)),
+            ),
+          ),
+        ),
+        if (!widget.isLast)
+          Container(
+            width: 1, height: 60,
+            margin: const EdgeInsets.symmetric(vertical: 4),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter, end: Alignment.bottomCenter,
+                colors: [s.color.withValues(alpha: 0.5), Colors.transparent],
+              ),
+            ),
+          ),
+      ]),
+      const SizedBox(width: 22),
+
+      // Right: content
+      Expanded(
+        child: Padding(
+          padding: EdgeInsets.only(bottom: widget.isLast ? 0 : 48),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: s.color.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text('Step ${s.number}',
+                    style: GoogleFonts.inter(fontSize: 10.5, fontWeight: FontWeight.w700, color: s.color, letterSpacing: 0.5)),
+              ),
+            ]),
+            const SizedBox(height: 8),
+            Text(s.title,
+                style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white)),
+            const SizedBox(height: 6),
+            Text(s.desc,
+                style: GoogleFonts.inter(fontSize: 14, color: Colors.white60, height: 1.65)),
+          ]),
+        ),
+      ),
+    ]);
   }
 }
 
-class _FormCard extends StatelessWidget {
+class _QuickConsultCard extends StatelessWidget {
   final TextEditingController nameCtrl;
   final TextEditingController phoneCtrl;
-  final String? selectedDept;
-  final DateTime? selectedDate;
-  final ValueChanged<String?> onDeptChanged;
-  final VoidCallback onPickDate;
+  final String? selectedSpecialty;
+  final ValueChanged<String?> onSpecialtyChanged;
   final VoidCallback onSubmit;
   final String btnText;
   final bool success;
   final bool error;
+  final List<String> specialties;
 
-  static const _depts = [
-    'Ambulance', 'Blood Bank', 'Laboratory', 'Consultancy',
-    'Pharmacy', 'Scanning', 'Emergency', 'General OPD',
-  ];
-
-  const _FormCard({
+  const _QuickConsultCard({
     required this.nameCtrl,
     required this.phoneCtrl,
-    required this.selectedDept,
-    required this.selectedDate,
-    required this.onDeptChanged,
-    required this.onPickDate,
+    required this.selectedSpecialty,
+    required this.onSpecialtyChanged,
     required this.onSubmit,
     required this.btnText,
     required this.success,
     required this.error,
+    required this.specialties,
   });
 
   @override
@@ -206,27 +301,46 @@ class _FormCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.12),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        color: Colors.white.withValues(alpha: 0.07),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
         borderRadius: BorderRadius.circular(24),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 32, offset: const Offset(0, 12))],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('📅  Schedule a Visit',
-              style: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 15, color: Colors.white)),
-          const SizedBox(height: 16),
-          _ApptInput(controller: nameCtrl, hint: 'Your Full Name', icon: Icons.person_outline),
-          const SizedBox(height: 12),
-          _ApptInput(controller: phoneCtrl, hint: 'Mobile Number', icon: Icons.phone_outlined, keyboardType: TextInputType.phone),
-          const SizedBox(height: 12),
-          _DeptDropdown(selected: selectedDept, depts: _depts, onChanged: onDeptChanged),
-          const SizedBox(height: 12),
-          _DatePicker(date: selectedDate, onTap: onPickDate),
-          const SizedBox(height: 18),
-          _SubmitButton(text: btnText, success: success, error: error, onTap: onSubmit),
-        ],
-      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Container(
+            width: 44, height: 44,
+            decoration: BoxDecoration(color: AppColors.blue.withValues(alpha: 0.25), borderRadius: BorderRadius.circular(12)),
+            child: const Icon(Icons.medical_services_outlined, color: Colors.white70, size: 22),
+          ),
+          const SizedBox(width: 12),
+          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text('Quick Consult Request',
+                style: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 15, color: Colors.white)),
+            Text('We\'ll match you in < 2 minutes',
+                style: GoogleFonts.inter(fontSize: 11.5, color: Colors.white38)),
+          ]),
+        ]),
+        const SizedBox(height: 22),
+
+        _ApptInput(controller: nameCtrl, hint: 'Your Full Name', icon: Icons.person_outline),
+        const SizedBox(height: 12),
+        _ApptInput(controller: phoneCtrl, hint: 'Mobile Number', icon: Icons.phone_outlined, keyboardType: TextInputType.phone),
+        const SizedBox(height: 12),
+        _SpecialtyDropdown(selected: selectedSpecialty, specialties: specialties, onChanged: onSpecialtyChanged),
+        const SizedBox(height: 20),
+
+        _ConsultSubmitButton(text: btnText, success: success, error: error, onTap: onSubmit),
+        const SizedBox(height: 16),
+
+        // Trust line
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          const Icon(Icons.shield_outlined, size: 13, color: Colors.white38),
+          const SizedBox(width: 6),
+          Text('100% confidential · No spam calls',
+              style: GoogleFonts.inter(fontSize: 11.5, color: Colors.white38)),
+        ]),
+      ]),
     );
   }
 }
@@ -255,42 +369,39 @@ class _ApptInput extends StatelessWidget {
         hintStyle: GoogleFonts.inter(fontSize: 13.5, color: AppColors.textSoft),
         prefixIcon: Icon(icon, size: 18, color: AppColors.textSoft),
         filled: true,
-        fillColor: Colors.white.withOpacity(0.92),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        fillColor: Colors.white.withValues(alpha: 0.92),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       ),
     );
   }
 }
 
-class _DeptDropdown extends StatelessWidget {
+class _SpecialtyDropdown extends StatelessWidget {
   final String? selected;
-  final List<String> depts;
+  final List<String> specialties;
   final ValueChanged<String?> onChanged;
 
-  const _DeptDropdown({required this.selected, required this.depts, required this.onChanged});
+  const _SpecialtyDropdown({required this.selected, required this.specialties, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.92),
-        borderRadius: BorderRadius.circular(10),
+        color: Colors.white.withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: selected,
-          hint: Text('Select Department',
-              style: GoogleFonts.inter(fontSize: 13.5, color: AppColors.textSoft)),
+          hint: Text('Select Specialty', style: GoogleFonts.inter(fontSize: 13.5, color: AppColors.textSoft)),
           isExpanded: true,
-          icon: const Icon(Icons.keyboard_arrow_down, color: AppColors.textSoft, size: 20),
-          items: depts
-              .map((d) => DropdownMenuItem(
-                    value: d,
-                    child: Text(d, style: GoogleFonts.inter(fontSize: 13.5, color: AppColors.textDark)),
-                  ))
-              .toList(),
+          icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.textSoft, size: 20),
+          items: specialties.map((d) => DropdownMenuItem(
+            value: d,
+            child: Text(d, style: GoogleFonts.inter(fontSize: 13.5, color: AppColors.textDark)),
+          )).toList(),
           onChanged: onChanged,
         ),
       ),
@@ -298,62 +409,25 @@ class _DeptDropdown extends StatelessWidget {
   }
 }
 
-class _DatePicker extends StatelessWidget {
-  final DateTime? date;
-  final VoidCallback onTap;
-  const _DatePicker({required this.date, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.92),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.calendar_today_outlined, size: 18, color: AppColors.textSoft),
-            const SizedBox(width: 10),
-            Text(
-              date == null
-                  ? 'Select Date'
-                  : '${date!.day}/${date!.month}/${date!.year}',
-              style: GoogleFonts.inter(
-                fontSize: 13.5,
-                color: date == null ? AppColors.textSoft : AppColors.textDark,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SubmitButton extends StatefulWidget {
+class _ConsultSubmitButton extends StatefulWidget {
   final String text;
   final bool success;
   final bool error;
   final VoidCallback onTap;
-  const _SubmitButton({required this.text, required this.success, required this.error, required this.onTap});
-
+  const _ConsultSubmitButton({required this.text, required this.success, required this.error, required this.onTap});
   @override
-  State<_SubmitButton> createState() => _SubmitButtonState();
+  State<_ConsultSubmitButton> createState() => _ConsultSubmitButtonState();
 }
 
-class _SubmitButtonState extends State<_SubmitButton> {
+class _ConsultSubmitButtonState extends State<_ConsultSubmitButton> {
   bool _hovered = false;
 
   @override
   Widget build(BuildContext context) {
-    Color bg = Colors.white;
-    Color fg = AppColors.tealDark;
-
-    if (widget.success) { bg = const Color(0xFFE6FAF0); fg = const Color(0xFF1A7A4C); }
-    if (widget.error) { bg = AppColors.accentSoft; fg = AppColors.accent; }
+    Color bg;
+    if (widget.success) bg = const Color(0xFF4ADE80);
+    else if (widget.error) bg = AppColors.accent;
+    else bg = AppColors.blue;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
@@ -363,17 +437,15 @@ class _SubmitButtonState extends State<_SubmitButton> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 14),
+          padding: const EdgeInsets.symmetric(vertical: 15),
           transform: Matrix4.translationValues(0, _hovered ? -1 : 0, 0),
           decoration: BoxDecoration(
             color: bg,
-            borderRadius: BorderRadius.circular(10),
-            boxShadow: _hovered ? [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 4))] : [],
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: _hovered ? [BoxShadow(color: bg.withValues(alpha: 0.4), blurRadius: 14, offset: const Offset(0, 6))] : [],
           ),
-          child: Center(
-            child: Text(widget.text,
-                style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w700, color: fg)),
-          ),
+          child: Center(child: Text(widget.text,
+              style: GoogleFonts.inter(fontSize: 14.5, fontWeight: FontWeight.w700, color: Colors.white))),
         ),
       ),
     );

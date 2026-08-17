@@ -30,11 +30,11 @@ class NavBar extends StatelessWidget {
           children: [
             // ── Left: Nav Links
             if (isWide) ...[
-              _NavLink(label: 'Services', onTap: onServicesPressed),
-              _NavLink(label: 'About', onTap: onAboutPressed),
-              _NavLink(label: 'Appointment', onTap: onAppointmentPressed),
-              _NavLink(label: 'Notices', onTap: onNoticesPressed),
-              _NavLink(label: 'Contact', onTap: onContactPressed),
+              _NavLink(label: 'Doctors', onTap: onServicesPressed),
+              _NavLink(label: 'Lab Tests', onTap: onAboutPressed),
+              _NavLink(label: 'Medicines', onTap: onAppointmentPressed),
+              _NavLink(label: 'Hospitals', onTap: onNoticesPressed),
+              _NavLink(label: 'Packages', onTap: onContactPressed),
             ],
             const Spacer(),
 
@@ -75,7 +75,7 @@ class _NavLinkState extends State<_NavLink> {
           margin: const EdgeInsets.symmetric(horizontal: 2),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
-            color: _hovered ? AppColors.tealLight : Colors.transparent,
+            color: _hovered ? AppColors.blueLight : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
           ),
           child: Text(
@@ -83,7 +83,7 @@ class _NavLinkState extends State<_NavLink> {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: _hovered ? AppColors.teal : AppColors.textMid,
+              color: _hovered ? AppColors.blue : AppColors.textMid,
             ),
           ),
         ),
@@ -156,20 +156,20 @@ class _BookButtonState extends State<_BookButton> {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
           decoration: BoxDecoration(
-            color: _hovered ? AppColors.tealDark : AppColors.teal,
+            gradient: LinearGradient(
+              colors: _hovered
+                  ? [AppColors.blueDark, AppColors.navy]
+                  : [AppColors.blue, AppColors.navyMid],
+            ),
             borderRadius: BorderRadius.circular(10),
             boxShadow: _hovered
-                ? [
-                    BoxShadow(
-                      color: AppColors.teal.withOpacity(0.35),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    )
-                  ]
+                ? [BoxShadow(
+                    color: AppColors.blue.withValues(alpha: 0.35),
+                    blurRadius: 12, offset: const Offset(0, 4))]
                 : [],
           ),
           child: Text(
-            'Book Appointment',
+            'Consult Now',
             style: GoogleFonts.inter(
               color: Colors.white,
               fontSize: 13.5,
@@ -227,12 +227,12 @@ class _LogoProfileMenuState extends State<_LogoProfileMenu> {
               link: _layerLink,
               showWhenUnlinked: false,
               offset: const Offset(-140, 64),
-              child: Material(
-                elevation: 16,
-                borderRadius: BorderRadius.circular(18),
-                shadowColor: AppColors.teal.withOpacity(0.2),
-                child: _ProfileDropdown(onClose: _close),
-              ),
+                child: Material(
+                  elevation: 16,
+                  borderRadius: BorderRadius.circular(18),
+                  shadowColor: AppColors.blue.withValues(alpha: 0.2),
+                  child: _ProfileDropdown(onClose: _close),
+                ),
             ),
           ],
         ),

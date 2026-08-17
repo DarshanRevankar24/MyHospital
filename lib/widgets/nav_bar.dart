@@ -264,21 +264,28 @@ class _LogoProfileMenuState extends State<_LogoProfileMenu> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.asset(
-                    'web/hospital_logo.png',
-                    width: 36,
-                    height: 36,
-                    fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: AppColors.teal,
-                        borderRadius: BorderRadius.circular(8),
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [Color(0xFFB8C8D8), Color(0xFF6A7F94)],
+                    ),
+                  ),
+                  padding: const EdgeInsets.all(2),
+                  child: ClipOval(
+                    child: Image.asset(
+                      'web/hospital_logo.png',
+                      width: 34,
+                      height: 34,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        color: AppColors.navyMid,
+                        child: const Icon(Icons.local_hospital, color: Colors.white, size: 18),
                       ),
-                      child: const Icon(Icons.local_hospital, color: Colors.white, size: 20),
                     ),
                   ),
                 ),
@@ -337,42 +344,84 @@ class _ProfileDropdown extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Header
+          // ── Header with navy gradient
           Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.tealLight,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+            padding: const EdgeInsets.fromLTRB(16, 18, 16, 16),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [AppColors.navyDark, AppColors.navyMid],
+              ),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
+                // Circular avatar
                 Container(
-                  width: 44,
-                  height: 44,
-                  decoration: const BoxDecoration(
-                    color: AppColors.teal,
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
                     shape: BoxShape.circle,
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [Color(0xFFB8C8D8), Color(0xFF5A7A94)],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.blue.withValues(alpha: 0.35),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      )
+                    ],
                   ),
-                  child: const Center(
-                    child: Text(
-                      'JD',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16,
+                  padding: const EdgeInsets.all(2.5),
+                  child: ClipOval(
+                    child: Container(
+                      color: AppColors.navyAccent,
+                      child: const Center(
+                        child: Text(
+                          'JD',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 15,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
-                const Text('John Doe',
-                    style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                        color: AppColors.textDark)),
-                const Text('john.doe@email.com',
-                    style: TextStyle(fontSize: 11.5, color: AppColors.textSoft)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('John Doe',
+                          style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                              color: Colors.white)),
+                      const SizedBox(height: 2),
+                      const Text('john.doe@email.com',
+                          style: TextStyle(fontSize: 11, color: Colors.white54)),
+                      const SizedBox(height: 5),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: AppColors.blue.withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Text(
+                          '🏥  Patient',
+                          style: TextStyle(fontSize: 10, color: Colors.white70, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -385,6 +434,7 @@ class _ProfileDropdown extends StatelessWidget {
                 _DropdownItem(icon: Icons.calendar_today_outlined, label: 'My Appointments'),
                 _DropdownItem(icon: Icons.description_outlined, label: 'Medical Records'),
                 _DropdownItem(icon: Icons.medication_outlined, label: 'Prescriptions'),
+                _DropdownItem(icon: Icons.health_and_safety_outlined, label: 'Health Summary'),
                 _DropdownItem(icon: Icons.settings_outlined, label: 'Settings'),
                 const Divider(height: 16, color: AppColors.border),
                 _DropdownItem(

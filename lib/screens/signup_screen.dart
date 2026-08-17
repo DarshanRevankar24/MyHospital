@@ -18,7 +18,9 @@ class _SignupScreenState extends State<SignupScreen>
   final _phoneCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
   final _confirmCtrl = TextEditingController();
+  final _dobCtrl = TextEditingController();
 
+  String _gender = 'Male';
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
   bool _agreeTerms = false;
@@ -32,10 +34,9 @@ class _SignupScreenState extends State<SignupScreen>
   void initState() {
     super.initState();
     _animCtrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 800));
+        vsync: this, duration: const Duration(milliseconds: 900));
     _fadeAnim = CurvedAnimation(parent: _animCtrl, curve: Curves.easeOut);
-    _slideAnim = Tween<Offset>(
-            begin: const Offset(0, 0.06), end: Offset.zero)
+    _slideAnim = Tween<Offset>(begin: const Offset(0, 0.05), end: Offset.zero)
         .animate(CurvedAnimation(parent: _animCtrl, curve: Curves.easeOut));
     _animCtrl.forward();
   }
@@ -49,6 +50,7 @@ class _SignupScreenState extends State<SignupScreen>
     _phoneCtrl.dispose();
     _passwordCtrl.dispose();
     _confirmCtrl.dispose();
+    _dobCtrl.dispose();
     super.dispose();
   }
 
@@ -62,8 +64,7 @@ class _SignupScreenState extends State<SignupScreen>
     await Future.delayed(const Duration(seconds: 2));
     if (mounted) {
       setState(() => _isLoading = false);
-      _showSnack('Account created successfully! Welcome to MyHospital 🎉',
-          isSuccess: true);
+      _showSnack('Account created! Welcome to MyHospital 🎉', isSuccess: true);
     }
   }
 
@@ -72,8 +73,7 @@ class _SignupScreenState extends State<SignupScreen>
       SnackBar(
         content: Text(msg,
             style: GoogleFonts.inter(color: Colors.white, fontSize: 13.5)),
-        backgroundColor:
-            isSuccess ? AppColors.blue : AppColors.accent,
+        backgroundColor: isSuccess ? AppColors.blue : AppColors.accent,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.all(16),
@@ -89,76 +89,85 @@ class _SignupScreenState extends State<SignupScreen>
       backgroundColor: AppColors.navy,
       body: Stack(
         children: [
-          // ── Background decorative circles
+          // ── Ambient glow decorations
           Positioned(
-            top: -80,
-            right: -80,
-            child: _GlowCircle(size: 320, color: AppColors.blueMid.withOpacity(0.15)),
+            top: -100,
+            right: -100,
+            child: _GlowOrb(size: 380, color: AppColors.blueMid.withValues(alpha: 0.12)),
           ),
           Positioned(
-            bottom: -60,
-            left: -60,
-            child: _GlowCircle(size: 260, color: AppColors.navyMid.withOpacity(0.5)),
+            bottom: -80,
+            left: -80,
+            child: _GlowOrb(size: 300, color: AppColors.navyMid.withValues(alpha: 0.6)),
           ),
           Positioned(
-            top: 200,
-            left: 100,
-            child: _GlowCircle(size: 120, color: AppColors.blueDark.withOpacity(0.2)),
+            top: 260,
+            left: 120,
+            child: _GlowOrb(size: 130, color: AppColors.blue.withValues(alpha: 0.14)),
           ),
 
           // ── Main content
-          isWide ? _WideLayout(
-            fadeAnim: _fadeAnim,
-            slideAnim: _slideAnim,
-            formKey: _formKey,
-            firstNameCtrl: _firstNameCtrl,
-            lastNameCtrl: _lastNameCtrl,
-            emailCtrl: _emailCtrl,
-            phoneCtrl: _phoneCtrl,
-            passwordCtrl: _passwordCtrl,
-            confirmCtrl: _confirmCtrl,
-            obscurePassword: _obscurePassword,
-            obscureConfirm: _obscureConfirm,
-            agreeTerms: _agreeTerms,
-            isLoading: _isLoading,
-            onTogglePassword: () =>
-                setState(() => _obscurePassword = !_obscurePassword),
-            onToggleConfirm: () =>
-                setState(() => _obscureConfirm = !_obscureConfirm),
-            onTermsChanged: (v) => setState(() => _agreeTerms = v ?? false),
-            onSubmit: _submit,
-          ) : _NarrowLayout(
-            fadeAnim: _fadeAnim,
-            slideAnim: _slideAnim,
-            formKey: _formKey,
-            firstNameCtrl: _firstNameCtrl,
-            lastNameCtrl: _lastNameCtrl,
-            emailCtrl: _emailCtrl,
-            phoneCtrl: _phoneCtrl,
-            passwordCtrl: _passwordCtrl,
-            confirmCtrl: _confirmCtrl,
-            obscurePassword: _obscurePassword,
-            obscureConfirm: _obscureConfirm,
-            agreeTerms: _agreeTerms,
-            isLoading: _isLoading,
-            onTogglePassword: () =>
-                setState(() => _obscurePassword = !_obscurePassword),
-            onToggleConfirm: () =>
-                setState(() => _obscureConfirm = !_obscureConfirm),
-            onTermsChanged: (v) => setState(() => _agreeTerms = v ?? false),
-            onSubmit: _submit,
-          ),
+          if (isWide)
+            _WideLayout(
+              fadeAnim: _fadeAnim,
+              slideAnim: _slideAnim,
+              formKey: _formKey,
+              firstNameCtrl: _firstNameCtrl,
+              lastNameCtrl: _lastNameCtrl,
+              emailCtrl: _emailCtrl,
+              phoneCtrl: _phoneCtrl,
+              passwordCtrl: _passwordCtrl,
+              confirmCtrl: _confirmCtrl,
+              dobCtrl: _dobCtrl,
+              gender: _gender,
+              obscurePassword: _obscurePassword,
+              obscureConfirm: _obscureConfirm,
+              agreeTerms: _agreeTerms,
+              isLoading: _isLoading,
+              onTogglePassword: () =>
+                  setState(() => _obscurePassword = !_obscurePassword),
+              onToggleConfirm: () =>
+                  setState(() => _obscureConfirm = !_obscureConfirm),
+              onGenderChanged: (v) => setState(() => _gender = v),
+              onTermsChanged: (v) => setState(() => _agreeTerms = v ?? false),
+              onSubmit: _submit,
+            )
+          else
+            _NarrowLayout(
+              fadeAnim: _fadeAnim,
+              slideAnim: _slideAnim,
+              formKey: _formKey,
+              firstNameCtrl: _firstNameCtrl,
+              lastNameCtrl: _lastNameCtrl,
+              emailCtrl: _emailCtrl,
+              phoneCtrl: _phoneCtrl,
+              passwordCtrl: _passwordCtrl,
+              confirmCtrl: _confirmCtrl,
+              dobCtrl: _dobCtrl,
+              gender: _gender,
+              obscurePassword: _obscurePassword,
+              obscureConfirm: _obscureConfirm,
+              agreeTerms: _agreeTerms,
+              isLoading: _isLoading,
+              onTogglePassword: () =>
+                  setState(() => _obscurePassword = !_obscurePassword),
+              onToggleConfirm: () =>
+                  setState(() => _obscureConfirm = !_obscureConfirm),
+              onGenderChanged: (v) => setState(() => _gender = v),
+              onTermsChanged: (v) => setState(() => _agreeTerms = v ?? false),
+              onSubmit: _submit,
+            ),
         ],
       ),
     );
   }
 }
 
-// ── Glow circle decoration
-class _GlowCircle extends StatelessWidget {
+// ── Ambient glow orb
+class _GlowOrb extends StatelessWidget {
   final double size;
   final Color color;
-  const _GlowCircle({required this.size, required this.color});
+  const _GlowOrb({required this.size, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -169,7 +178,8 @@ class _GlowCircle extends StatelessWidget {
         shape: BoxShape.circle,
         color: color,
         boxShadow: [
-          BoxShadow(color: color, blurRadius: size * 0.5, spreadRadius: size * 0.1),
+          BoxShadow(
+              color: color, blurRadius: size * 0.55, spreadRadius: size * 0.1),
         ],
       ),
     );
@@ -184,10 +194,12 @@ class _WideLayout extends StatelessWidget {
   final Animation<Offset> slideAnim;
   final GlobalKey<FormState> formKey;
   final TextEditingController firstNameCtrl, lastNameCtrl, emailCtrl,
-      phoneCtrl, passwordCtrl, confirmCtrl;
+      phoneCtrl, passwordCtrl, confirmCtrl, dobCtrl;
+  final String gender;
   final bool obscurePassword, obscureConfirm, agreeTerms, isLoading;
   final VoidCallback onTogglePassword, onToggleConfirm, onSubmit;
   final ValueChanged<bool?> onTermsChanged;
+  final ValueChanged<String> onGenderChanged;
 
   const _WideLayout({
     required this.fadeAnim,
@@ -199,6 +211,8 @@ class _WideLayout extends StatelessWidget {
     required this.phoneCtrl,
     required this.passwordCtrl,
     required this.confirmCtrl,
+    required this.dobCtrl,
+    required this.gender,
     required this.obscurePassword,
     required this.obscureConfirm,
     required this.agreeTerms,
@@ -206,6 +220,7 @@ class _WideLayout extends StatelessWidget {
     required this.onTogglePassword,
     required this.onToggleConfirm,
     required this.onTermsChanged,
+    required this.onGenderChanged,
     required this.onSubmit,
   });
 
@@ -216,16 +231,7 @@ class _WideLayout extends StatelessWidget {
         // Left panel – branding
         Expanded(
           flex: 5,
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [AppColors.navyDark, AppColors.navyMid],
-              ),
-            ),
-            child: _BrandPanel(),
-          ),
+          child: _BrandPanel(),
         ),
         // Right panel – form
         Expanded(
@@ -242,6 +248,8 @@ class _WideLayout extends StatelessWidget {
               phoneCtrl: phoneCtrl,
               passwordCtrl: passwordCtrl,
               confirmCtrl: confirmCtrl,
+              dobCtrl: dobCtrl,
+              gender: gender,
               obscurePassword: obscurePassword,
               obscureConfirm: obscureConfirm,
               agreeTerms: agreeTerms,
@@ -249,6 +257,7 @@ class _WideLayout extends StatelessWidget {
               onTogglePassword: onTogglePassword,
               onToggleConfirm: onToggleConfirm,
               onTermsChanged: onTermsChanged,
+              onGenderChanged: onGenderChanged,
               onSubmit: onSubmit,
             ),
           ),
@@ -266,10 +275,12 @@ class _NarrowLayout extends StatelessWidget {
   final Animation<Offset> slideAnim;
   final GlobalKey<FormState> formKey;
   final TextEditingController firstNameCtrl, lastNameCtrl, emailCtrl,
-      phoneCtrl, passwordCtrl, confirmCtrl;
+      phoneCtrl, passwordCtrl, confirmCtrl, dobCtrl;
+  final String gender;
   final bool obscurePassword, obscureConfirm, agreeTerms, isLoading;
   final VoidCallback onTogglePassword, onToggleConfirm, onSubmit;
   final ValueChanged<bool?> onTermsChanged;
+  final ValueChanged<String> onGenderChanged;
 
   const _NarrowLayout({
     required this.fadeAnim,
@@ -281,6 +292,8 @@ class _NarrowLayout extends StatelessWidget {
     required this.phoneCtrl,
     required this.passwordCtrl,
     required this.confirmCtrl,
+    required this.dobCtrl,
+    required this.gender,
     required this.obscurePassword,
     required this.obscureConfirm,
     required this.agreeTerms,
@@ -288,6 +301,7 @@ class _NarrowLayout extends StatelessWidget {
     required this.onTogglePassword,
     required this.onToggleConfirm,
     required this.onTermsChanged,
+    required this.onGenderChanged,
     required this.onSubmit,
   });
 
@@ -298,8 +312,14 @@ class _NarrowLayout extends StatelessWidget {
         children: [
           // Mini brand header for narrow screens
           Container(
-            color: AppColors.navyDark,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [AppColors.navyDark, AppColors.navyMid],
+              ),
+            ),
+            padding: const EdgeInsets.fromLTRB(16, 48, 16, 28),
             child: _MiniHeader(),
           ),
           Container(
@@ -314,6 +334,8 @@ class _NarrowLayout extends StatelessWidget {
               phoneCtrl: phoneCtrl,
               passwordCtrl: passwordCtrl,
               confirmCtrl: confirmCtrl,
+              dobCtrl: dobCtrl,
+              gender: gender,
               obscurePassword: obscurePassword,
               obscureConfirm: obscureConfirm,
               agreeTerms: agreeTerms,
@@ -321,6 +343,7 @@ class _NarrowLayout extends StatelessWidget {
               onTogglePassword: onTogglePassword,
               onToggleConfirm: onToggleConfirm,
               onTermsChanged: onTermsChanged,
+              onGenderChanged: onGenderChanged,
               onSubmit: onSubmit,
             ),
           ),
@@ -336,132 +359,140 @@ class _NarrowLayout extends StatelessWidget {
 class _BrandPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 52, vertical: 60),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Back button
-          _BackButton(),
-          const Spacer(),
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppColors.navyDark, Color(0xFF1A2C4A)],
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 56),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Back button aligned left
+            Align(
+              alignment: Alignment.centerLeft,
+              child: _BackButton(),
+            ),
+            const Spacer(),
 
-          // Logo
-          Center(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: Image.asset(
-                'web/hospital_logo.png',
-                width: 200,
-                height: 200,
-                fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) => Container(
-                  width: 200,
-                  height: 200,
-                  decoration: BoxDecoration(
-                    color: AppColors.navyAccent,
-                    borderRadius: BorderRadius.circular(20),
+            // ── Circular logo with silver ring
+            Container(
+              width: 178,
+              height: 178,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFFB8C8D8), Color(0xFF6A7F94)],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.blue.withValues(alpha: 0.35),
+                    blurRadius: 40,
+                    spreadRadius: 4,
+                    offset: const Offset(0, 12),
                   ),
-                  child: const Icon(Icons.local_hospital,
-                      color: Colors.white60, size: 80),
+                ],
+              ),
+              padding: const EdgeInsets.all(5),
+              child: ClipOval(
+                child: Image.asset(
+                  'web/hospital_logo.png',
+                  width: 168,
+                  height: 168,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    width: 168,
+                    height: 168,
+                    color: AppColors.navyAccent,
+                    child: const Icon(Icons.local_hospital,
+                        color: Colors.white60, size: 72),
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 32),
+            const SizedBox(height: 28),
 
-          // Title
-          Center(
-            child: Text(
+            // Title
+            Text(
               'MyHospital',
               style: GoogleFonts.playfairDisplay(
-                fontSize: 34,
+                fontSize: 32,
                 fontWeight: FontWeight.w700,
                 color: Colors.white,
-                letterSpacing: -0.5,
+                letterSpacing: -0.3,
               ),
-              textAlign: TextAlign.center,
             ),
-          ),
-          const SizedBox(height: 8),
-          Center(
-            child: Text(
+            const SizedBox(height: 6),
+            Text(
               'Compassionate Care · Modern Medicine',
               style: GoogleFonts.inter(
-                fontSize: 13,
-                color: Colors.white54,
+                fontSize: 12.5,
+                color: Colors.white38,
                 fontWeight: FontWeight.w400,
                 letterSpacing: 0.3,
               ),
               textAlign: TextAlign.center,
             ),
-          ),
-          const SizedBox(height: 48),
+            const SizedBox(height: 40),
 
-          // Trust badges
-          ..._TrustBadge.items.map((b) => _TrustBadgeItem(badge: b)),
+            // Divider
+            Container(
+              height: 1,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.transparent,
+                    Colors.white.withValues(alpha: 0.15),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 36),
 
-          const Spacer(),
+            // Trust badges
+            ..._TrustBadge.items.map((b) => _TrustBadgeItem(badge: b)),
 
-          // Footer note
-          Text(
-            '© 2026 MyHospital · NABH Accredited',
-            style: GoogleFonts.inter(fontSize: 11, color: Colors.white30),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-}
+            const Spacer(),
 
-class _MiniHeader extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        IconButton(
-          onPressed: () => Navigator.of(context).maybePop(),
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white70, size: 18),
-        ),
-        const Spacer(),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: Image.asset(
-            'web/hospital_logo.png',
-            width: 40,
-            height: 40,
-            fit: BoxFit.contain,
-            errorBuilder: (_, __, ___) =>
-                const Icon(Icons.local_hospital, color: Colors.white, size: 40),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Text(
-          'MyHospital',
-          style: GoogleFonts.inter(
-              fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white),
-        ),
-        const Spacer(),
-      ],
-    );
-  }
-}
+            // Patient-only notice
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+              decoration: BoxDecoration(
+                color: AppColors.blue.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                    color: AppColors.blue.withValues(alpha: 0.25), width: 1),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.person_pin_circle_outlined,
+                      color: Colors.white60, size: 18),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Patient accounts only — for hospital staff & vendors, use the dedicated portals.',
+                      style: GoogleFonts.inter(
+                          fontSize: 11.5,
+                          color: Colors.white54,
+                          height: 1.5),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
 
-class _BackButton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => Navigator.of(context).maybePop(),
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.arrow_back_ios_new, color: Colors.white60, size: 15),
-            const SizedBox(width: 6),
-            Text('Back to Home',
-                style: GoogleFonts.inter(
-                    fontSize: 13, color: Colors.white60, fontWeight: FontWeight.w500)),
+            Text(
+              '© 2026 MyHospital · NABH Accredited',
+              style: GoogleFonts.inter(fontSize: 10.5, color: Colors.white24),
+            ),
           ],
         ),
       ),
@@ -469,6 +500,105 @@ class _BackButton extends StatelessWidget {
   }
 }
 
+// ── Mini header for narrow screens
+class _MiniHeader extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            IconButton(
+              onPressed: () => Navigator.of(context).maybePop(),
+              icon: const Icon(Icons.arrow_back_ios_new,
+                  color: Colors.white70, size: 18),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        // Circular logo
+        Container(
+          width: 90,
+          height: 90,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFFB8C8D8), Color(0xFF6A7F94)],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.blue.withValues(alpha: 0.3),
+                blurRadius: 24,
+                spreadRadius: 2,
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.all(3),
+          child: ClipOval(
+            child: Image.asset(
+              'web/hospital_logo.png',
+              width: 84,
+              height: 84,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) =>
+                  const Icon(Icons.local_hospital, color: Colors.white, size: 40),
+            ),
+          ),
+        ),
+        const SizedBox(height: 14),
+        Text(
+          'MyHospital',
+          style: GoogleFonts.playfairDisplay(
+              fontSize: 22, fontWeight: FontWeight.w700, color: Colors.white),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Compassionate Care · Modern Medicine',
+          style: GoogleFonts.inter(fontSize: 12, color: Colors.white38),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Back button
+class _BackButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.of(context).maybePop(),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.07),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+                color: Colors.white.withValues(alpha: 0.1), width: 1),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.arrow_back_ios_new,
+                  color: Colors.white60, size: 13),
+              const SizedBox(width: 6),
+              Text('Back to Home',
+                  style: GoogleFonts.inter(
+                      fontSize: 12.5,
+                      color: Colors.white60,
+                      fontWeight: FontWeight.w500)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Trust badge data
 class _TrustBadge {
   final IconData icon;
   final String title;
@@ -478,16 +608,16 @@ class _TrustBadge {
 
   static const items = [
     _TrustBadge(
-        icon: Icons.security_outlined,
-        title: 'HIPAA Compliant',
-        subtitle: 'Your data is 100% secure'),
+        icon: Icons.shield_outlined,
+        title: 'Your data is safe',
+        subtitle: 'HIPAA & DPDPA compliant encryption'),
     _TrustBadge(
         icon: Icons.verified_outlined,
         title: 'NABH Accredited',
         subtitle: 'National quality standards'),
     _TrustBadge(
-        icon: Icons.people_outline,
-        title: '50,000+ Patients',
+        icon: Icons.favorite_border,
+        title: '50,000+ Happy Patients',
         subtitle: 'Trusted across Karnataka'),
   ];
 }
@@ -499,28 +629,35 @@ class _TrustBadgeItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: 18),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: 42,
+            height: 42,
             decoration: BoxDecoration(
-              color: AppColors.blue.withOpacity(0.25),
-              borderRadius: BorderRadius.circular(10),
+              shape: BoxShape.circle,
+              color: AppColors.blue.withValues(alpha: 0.2),
             ),
             child: Icon(badge.icon, color: Colors.white70, size: 18),
           ),
           const SizedBox(width: 14),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(badge.title,
-                  style: GoogleFonts.inter(
-                      fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white)),
-              Text(badge.subtitle,
-                  style: GoogleFonts.inter(fontSize: 11.5, color: Colors.white38)),
-            ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(badge.title,
+                    style: GoogleFonts.inter(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white)),
+                const SizedBox(height: 2),
+                Text(badge.subtitle,
+                    style:
+                        GoogleFonts.inter(fontSize: 11.5, color: Colors.white38)),
+              ],
+            ),
           ),
         ],
       ),
@@ -536,10 +673,12 @@ class _FormPanel extends StatelessWidget {
   final Animation<Offset> slideAnim;
   final GlobalKey<FormState> formKey;
   final TextEditingController firstNameCtrl, lastNameCtrl, emailCtrl,
-      phoneCtrl, passwordCtrl, confirmCtrl;
+      phoneCtrl, passwordCtrl, confirmCtrl, dobCtrl;
+  final String gender;
   final bool obscurePassword, obscureConfirm, agreeTerms, isLoading;
   final VoidCallback onTogglePassword, onToggleConfirm, onSubmit;
   final ValueChanged<bool?> onTermsChanged;
+  final ValueChanged<String> onGenderChanged;
 
   const _FormPanel({
     required this.fadeAnim,
@@ -551,6 +690,8 @@ class _FormPanel extends StatelessWidget {
     required this.phoneCtrl,
     required this.passwordCtrl,
     required this.confirmCtrl,
+    required this.dobCtrl,
+    required this.gender,
     required this.obscurePassword,
     required this.obscureConfirm,
     required this.agreeTerms,
@@ -558,6 +699,7 @@ class _FormPanel extends StatelessWidget {
     required this.onTogglePassword,
     required this.onToggleConfirm,
     required this.onTermsChanged,
+    required this.onGenderChanged,
     required this.onSubmit,
   });
 
@@ -568,7 +710,7 @@ class _FormPanel extends StatelessWidget {
       child: SlideTransition(
         position: slideAnim,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 52),
+          padding: const EdgeInsets.symmetric(horizontal: 44, vertical: 48),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 520),
             child: Form(
@@ -576,29 +718,64 @@ class _FormPanel extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header
-                  Text('Create Account',
-                      style: GoogleFonts.playfairDisplay(
-                          fontSize: 30,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.navy)),
-                  const SizedBox(height: 6),
-                  RichText(
-                    text: TextSpan(
-                      style: GoogleFonts.inter(
-                          fontSize: 14, color: AppColors.textMid),
-                      children: [
-                        const TextSpan(text: 'Already registered? '),
-                        WidgetSpan(
-                          child: _TextLink(
-                            text: 'Sign in',
-                            onTap: () => Navigator.of(context).maybePop(),
+                  // ── Header
+                  Row(
+                    children: [
+                      Container(
+                        width: 4,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [AppColors.blueMid, AppColors.navy],
                           ),
+                          borderRadius: BorderRadius.circular(2),
                         ),
-                      ],
+                      ),
+                      const SizedBox(width: 14),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Create Patient Account',
+                              style: GoogleFonts.playfairDisplay(
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.navy)),
+                          const SizedBox(height: 3),
+                          Text('Join 50,000+ patients on MyHospital',
+                              style: GoogleFonts.inter(
+                                  fontSize: 12.5, color: AppColors.textSoft)),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Sign in link
+                  Padding(
+                    padding: const EdgeInsets.only(left: 18),
+                    child: RichText(
+                      text: TextSpan(
+                        style: GoogleFonts.inter(
+                            fontSize: 13.5, color: AppColors.textMid),
+                        children: [
+                          const TextSpan(text: 'Already have an account? '),
+                          WidgetSpan(
+                            child: _TextLink(
+                              text: 'Sign in',
+                              onTap: () => Navigator.of(context).maybePop(),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 28),
+
+                  // ── Section label
+                  _SectionLabel(label: 'Personal Details'),
+                  const SizedBox(height: 14),
 
                   // Name row
                   Row(
@@ -608,10 +785,9 @@ class _FormPanel extends StatelessWidget {
                           controller: firstNameCtrl,
                           label: 'First Name',
                           icon: Icons.person_outline,
-                          validator: (v) =>
-                              (v == null || v.trim().isEmpty)
-                                  ? 'Required'
-                                  : null,
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Required'
+                              : null,
                         ),
                       ),
                       const SizedBox(width: 14),
@@ -620,15 +796,44 @@ class _FormPanel extends StatelessWidget {
                           controller: lastNameCtrl,
                           label: 'Last Name',
                           icon: Icons.person_outline,
-                          validator: (v) =>
-                              (v == null || v.trim().isEmpty)
-                                  ? 'Required'
-                                  : null,
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Required'
+                              : null,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 14),
+
+                  // DOB + Gender row
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _SignupField(
+                          controller: dobCtrl,
+                          label: 'Date of Birth',
+                          icon: Icons.cake_outlined,
+                          keyboardType: TextInputType.datetime,
+                          hint: 'DD / MM / YYYY',
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Required'
+                              : null,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: _GenderSelector(
+                          value: gender,
+                          onChanged: onGenderChanged,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 22),
+
+                  // ── Section label
+                  _SectionLabel(label: 'Contact Information'),
+                  const SizedBox(height: 14),
 
                   // Email
                   _SignupField(
@@ -642,7 +847,7 @@ class _FormPanel extends StatelessWidget {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 14),
 
                   // Phone
                   _SignupField(
@@ -656,7 +861,11 @@ class _FormPanel extends StatelessWidget {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 22),
+
+                  // ── Section label
+                  _SectionLabel(label: 'Security'),
+                  const SizedBox(height: 14),
 
                   // Password
                   _SignupField(
@@ -680,7 +889,7 @@ class _FormPanel extends StatelessWidget {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 14),
 
                   // Confirm password
                   _SignupField(
@@ -704,57 +913,70 @@ class _FormPanel extends StatelessWidget {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 20),
-
-                  // Role selection
-                  _RoleSelector(),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
 
                   // Terms
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: Checkbox(
-                          value: agreeTerms,
-                          onChanged: onTermsChanged,
-                          activeColor: AppColors.blue,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(4)),
-                          side: const BorderSide(
-                              color: AppColors.border, width: 1.5),
-                        ),
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: agreeTerms
+                          ? AppColors.blueLight
+                          : AppColors.bg,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: agreeTerms
+                            ? AppColors.blue.withValues(alpha: 0.3)
+                            : AppColors.border,
                       ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: RichText(
-                          text: TextSpan(
-                            style: GoogleFonts.inter(
-                                fontSize: 13, color: AppColors.textMid),
-                            children: [
-                              const TextSpan(text: 'I agree to the '),
-                              WidgetSpan(
-                                  child: _TextLink(
-                                      text: 'Terms of Service',
-                                      onTap: () {})),
-                              const TextSpan(text: ' and '),
-                              WidgetSpan(
-                                  child: _TextLink(
-                                      text: 'Privacy Policy',
-                                      onTap: () {})),
-                            ],
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: Checkbox(
+                            value: agreeTerms,
+                            onChanged: onTermsChanged,
+                            activeColor: AppColors.blue,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5)),
+                            side: const BorderSide(
+                                color: AppColors.border, width: 1.5),
                           ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: RichText(
+                            text: TextSpan(
+                              style: GoogleFonts.inter(
+                                  fontSize: 13, color: AppColors.textMid),
+                              children: [
+                                const TextSpan(text: 'I agree to the '),
+                                WidgetSpan(
+                                    child: _TextLink(
+                                        text: 'Terms of Service',
+                                        onTap: () {})),
+                                const TextSpan(text: ' and '),
+                                WidgetSpan(
+                                    child: _TextLink(
+                                        text: 'Privacy Policy',
+                                        onTap: () {})),
+                                const TextSpan(
+                                    text:
+                                        '. Your health data is encrypted and never shared.'),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 26),
 
                   // Submit button
                   _SubmitButton(isLoading: isLoading, onTap: onSubmit),
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 26),
 
                   // Divider
                   Row(
@@ -763,7 +985,7 @@ class _FormPanel extends StatelessWidget {
                           child: Divider(color: AppColors.border, height: 1)),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Text('or continue with',
+                        child: Text('or sign up with',
                             style: GoogleFonts.inter(
                                 fontSize: 12, color: AppColors.textSoft)),
                       ),
@@ -771,7 +993,7 @@ class _FormPanel extends StatelessWidget {
                           child: Divider(color: AppColors.border, height: 1)),
                     ],
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 18),
 
                   // Social buttons
                   Row(
@@ -787,6 +1009,7 @@ class _FormPanel extends StatelessWidget {
                               icon: Icons.apple)),
                     ],
                   ),
+                  const SizedBox(height: 8),
                 ],
               ),
             ),
@@ -797,12 +1020,97 @@ class _FormPanel extends StatelessWidget {
   }
 }
 
+// ── Section label divider
+class _SectionLabel extends StatelessWidget {
+  final String label;
+  const _SectionLabel({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text(label,
+            style: GoogleFonts.inter(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: AppColors.blue,
+                letterSpacing: 1.1)),
+        const SizedBox(width: 10),
+        Expanded(
+            child: Container(height: 1, color: AppColors.blueLight)),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────
+// ── Gender Selector
+// ─────────────────────────────────────────────
+class _GenderSelector extends StatelessWidget {
+  final String value;
+  final ValueChanged<String> onChanged;
+  const _GenderSelector({required this.value, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Gender',
+            style: GoogleFonts.inter(
+                fontSize: 12, color: AppColors.textSoft)),
+        const SizedBox(height: 6),
+        Container(
+          height: 54,
+          decoration: BoxDecoration(
+            color: AppColors.bg,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Row(
+            children: ['Male', 'Female', 'Other']
+                .map((g) => Expanded(
+                      child: GestureDetector(
+                        onTap: () => onChanged(g),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 160),
+                          margin: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: value == g
+                                ? AppColors.blue
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(9),
+                          ),
+                          child: Center(
+                            child: Text(
+                              g,
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: value == g
+                                    ? Colors.white
+                                    : AppColors.textMid,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ))
+                .toList(),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 // ─────────────────────────────────────────────
 // ── Individual Form Field
 // ─────────────────────────────────────────────
 class _SignupField extends StatefulWidget {
   final TextEditingController controller;
   final String label;
+  final String? hint;
   final IconData icon;
   final bool obscure;
   final Widget? suffixIcon;
@@ -813,6 +1121,7 @@ class _SignupField extends StatefulWidget {
     required this.controller,
     required this.label,
     required this.icon,
+    this.hint,
     this.obscure = false,
     this.suffixIcon,
     this.keyboardType,
@@ -838,6 +1147,8 @@ class _SignupFieldState extends State<_SignupField> {
         style: GoogleFonts.inter(fontSize: 14, color: AppColors.textDark),
         decoration: InputDecoration(
           labelText: widget.label,
+          hintText: widget.hint,
+          hintStyle: GoogleFonts.inter(fontSize: 13, color: AppColors.textSoft),
           labelStyle: GoogleFonts.inter(
             fontSize: 13.5,
             color: _focused ? AppColors.blue : AppColors.textSoft,
@@ -858,129 +1169,18 @@ class _SignupFieldState extends State<_SignupField> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide:
-                const BorderSide(color: AppColors.blue, width: 1.5),
+            borderSide: const BorderSide(color: AppColors.blue, width: 1.5),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide:
-                const BorderSide(color: AppColors.accent, width: 1.5),
+            borderSide: const BorderSide(color: AppColors.accent, width: 1.5),
           ),
           focusedErrorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide:
-                const BorderSide(color: AppColors.accent, width: 1.5),
+            borderSide: const BorderSide(color: AppColors.accent, width: 1.5),
           ),
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────
-// ── Role Selector
-// ─────────────────────────────────────────────
-class _RoleSelector extends StatefulWidget {
-  @override
-  State<_RoleSelector> createState() => _RoleSelectorState();
-}
-
-class _RoleSelectorState extends State<_RoleSelector> {
-  String _selected = 'Patient';
-
-  static const _roles = ['Patient', 'Doctor', 'Staff'];
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Register as',
-            style: GoogleFonts.inter(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textMid)),
-        const SizedBox(height: 10),
-        Row(
-          children: _roles
-              .map((role) => Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                          right: role != _roles.last ? 10 : 0),
-                      child: _RoleChip(
-                        label: role,
-                        selected: _selected == role,
-                        onTap: () => setState(() => _selected = role),
-                      ),
-                    ),
-                  ))
-              .toList(),
-        ),
-      ],
-    );
-  }
-}
-
-class _RoleChip extends StatefulWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-  const _RoleChip(
-      {required this.label, required this.selected, required this.onTap});
-
-  @override
-  State<_RoleChip> createState() => _RoleChipState();
-}
-
-class _RoleChipState extends State<_RoleChip> {
-  bool _hovered = false;
-
-  static const _icons = {
-    'Patient': Icons.person_outline,
-    'Doctor': Icons.medical_services_outlined,
-    'Staff': Icons.badge_outlined,
-  };
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          decoration: BoxDecoration(
-            color: widget.selected
-                ? AppColors.blue
-                : (_hovered ? AppColors.blueLight : AppColors.bg),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: widget.selected ? AppColors.blue : AppColors.border,
-              width: widget.selected ? 1.5 : 1,
-            ),
-          ),
-          child: Column(
-            children: [
-              Icon(
-                _icons[widget.label] ?? Icons.person_outline,
-                size: 20,
-                color: widget.selected ? Colors.white : AppColors.textMid,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                widget.label,
-                style: GoogleFonts.inter(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w600,
-                  color: widget.selected ? Colors.white : AppColors.textMid,
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );
@@ -1011,11 +1211,14 @@ class _SubmitButtonState extends State<_SubmitButton> {
         onTap: widget.isLoading ? null : widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          transform: Matrix4.translationValues(0, _hovered && !widget.isLoading ? -2 : 0, 0),
+          transform: Matrix4.translationValues(
+              0, _hovered && !widget.isLoading ? -2 : 0, 0),
           width: double.infinity,
-          height: 52,
+          height: 54,
           decoration: BoxDecoration(
             gradient: LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
               colors: _hovered && !widget.isLoading
                   ? [AppColors.blueDark, AppColors.navy]
                   : [AppColors.blue, AppColors.navyMid],
@@ -1024,12 +1227,18 @@ class _SubmitButtonState extends State<_SubmitButton> {
             boxShadow: _hovered && !widget.isLoading
                 ? [
                     BoxShadow(
-                      color: AppColors.blue.withOpacity(0.4),
-                      blurRadius: 20,
+                      color: AppColors.blue.withValues(alpha: 0.38),
+                      blurRadius: 22,
                       offset: const Offset(0, 8),
                     )
                   ]
-                : [],
+                : [
+                    BoxShadow(
+                      color: AppColors.blue.withValues(alpha: 0.18),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    )
+                  ],
           ),
           child: Center(
             child: widget.isLoading
@@ -1042,14 +1251,15 @@ class _SubmitButtonState extends State<_SubmitButton> {
                 : Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text('Create Account',
+                      const Icon(Icons.how_to_reg_outlined,
+                          size: 18, color: Colors.white),
+                      const SizedBox(width: 10),
+                      Text('Create My Account',
                           style: GoogleFonts.inter(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
-                              color: Colors.white)),
-                      const SizedBox(width: 8),
-                      const Icon(Icons.arrow_forward,
-                          size: 18, color: Colors.white),
+                              color: Colors.white,
+                              letterSpacing: 0.2)),
                     ],
                   ),
           ),
@@ -1083,12 +1293,21 @@ class _SocialButtonState extends State<_SocialButton> {
         onTap: () {},
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          height: 48,
+          height: 50,
           decoration: BoxDecoration(
-            color: _hovered ? AppColors.bg : Colors.white,
+            color: _hovered ? AppColors.blueLight : Colors.white,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-                color: _hovered ? AppColors.blue : AppColors.border),
+                color: _hovered ? AppColors.blue : AppColors.border,
+                width: _hovered ? 1.5 : 1),
+            boxShadow: _hovered
+                ? [
+                    BoxShadow(
+                        color: AppColors.blue.withValues(alpha: 0.1),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4))
+                  ]
+                : [],
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -1139,7 +1358,8 @@ class _TextLinkState extends State<_TextLink> {
             fontSize: 13,
             fontWeight: FontWeight.w600,
             color: _hovered ? AppColors.blueDark : AppColors.blue,
-            decoration: _hovered ? TextDecoration.underline : TextDecoration.none,
+            decoration:
+                _hovered ? TextDecoration.underline : TextDecoration.none,
           ),
         ),
       ),

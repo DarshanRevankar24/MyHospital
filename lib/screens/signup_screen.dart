@@ -61,10 +61,16 @@ class _SignupScreenState extends State<SignupScreen>
       return;
     }
     setState(() => _isLoading = true);
+    // Simulate network call — replace with real API when backend is ready
     await Future.delayed(const Duration(seconds: 2));
     if (mounted) {
       setState(() => _isLoading = false);
       _showSnack('Account created! Welcome to MyHospital 🎉', isSuccess: true);
+      // Brief pause so the user sees the success message, then go to Home
+      await Future.delayed(const Duration(milliseconds: 1200));
+      if (mounted) {
+        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+      }
     }
   }
 

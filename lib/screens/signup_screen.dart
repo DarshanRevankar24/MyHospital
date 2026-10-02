@@ -69,7 +69,7 @@ class _SignupScreenState extends State<SignupScreen>
       // Brief pause so the user sees the success message, then go to Home
       await Future.delayed(const Duration(milliseconds: 1200));
       if (mounted) {
-        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+        Navigator.of(context).pushNamedAndRemoveUntil('/dashboard', (route) => false);
       }
     }
   }

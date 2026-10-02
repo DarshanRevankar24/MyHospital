@@ -38,7 +38,9 @@ class NavBar extends StatelessWidget {
             ],
             const Spacer(),
 
-            // ── Right: Sign Up + Book Button + Logo/Profile
+            // ── Right: Login + Sign Up + Book Button + Logo/Profile
+            _LoginButton(),
+            const SizedBox(width: 8),
             _SignUpButton(),
             const SizedBox(width: 10),
             _BookButton(onTap: onAppointmentPressed),
@@ -84,6 +86,42 @@ class _NavLinkState extends State<_NavLink> {
               fontSize: 14,
               fontWeight: FontWeight.w500,
               color: _hovered ? AppColors.blue : AppColors.textMid,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LoginButton extends StatefulWidget {
+  const _LoginButton();
+  @override
+  State<_LoginButton> createState() => _LoginButtonState();
+}
+
+class _LoginButtonState extends State<_LoginButton> {
+  bool _hovered = false;
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        onTap: () => Navigator.of(context).pushNamed('/login'),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+          decoration: BoxDecoration(
+            color: _hovered ? AppColors.blueLight : Colors.transparent,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Text(
+            'Sign In',
+            style: GoogleFonts.inter(
+              color: _hovered ? AppColors.blue : AppColors.textMid,
+              fontSize: 13.5,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),
@@ -430,17 +468,18 @@ class _ProfileDropdown extends StatelessWidget {
             padding: const EdgeInsets.all(8),
             child: Column(
               children: [
-                _DropdownItem(icon: Icons.person_outline, label: 'My Profile'),
-                _DropdownItem(icon: Icons.calendar_today_outlined, label: 'My Appointments'),
-                _DropdownItem(icon: Icons.description_outlined, label: 'Medical Records'),
-                _DropdownItem(icon: Icons.medication_outlined, label: 'Prescriptions'),
-                _DropdownItem(icon: Icons.health_and_safety_outlined, label: 'Health Summary'),
-                _DropdownItem(icon: Icons.settings_outlined, label: 'Settings'),
+                _DropdownItem(icon: Icons.dashboard_outlined, label: 'Dashboard', route: '/dashboard'),
+                _DropdownItem(icon: Icons.person_outline, label: 'My Profile', route: '/profile'),
+                _DropdownItem(icon: Icons.calendar_today_outlined, label: 'My Appointments', route: '/hospitals'),
+                _DropdownItem(icon: Icons.medication_outlined, label: 'Medications', route: '/medications'),
+                _DropdownItem(icon: Icons.people_outline, label: 'Family', route: '/family'),
+                _DropdownItem(icon: Icons.settings_outlined, label: 'Settings', route: '/profile'),
                 const Divider(height: 16, color: AppColors.border),
                 _DropdownItem(
                   icon: Icons.logout,
                   label: 'Sign Out',
                   isDestructive: true,
+                  route: '/login',
                 ),
               ],
             ),
@@ -455,11 +494,13 @@ class _DropdownItem extends StatefulWidget {
   final IconData icon;
   final String label;
   final bool isDestructive;
+  final String? route;
 
   const _DropdownItem({
     required this.icon,
     required this.label,
     this.isDestructive = false,
+    this.route,
   });
 
   @override
@@ -479,7 +520,11 @@ class _DropdownItemState extends State<_DropdownItem> {
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       child: GestureDetector(
-        onTap: () {},
+        onTap: () {
+          if (widget.route != null) {
+            Navigator.of(context).pushNamed(widget.route!);
+          }
+        },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),

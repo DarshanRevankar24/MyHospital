@@ -2,6 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'screens/home_screen.dart';
 import 'screens/signup_screen.dart';
+import 'screens/login_screen.dart';
+import 'screens/dashboard_screen.dart';
+import 'screens/hospital_screen.dart';
+import 'screens/lab_tests_screen.dart';
+import 'screens/pharmacy_screen.dart';
+import 'screens/blood_bank_screen.dart';
+import 'screens/ambulance_screen.dart';
+import 'screens/medications_screen.dart';
+import 'screens/family_screen.dart';
+import 'screens/profile_screen.dart';
 
 void main() {
   runApp(const MyHospitalApp());
@@ -28,6 +38,16 @@ class MyHospitalApp extends StatelessWidget {
       routes: {
         '/': (context) => const HomeScreen(),
         '/signup': (context) => const SignupScreen(),
+        '/login': (context) => const LoginScreen(),
+        '/dashboard': (context) => const DashboardScreen(),
+        '/hospitals': (context) => const HospitalScreen(),
+        '/lab-tests': (context) => const LabTestsScreen(),
+        '/pharmacy': (context) => const PharmacyScreen(),
+        '/blood-bank': (context) => const BloodBankScreen(),
+        '/ambulance': (context) => const AmbulanceScreen(),
+        '/medications': (context) => const MedicationsScreen(),
+        '/family': (context) => const FamilyScreen(),
+        '/profile': (context) => const ProfileScreen(),
       },
     );
   }

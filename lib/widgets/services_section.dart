@@ -140,33 +140,56 @@ class _ServiceCard extends StatefulWidget {
 
 class _ServiceCardState extends State<_ServiceCard> {
   bool _hovered = false;
+  Offset _mousePos = Offset(150, 150); // Default center
 
   @override
   Widget build(BuildContext context) {
     final s = widget.service;
+    
+    // Calculate cinematic 3D tilts (assumes typical card size ~ 300x300)
+    final double tiltX = (_mousePos.dy - 150) / 150 * 0.05;
+    final double tiltY = (_mousePos.dx - 150) / 150 * -0.05;
+
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
+      onExit: (_) => setState(() {
+        _hovered = false;
+        _mousePos = const Offset(150, 150);
+      }),
+      onHover: (e) {
+        if (mounted && _hovered) {
+          setState(() {
+            _mousePos = e.localPosition;
+          });
+        }
+      },
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 240),
-        transform: Matrix4.translationValues(0, _hovered ? -6 : 0, 0),
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeOutCubic,
+        transform: Matrix4.identity()
+          ..setEntry(3, 2, 0.001) // perspective
+          ..rotateX(_hovered ? tiltX : 0)
+          ..rotateY(_hovered ? tiltY : 0)
+          ..translate(0.0, _hovered ? -8.0 : 0.0, 0.0),
+        transformAlignment: FractionalOffset.center,
         padding: const EdgeInsets.all(28),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: _hovered ? Colors.transparent : AppColors.border),
           boxShadow: _hovered
-              ? [BoxShadow(color: AppColors.blue.withValues(alpha: 0.12), blurRadius: 36, offset: const Offset(0, 12))]
+              ? [BoxShadow(color: AppColors.blue.withValues(alpha: 0.15), blurRadius: 40, offset: const Offset(0, 15))]
               : [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 8, offset: const Offset(0, 2))],
         ),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           // Top row: icon + HOT badge
           Row(children: [
             AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeOutBack,
               width: 60, height: 60,
               decoration: BoxDecoration(color: s.iconBg, borderRadius: BorderRadius.circular(16)),
-              transform: _hovered ? (Matrix4.identity()..scale(1.08)) : Matrix4.identity(),
+              transform: _hovered ? (Matrix4.identity()..scale(1.12)) : Matrix4.identity(),
               child: Center(child: Text(s.emoji, style: const TextStyle(fontSize: 26))),
             ),
             const Spacer(),

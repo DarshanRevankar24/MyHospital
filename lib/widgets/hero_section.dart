@@ -24,6 +24,10 @@ class _HeroSectionState extends State<HeroSection>
   late Animation<double> _fadeIn;
   late Animation<Offset> _slideIn;
 
+  // 3D Parallax Mouse Tracking
+  Offset _mousePos = Offset.zero;
+  final double _maxTilt = 0.03; // Max rotation in radians
+
   static const _categories = [
     _Cat(emoji: '🩺', label: 'Consult Doctor'),
     _Cat(emoji: '🔬', label: 'Lab Tests'),
@@ -36,10 +40,10 @@ class _HeroSectionState extends State<HeroSection>
   void initState() {
     super.initState();
     _animCtrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 900));
-    _fadeIn = CurvedAnimation(parent: _animCtrl, curve: Curves.easeOut);
-    _slideIn = Tween<Offset>(begin: const Offset(0, 0.06), end: Offset.zero)
-        .animate(CurvedAnimation(parent: _animCtrl, curve: Curves.easeOut));
+        vsync: this, duration: const Duration(milliseconds: 1400));
+    _fadeIn = CurvedAnimation(parent: _animCtrl, curve: Curves.easeOutCubic);
+    _slideIn = Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero)
+        .animate(CurvedAnimation(parent: _animCtrl, curve: Curves.easeOutCubic));
     _animCtrl.forward();
   }
 
@@ -53,60 +57,100 @@ class _HeroSectionState extends State<HeroSection>
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
+    final height = MediaQuery.of(context).size.height;
     final isWide = width > 900;
 
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [AppColors.navyDark, AppColors.navy, Color(0xFF1A2C4A)],
-          stops: [0.0, 0.55, 1.0],
-        ),
-      ),
-      child: Stack(children: [
-        // Ambient orbs
-        Positioned(top: -60, right: -60,
-            child: _Orb(size: 340, color: AppColors.blue.withValues(alpha: 0.12))),
-        Positioned(bottom: -80, left: 80,
-            child: _Orb(size: 220, color: AppColors.blueMid.withValues(alpha: 0.08))),
-        // Main content
-        Padding(
-          padding: EdgeInsets.symmetric(
-              horizontal: isWide ? 64 : 24, vertical: isWide ? 72 : 48),
-          child: FadeTransition(
-            opacity: _fadeIn,
-            child: SlideTransition(
-              position: _slideIn,
-              child: isWide
-                  ? Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Expanded(flex: 6, child: _HeroContent(
-                        searchCtrl: _searchCtrl,
-                        activeCategory: _activeCategory,
-                        categories: _categories,
-                        onCategoryTap: (i) => setState(() => _activeCategory = i),
-                        onConsultNow: widget.onBookAppointment,
-                        onExplore: widget.onExploreServices,
-                      )),
-                      const SizedBox(width: 48),
-                      Expanded(flex: 4, child: _QuickBookCard()),
-                    ])
-                  : Column(children: [
-                      _HeroContent(
-                        searchCtrl: _searchCtrl,
-                        activeCategory: _activeCategory,
-                        categories: _categories,
-                        onCategoryTap: (i) => setState(() => _activeCategory = i),
-                        onConsultNow: widget.onBookAppointment,
-                        onExplore: widget.onExploreServices,
-                      ),
-                      const SizedBox(height: 36),
-                      _QuickBookCard(),
-                    ]),
-            ),
+    // Calculate cinematic 3D tilts
+    final double tiltX = (_mousePos.dy - (height / 2)) / (height / 2) * _maxTilt;
+    final double tiltY = (_mousePos.dx - (width / 2)) / (width / 2) * -_maxTilt;
+
+    return MouseRegion(
+      onHover: (e) {
+        if (mounted) {
+          setState(() {
+            _mousePos = e.position;
+          });
+        }
+      },
+      onExit: (e) {
+        if (mounted) {
+          setState(() {
+            _mousePos = Offset(width / 2, height / 2);
+          });
+        }
+      },
+      child: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [AppColors.navyDark, AppColors.navy, Color(0xFF1A2C4A)],
+            stops: [0.0, 0.55, 1.0],
           ),
         ),
-      ]),
+        child: Stack(children: [
+          // Ambient cinematic orbs with parallax
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOutQuad,
+            top: -60 + (_mousePos.dy * 0.03), 
+            right: -60 + (_mousePos.dx * 0.03),
+            child: _Orb(size: 450, color: AppColors.blue.withValues(alpha: 0.15)),
+          ),
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOutQuad,
+            bottom: -80 - (_mousePos.dy * 0.02), 
+            left: 80 - (_mousePos.dx * 0.02),
+            child: _Orb(size: 320, color: AppColors.blueMid.withValues(alpha: 0.1)),
+          ),
+          // Main content with 3D Tilt
+          Padding(
+            padding: EdgeInsets.symmetric(
+                horizontal: isWide ? 64 : 24, vertical: isWide ? 72 : 48),
+            child: FadeTransition(
+              opacity: _fadeIn,
+              child: SlideTransition(
+                position: _slideIn,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeOutCubic,
+                  transform: Matrix4.identity()
+                    ..setEntry(3, 2, 0.001) // perspective
+                    ..rotateX(tiltX)
+                    ..rotateY(tiltY),
+                  transformAlignment: FractionalOffset.center,
+                  child: isWide
+                      ? Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Expanded(flex: 6, child: _HeroContent(
+                            searchCtrl: _searchCtrl,
+                            activeCategory: _activeCategory,
+                            categories: _categories,
+                            onCategoryTap: (i) => setState(() => _activeCategory = i),
+                            onConsultNow: widget.onBookAppointment,
+                            onExplore: widget.onExploreServices,
+                          )),
+                          const SizedBox(width: 48),
+                          Expanded(flex: 4, child: _QuickBookCard()),
+                        ])
+                      : Column(children: [
+                          _HeroContent(
+                            searchCtrl: _searchCtrl,
+                            activeCategory: _activeCategory,
+                            categories: _categories,
+                            onCategoryTap: (i) => setState(() => _activeCategory = i),
+                            onConsultNow: widget.onBookAppointment,
+                            onExplore: widget.onExploreServices,
+                          ),
+                          const SizedBox(height: 36),
+                          _QuickBookCard(),
+                        ]),
+                ),
+              ),
+            ),
+          ),
+        ]),
+      ),
     );
   }
 }
@@ -476,7 +520,7 @@ class _QuickBookCard extends StatelessWidget {
         Row(children: [
           Container(
             width: 8, height: 8,
-            decoration: const BoxDecoration(color: Color(0xFF4ADE80), shape: BoxShape.circle),
+            decoration: BoxDecoration(color: const Color(0xFF4ADE80), shape: BoxShape.circle, boxShadow: [BoxShadow(color: const Color(0xFF4ADE80).withValues(alpha: 0.5), blurRadius: 8)]),
           ),
           const SizedBox(width: 8),
           Text('Available Now', style: GoogleFonts.inter(fontSize: 11.5, color: Colors.white60, fontWeight: FontWeight.w500)),

@@ -105,16 +105,85 @@ class _HomeScreenState extends State<HomeScreen> {
                     onExploreServices: () => _scrollToKey(_servicesKey),
                   ),
                   const AnnouncementTicker(),
-                  ServicesSection(key: _servicesKey),
-                  WhySection(key: _aboutKey),
-                  AppointmentSection(key: _appointmentKey),
-                  InfoSection(key: _noticesKey),
+                  _ScrollReveal(scrollCtrl: _scrollController, child: ServicesSection(key: _servicesKey)),
+                  _ScrollReveal(scrollCtrl: _scrollController, child: WhySection(key: _aboutKey)),
+                  _ScrollReveal(scrollCtrl: _scrollController, child: AppointmentSection(key: _appointmentKey)),
+                  _ScrollReveal(scrollCtrl: _scrollController, child: InfoSection(key: _noticesKey)),
                   ContactStrip(key: _contactKey),
                 ],
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ScrollReveal extends StatefulWidget {
+  final Widget child;
+  final ScrollController scrollCtrl;
+
+  const _ScrollReveal({required this.child, required this.scrollCtrl});
+
+  @override
+  State<_ScrollReveal> createState() => _ScrollRevealState();
+}
+
+class _ScrollRevealState extends State<_ScrollReveal> with SingleTickerProviderStateMixin {
+  late AnimationController _animCtrl;
+  late Animation<double> _fade;
+  late Animation<Offset> _slide;
+  bool _revealed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _animCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1000));
+    _fade = CurvedAnimation(parent: _animCtrl, curve: Curves.easeOutCubic);
+    _slide = Tween<Offset>(begin: const Offset(0, 0.15), end: Offset.zero)
+        .animate(CurvedAnimation(parent: _animCtrl, curve: Curves.easeOutCubic));
+
+    widget.scrollCtrl.addListener(_checkVisibility);
+  }
+
+  void _checkVisibility() {
+    if (_revealed || !mounted) return;
+    
+    final RenderObject? renderObject = context.findRenderObject();
+    if (renderObject is RenderBox) {
+      final position = renderObject.localToGlobal(Offset.zero).dy;
+      final screenHeight = MediaQuery.of(context).size.height;
+      
+      // Reveal when the widget is within the bottom 15% of the screen
+      if (position < screenHeight * 0.85) {
+        _revealed = true;
+        _animCtrl.forward();
+      }
+    }
+  }
+  
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Check initial visibility after layout
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkVisibility());
+  }
+
+  @override
+  void dispose() {
+    widget.scrollCtrl.removeListener(_checkVisibility);
+    _animCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _fade,
+      child: SlideTransition(
+        position: _slide,
+        child: widget.child,
       ),
     );
   }

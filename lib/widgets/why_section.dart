@@ -133,84 +133,162 @@ class _FeatureCard extends StatefulWidget {
 
 class _FeatureCardState extends State<_FeatureCard> {
   bool _hovered = false;
+  Offset _mousePos = const Offset(200, 100);
+
   @override
   Widget build(BuildContext context) {
     final f = widget.feature;
+    
+    // 3D Tilt calculation
+    final double tiltX = (_mousePos.dy - 100) / 100 * 0.04;
+    final double tiltY = (_mousePos.dx - 200) / 200 * -0.04;
+
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
+      onExit: (_) => setState(() {
+        _hovered = false;
+        _mousePos = const Offset(200, 100);
+      }),
+      onHover: (e) {
+        if (mounted && _hovered) {
+          setState(() => _mousePos = e.localPosition);
+        }
+      },
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeOutCubic,
+        transform: Matrix4.identity()
+          ..setEntry(3, 2, 0.001)
+          ..rotateX(_hovered ? tiltX : 0)
+          ..rotateY(_hovered ? tiltY : 0),
+        transformAlignment: FractionalOffset.center,
         margin: const EdgeInsets.only(bottom: 14),
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: _hovered ? f.bgColor : Colors.transparent,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: _hovered ? f.color.withValues(alpha: 0.2) : Colors.transparent),
-        ),
-        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            width: 52, height: 52,
-            decoration: BoxDecoration(color: f.bgColor, borderRadius: BorderRadius.circular(14)),
-            transform: _hovered ? (Matrix4.identity()..scale(1.08)) : Matrix4.identity(),
-            child: Icon(f.icon, color: f.color, size: 24),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: _hovered ? f.bgColor : Colors.transparent,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: _hovered ? f.color.withValues(alpha: 0.2) : Colors.transparent),
+            // Cinematic dynamic spotlight glow
+            gradient: _hovered ? RadialGradient(
+              center: Alignment((_mousePos.dx - 200) / 200, (_mousePos.dy - 100) / 100),
+              radius: 1.5,
+              colors: [
+                f.bgColor,
+                f.bgColor.withValues(alpha: 0.2),
+              ],
+            ) : null,
           ),
-          const SizedBox(width: 18),
-          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(f.title, style: GoogleFonts.inter(fontSize: 15.5, fontWeight: FontWeight.w700, color: AppColors.textDark)),
-            const SizedBox(height: 5),
-            Text(f.desc, style: GoogleFonts.inter(fontSize: 13.5, color: AppColors.textMid, height: 1.6)),
-          ])),
-        ]),
+          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeOutBack,
+              width: 52, height: 52,
+              decoration: BoxDecoration(color: f.bgColor, borderRadius: BorderRadius.circular(14)),
+              transform: _hovered ? (Matrix4.identity()..scale(1.12)) : Matrix4.identity(),
+              child: Icon(f.icon, color: f.color, size: 24),
+            ),
+            const SizedBox(width: 18),
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(f.title, style: GoogleFonts.inter(fontSize: 15.5, fontWeight: FontWeight.w700, color: AppColors.textDark)),
+              const SizedBox(height: 5),
+              Text(f.desc, style: GoogleFonts.inter(fontSize: 13.5, color: AppColors.textMid, height: 1.6)),
+            ])),
+          ]),
+        ),
       ),
     );
   }
 }
 
-class _MarketplaceStats extends StatelessWidget {
+class _MarketplaceStats extends StatefulWidget {
+  @override
+  State<_MarketplaceStats> createState() => _MarketplaceStatsState();
+}
+
+class _MarketplaceStatsState extends State<_MarketplaceStats> {
+  bool _hovered = false;
+  Offset _mousePos = const Offset(200, 200);
+
   @override
   Widget build(BuildContext context) {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      // Visual showcase card
-      Container(
-        padding: const EdgeInsets.all(28),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft, end: Alignment.bottomRight,
-            colors: [AppColors.navyDark, AppColors.navy],
-          ),
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [BoxShadow(color: AppColors.navy.withValues(alpha: 0.35), blurRadius: 32, offset: const Offset(0, 12))],
-        ),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('Network at a Glance', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white70)),
-          const SizedBox(height: 24),
-          _NetworkStat(emoji: '👨‍⚕️', label: 'Verified Doctors', value: '2,000+', sub: 'Across 35+ specialties'),
-          const SizedBox(height: 16),
-          _NetworkStat(emoji: '🔬', label: 'NABL-accredited Labs', value: '300+', sub: 'Home collection available'),
-          const SizedBox(height: 16),
-          _NetworkStat(emoji: '💊', label: 'Partner Pharmacies', value: '200+', sub: 'Genuine medicines, fast delivery'),
-          const SizedBox(height: 16),
-          _NetworkStat(emoji: '🏥', label: 'Partner Hospitals', value: '150+', sub: 'Beds, reviews, insurance info'),
-          const SizedBox(height: 24),
-          Container(
-            height: 1,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(colors: [Colors.transparent, Colors.white.withValues(alpha: 0.15), Colors.transparent]),
+    final double tiltX = (_mousePos.dy - 200) / 200 * 0.03;
+    final double tiltY = (_mousePos.dx - 200) / 200 * -0.03;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() {
+        _hovered = false;
+        _mousePos = const Offset(200, 200);
+      }),
+      onHover: (e) {
+        if (mounted && _hovered) {
+          setState(() => _mousePos = e.localPosition);
+        }
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeOutCubic,
+        transform: Matrix4.identity()
+          ..setEntry(3, 2, 0.001)
+          ..rotateX(_hovered ? tiltX : 0)
+          ..rotateY(_hovered ? tiltY : 0),
+        transformAlignment: FractionalOffset.center,
+        child: Container(
+          padding: const EdgeInsets.all(28),
+          decoration: BoxDecoration(
+            gradient: RadialGradient(
+              center: _hovered 
+                ? Alignment((_mousePos.dx - 200) / 200, (_mousePos.dy - 200) / 200)
+                : Alignment.topLeft,
+              radius: _hovered ? 1.5 : 2.0,
+              colors: [
+                _hovered ? const Color(0xFF1E3354) : AppColors.navyDark, 
+                AppColors.navy
+              ],
+            ),
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.navy.withValues(alpha: _hovered ? 0.45 : 0.35), 
+                blurRadius: _hovered ? 48 : 32, 
+                offset: Offset(0, _hovered ? 20 : 12)
+              )
+            ],
+            border: Border.all(
+              color: _hovered ? AppColors.blue.withValues(alpha: 0.3) : Colors.transparent,
+              width: 1,
             ),
           ),
-          const SizedBox(height: 20),
-          Row(children: [
-            _MiniStat(number: '4.8★', label: 'App Rating'),
-            const SizedBox(width: 24),
-            _MiniStat(number: '10 min', label: 'Avg Response'),
-            const SizedBox(width: 24),
-            _MiniStat(number: '50K+', label: 'Happy Patients'),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text('Network at a Glance', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white70)),
+            const SizedBox(height: 24),
+            _NetworkStat(emoji: '👨‍⚕️', label: 'Verified Doctors', value: '2,000+', sub: 'Across 35+ specialties'),
+            const SizedBox(height: 16),
+            _NetworkStat(emoji: '🔬', label: 'NABL-accredited Labs', value: '300+', sub: 'Home collection available'),
+            const SizedBox(height: 16),
+            _NetworkStat(emoji: '💊', label: 'Partner Pharmacies', value: '200+', sub: 'Genuine medicines, fast delivery'),
+            const SizedBox(height: 16),
+            _NetworkStat(emoji: '🏥', label: 'Partner Hospitals', value: '150+', sub: 'Beds, reviews, insurance info'),
+            const SizedBox(height: 24),
+            Container(
+              height: 1,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(colors: [Colors.transparent, Colors.white.withValues(alpha: 0.15), Colors.transparent]),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(children: [
+              _MiniStat(number: '4.8★', label: 'App Rating'),
+              const SizedBox(width: 24),
+              _MiniStat(number: '10 min', label: 'Avg Response'),
+              const SizedBox(width: 24),
+              _MiniStat(number: '50K+', label: 'Happy Patients'),
+            ]),
           ]),
-        ]),
+        ),
       ),
-    ]);
+    );
   }
 }
 

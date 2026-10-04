@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_colors.dart';
 import '../widgets/top_bar.dart';
 import '../widgets/nav_bar.dart';
@@ -20,6 +21,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
   bool _isScrolled = false;
+  bool _showIntro = true; // Cinematic intro state
 
   // Keys for scroll-to navigation
   final GlobalKey _servicesKey = GlobalKey();
@@ -62,10 +64,13 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Column(
+      body: Stack(
         children: [
-          // ── Top Info Bar
-          const TopBar(),
+          // Main App Content
+          Column(
+            children: [
+              // ── Top Info Bar
+              const TopBar(),
 
           // ── Sticky Navbar
           AnimatedContainer(
@@ -116,8 +121,20 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-    );
-  }
+      
+      // Cinematic Intro Overlay
+      if (_showIntro)
+        Positioned.fill(
+          child: _CinematicIntro(
+            onComplete: () {
+              if (mounted) setState(() => _showIntro = false);
+            },
+          ),
+        ),
+      ],
+    ),
+  );
+}
 }
 
 class _ScrollReveal extends StatefulWidget {
@@ -184,6 +201,147 @@ class _ScrollRevealState extends State<_ScrollReveal> with SingleTickerProviderS
       child: SlideTransition(
         position: _slide,
         child: widget.child,
+      ),
+    );
+  }
+}
+
+// ── Cinematic Intro Sequence ──
+class _CinematicIntro extends StatefulWidget {
+  final VoidCallback onComplete;
+  const _CinematicIntro({required this.onComplete});
+
+  @override
+  State<_CinematicIntro> createState() => _CinematicIntroState();
+}
+
+class _CinematicIntroState extends State<_CinematicIntro> with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _scaleIn;
+  late Animation<double> _rotate;
+  late Animation<double> _textFade;
+  late Animation<double> _exitScale;
+  late Animation<double> _exitFade;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 3200));
+
+    // Phase 1: Swirl In (0.0 to 0.4)
+    _scaleIn = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _ctrl, curve: const Interval(0.0, 0.4, curve: Curves.easeOutBack)),
+    );
+    _rotate = Tween<double>(begin: -2.0, end: 0.0).animate(
+      CurvedAnimation(parent: _ctrl, curve: const Interval(0.0, 0.4, curve: Curves.easeOutCubic)),
+    );
+
+    // Phase 2: Text Reveal (0.3 to 0.5)
+    _textFade = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _ctrl, curve: const Interval(0.3, 0.5, curve: Curves.easeIn)),
+    );
+
+    // Phase 3: Swirl Out & Reveal App (0.75 to 1.0)
+    _exitScale = Tween<double>(begin: 1.0, end: 20.0).animate(
+      CurvedAnimation(parent: _ctrl, curve: const Interval(0.75, 1.0, curve: Curves.easeInExpo)),
+    );
+    _exitFade = Tween<double>(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(parent: _ctrl, curve: const Interval(0.8, 1.0, curve: Curves.easeOut)),
+    );
+
+    _ctrl.forward().then((_) => widget.onComplete());
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _exitFade,
+      child: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [AppColors.navyDark, Color(0xFF0F172A)],
+          ),
+        ),
+        child: Center(
+          child: AnimatedBuilder(
+            animation: _ctrl,
+            builder: (context, child) {
+              return Transform.scale(
+                scale: _exitScale.value,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Swirling Logo
+                    Transform.scale(
+                      scale: _scaleIn.value,
+                      child: Transform.rotate(
+                        angle: _rotate.value * 3.14159,
+                        child: Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: const LinearGradient(
+                              colors: [AppColors.blue, AppColors.teal],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.blue.withValues(alpha: 0.5),
+                                blurRadius: 40,
+                                spreadRadius: 10,
+                              )
+                            ],
+                          ),
+                          child: const Center(
+                            child: Icon(Icons.favorite_rounded, color: Colors.white, size: 50),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 40),
+                    // Cinematic Text
+                    Opacity(
+                      opacity: _textFade.value,
+                      child: Column(
+                        children: [
+                          Text(
+                            'MyHospital',
+                            style: GoogleFonts.playfairDisplay(
+                              fontSize: 42,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'The Future of Healthcare',
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                              color: AppColors.blueMid,
+                              letterSpacing: 3,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
       ),
     );
   }

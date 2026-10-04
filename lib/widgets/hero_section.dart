@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:animate_do/animate_do.dart';
+import 'package:lottie/lottie.dart';
 import '../theme/app_colors.dart';
 
 class HeroSection extends StatefulWidget {
@@ -108,33 +110,21 @@ class _HeroSectionState extends State<HeroSection>
           Padding(
             padding: EdgeInsets.symmetric(
                 horizontal: isWide ? 64 : 24, vertical: isWide ? 72 : 48),
-            child: FadeTransition(
-              opacity: _fadeIn,
-              child: SlideTransition(
-                position: _slideIn,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  curve: Curves.easeOutCubic,
-                  transform: Matrix4.identity()
-                    ..setEntry(3, 2, 0.001) // perspective
-                    ..rotateX(tiltX)
-                    ..rotateY(tiltY),
-                  transformAlignment: FractionalOffset.center,
-                  child: isWide
-                      ? Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          Expanded(flex: 6, child: _HeroContent(
-                            searchCtrl: _searchCtrl,
-                            activeCategory: _activeCategory,
-                            categories: _categories,
-                            onCategoryTap: (i) => setState(() => _activeCategory = i),
-                            onConsultNow: widget.onBookAppointment,
-                            onExplore: widget.onExploreServices,
-                          )),
-                          const SizedBox(width: 48),
-                          Expanded(flex: 4, child: _QuickBookCard()),
-                        ])
-                      : Column(children: [
-                          _HeroContent(
+            child: FadeIn(
+              duration: const Duration(milliseconds: 1400),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOutCubic,
+                transform: Matrix4.identity()
+                  ..setEntry(3, 2, 0.001) // perspective
+                  ..rotateX(tiltX)
+                  ..rotateY(tiltY),
+                transformAlignment: FractionalOffset.center,
+                child: isWide
+                    ? Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Expanded(flex: 6, child: SlideInLeft(
+                          duration: const Duration(milliseconds: 1000),
+                          child: _HeroContent(
                             searchCtrl: _searchCtrl,
                             activeCategory: _activeCategory,
                             categories: _categories,
@@ -142,10 +132,32 @@ class _HeroSectionState extends State<HeroSection>
                             onConsultNow: widget.onBookAppointment,
                             onExplore: widget.onExploreServices,
                           ),
-                          const SizedBox(height: 36),
-                          _QuickBookCard(),
-                        ]),
-                ),
+                        )),
+                        const SizedBox(width: 48),
+                        Expanded(flex: 4, child: SlideInRight(
+                          duration: const Duration(milliseconds: 1200),
+                          child: _QuickBookCard(),
+                        )),
+                      ])
+                    : Column(children: [
+                        FadeInUp(
+                          duration: const Duration(milliseconds: 1000),
+                          child: _HeroContent(
+                            searchCtrl: _searchCtrl,
+                            activeCategory: _activeCategory,
+                            categories: _categories,
+                            onCategoryTap: (i) => setState(() => _activeCategory = i),
+                            onConsultNow: widget.onBookAppointment,
+                            onExplore: widget.onExploreServices,
+                          ),
+                        ),
+                        const SizedBox(height: 36),
+                        FadeInUp(
+                          delay: const Duration(milliseconds: 400),
+                          duration: const Duration(milliseconds: 1000),
+                          child: _QuickBookCard(),
+                        ),
+                      ]),
               ),
             ),
           ),
@@ -215,20 +227,27 @@ class _HeroContent extends StatelessWidget {
       const SizedBox(height: 22),
 
       // Main headline
-      RichText(text: TextSpan(
-        style: GoogleFonts.playfairDisplay(
-            fontSize: 46, fontWeight: FontWeight.w700, color: Colors.white, height: 1.15),
-        children: const [
-          TextSpan(text: 'Healthcare\n'),
-          TextSpan(text: 'at Your '),
-          TextSpan(text: 'Fingertips', style: TextStyle(color: AppColors.blueMid)),
-        ],
-      )),
+      FadeInUp(
+        duration: const Duration(milliseconds: 1000),
+        child: RichText(text: TextSpan(
+          style: GoogleFonts.playfairDisplay(
+              fontSize: 46, fontWeight: FontWeight.w700, color: Colors.white, height: 1.15),
+          children: const [
+            TextSpan(text: 'Healthcare\n'),
+            TextSpan(text: 'at Your '),
+            TextSpan(text: 'Fingertips', style: TextStyle(color: AppColors.blueMid)),
+          ],
+        )),
+      ),
       const SizedBox(height: 16),
 
-      Text(
-        'Book lab tests, consult doctors & order medicines.\nDelivered to your door — anywhere, anytime.',
-        style: GoogleFonts.inter(fontSize: 16, color: Colors.white60, height: 1.7),
+      FadeInUp(
+        delay: const Duration(milliseconds: 200),
+        duration: const Duration(milliseconds: 1000),
+        child: Text(
+          'Book lab tests, consult doctors & order medicines.\nDelivered to your door — anywhere, anytime.',
+          style: GoogleFonts.inter(fontSize: 16, color: Colors.white60, height: 1.7),
+        ),
       ),
       const SizedBox(height: 32),
 
@@ -524,8 +543,19 @@ class _QuickBookCard extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Text('Available Now', style: GoogleFonts.inter(fontSize: 11.5, color: Colors.white60, fontWeight: FontWeight.w500)),
+          const Spacer(),
+          // High quality lottie graphic for medical pulse
+          SizedBox(
+            width: 40,
+            height: 40,
+            child: Lottie.network(
+              'https://lottie.host/80cf3f1e-f3a7-47b7-bd6b-5dd31bb438e1/1xI2xPZ6jM.json', 
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => const Icon(Icons.favorite, color: Colors.redAccent, size: 20),
+            ),
+          ),
         ]),
-        const SizedBox(height: 12),
+        const SizedBox(height: 4),
         Text('Quick Access', style: GoogleFonts.inter(
             fontSize: 17, fontWeight: FontWeight.w700, color: Colors.white)),
         const SizedBox(height: 4),

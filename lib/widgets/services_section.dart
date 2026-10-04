@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:animate_do/animate_do.dart';
+import 'package:lottie/lottie.dart';
 import '../theme/app_colors.dart';
 
 class _ServiceData {
@@ -120,9 +122,13 @@ class ServicesSection extends StatelessWidget {
         LayoutBuilder(builder: (_, constraints) {
           return Wrap(
             spacing: 22, runSpacing: 22,
-            children: _services.map((s) => SizedBox(
+            children: _services.asMap().entries.map((entry) => SizedBox(
               width: (constraints.maxWidth - (cols - 1) * 22) / cols,
-              child: _ServiceCard(service: s),
+              child: FadeInUp(
+                delay: Duration(milliseconds: 100 + (entry.key * 100)),
+                duration: const Duration(milliseconds: 800),
+                child: _ServiceCard(service: entry.value)
+              ),
             )).toList(),
           );
         }),
@@ -305,31 +311,46 @@ class _SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(children: [
-      Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-        decoration: BoxDecoration(
-          color: AppColors.blueLight,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.blue.withValues(alpha: 0.2)),
+      FadeInDown(
+        duration: const Duration(milliseconds: 800),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          decoration: BoxDecoration(
+            color: AppColors.blueLight,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.blue.withValues(alpha: 0.2)),
+          ),
+          child: Text(eyebrow.toUpperCase(),
+              style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.blue, letterSpacing: 1.1)),
         ),
-        child: Text(eyebrow.toUpperCase(),
-            style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.blue, letterSpacing: 1.1)),
       ),
       const SizedBox(height: 14),
-      Text(title,
-          textAlign: TextAlign.center,
-          style: GoogleFonts.playfairDisplay(fontSize: 34, fontWeight: FontWeight.w700, color: AppColors.textDark)),
-      const SizedBox(height: 14),
-      ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 600),
-        child: Text(subtitle,
+      FadeInUp(
+        delay: const Duration(milliseconds: 100),
+        duration: const Duration(milliseconds: 800),
+        child: Text(title,
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(fontSize: 15.5, color: AppColors.textMid, height: 1.7)),
+            style: GoogleFonts.playfairDisplay(fontSize: 34, fontWeight: FontWeight.w700, color: AppColors.textDark)),
+      ),
+      const SizedBox(height: 14),
+      FadeInUp(
+        delay: const Duration(milliseconds: 200),
+        duration: const Duration(milliseconds: 800),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: Text(subtitle,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(fontSize: 15.5, color: AppColors.textMid, height: 1.7)),
+        ),
       ),
       const SizedBox(height: 16),
-      Container(width: 50, height: 3, decoration: BoxDecoration(
-          gradient: const LinearGradient(colors: [AppColors.blue, AppColors.blueMid]),
-          borderRadius: BorderRadius.circular(2))),
+      FadeIn(
+        delay: const Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 800),
+        child: Container(width: 50, height: 3, decoration: BoxDecoration(
+            gradient: const LinearGradient(colors: [AppColors.blue, AppColors.blueMid]),
+            borderRadius: BorderRadius.circular(2))),
+      ),
     ]);
   }
 }

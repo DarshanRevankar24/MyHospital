@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:animate_do/animate_do.dart';
+import 'package:lottie/lottie.dart';
 import '../theme/app_colors.dart';
 
 class AppointmentSection extends StatefulWidget {
@@ -113,35 +115,46 @@ class _SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(children: [
-      Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-        decoration: BoxDecoration(
-          color: AppColors.blue.withValues(alpha: 0.18),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.blue.withValues(alpha: 0.3)),
-        ),
-        child: Text('HOW IT WORKS',
-            style: GoogleFonts.inter(
-                fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white70, letterSpacing: 1.1)),
-      ),
-      const SizedBox(height: 14),
-      RichText(
-        textAlign: TextAlign.center,
-        text: TextSpan(
-          style: GoogleFonts.playfairDisplay(fontSize: 34, fontWeight: FontWeight.w700, color: Colors.white, height: 1.2),
-          children: const [
-            TextSpan(text: 'Healthcare in\n'),
-            TextSpan(text: '3 Simple Steps', style: TextStyle(color: AppColors.blueMid)),
-          ],
+      FadeInDown(
+        duration: const Duration(milliseconds: 800),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          decoration: BoxDecoration(
+            color: AppColors.blue.withValues(alpha: 0.18),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.blue.withValues(alpha: 0.3)),
+          ),
+          child: Text('HOW IT WORKS',
+              style: GoogleFonts.inter(
+                  fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white70, letterSpacing: 1.1)),
         ),
       ),
       const SizedBox(height: 14),
-      ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 560),
-        child: Text(
-          'Whether you need a doctor, a lab test or medicines — we connect you instantly with the best partners near you.',
+      FadeInUp(
+        delay: const Duration(milliseconds: 100),
+        duration: const Duration(milliseconds: 800),
+        child: RichText(
           textAlign: TextAlign.center,
-          style: GoogleFonts.inter(fontSize: 15, color: Colors.white60, height: 1.7),
+          text: TextSpan(
+            style: GoogleFonts.playfairDisplay(fontSize: 34, fontWeight: FontWeight.w700, color: Colors.white, height: 1.2),
+            children: const [
+              TextSpan(text: 'Healthcare in\n'),
+              TextSpan(text: '3 Simple Steps', style: TextStyle(color: AppColors.blueMid)),
+            ],
+          ),
+        ),
+      ),
+      const SizedBox(height: 14),
+      FadeInUp(
+        delay: const Duration(milliseconds: 200),
+        duration: const Duration(milliseconds: 800),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 560),
+          child: Text(
+            'Whether you need a doctor, a lab test or medicines — we connect you instantly with the best partners near you.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(fontSize: 15, color: Colors.white60, height: 1.7),
+          ),
         ),
       ),
     ]);
@@ -181,7 +194,11 @@ class _StepsColumn extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: List.generate(_steps.length, (i) {
         final s = _steps[i];
-        return _StepItem(step: s, isLast: i == _steps.length - 1);
+        return FadeInLeft(
+          delay: Duration(milliseconds: 100 + (i * 150)),
+          duration: const Duration(milliseconds: 800),
+          child: _StepItem(step: s, isLast: i == _steps.length - 1),
+        );
       }),
     );
   }
@@ -314,12 +331,21 @@ class _QuickConsultCard extends StatelessWidget {
             child: const Icon(Icons.medical_services_outlined, color: Colors.white70, size: 22),
           ),
           const SizedBox(width: 12),
-          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text('Quick Consult Request',
                 style: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 15, color: Colors.white)),
             Text('We\'ll match you in < 2 minutes',
                 style: GoogleFonts.inter(fontSize: 11.5, color: Colors.white38)),
-          ]),
+          ])),
+          // Heartbeat/Pulse Lottie next to Quick Consult form
+          SizedBox(
+            width: 44, height: 44,
+            child: Lottie.network(
+              'https://lottie.host/80cf3f1e-f3a7-47b7-bd6b-5dd31bb438e1/1xI2xPZ6jM.json', 
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => const SizedBox(),
+            ),
+          )
         ]),
         const SizedBox(height: 22),
 

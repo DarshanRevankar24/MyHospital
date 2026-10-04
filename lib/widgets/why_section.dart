@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:animate_do/animate_do.dart';
+import 'package:lottie/lottie.dart';
 import '../theme/app_colors.dart';
 
 class WhySection extends StatelessWidget {
@@ -20,7 +22,11 @@ class WhySection extends StatelessWidget {
             ? Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Expanded(child: _TrustCards()),
                 const SizedBox(width: 60),
-                Expanded(child: _MarketplaceStats()),
+                Expanded(child: FadeInRight(
+                  delay: const Duration(milliseconds: 200),
+                  duration: const Duration(milliseconds: 1000),
+                  child: _MarketplaceStats()
+                )),
               ])
             : Column(children: [
                 _TrustCards(),
@@ -36,41 +42,55 @@ class _SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(children: [
-      Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-        decoration: BoxDecoration(
-          color: AppColors.blueLight,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.blue.withValues(alpha: 0.2)),
-        ),
-        child: Text('WHY MYHOSPITAL',
-            style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.blue, letterSpacing: 1.1)),
-      ),
-      const SizedBox(height: 14),
-      RichText(
-        textAlign: TextAlign.center,
-        text: TextSpan(
-          style: GoogleFonts.playfairDisplay(fontSize: 34, fontWeight: FontWeight.w700, color: AppColors.textDark),
-          children: const [
-            TextSpan(text: 'Why 50,000+ Patients\n'),
-            TextSpan(text: 'Choose ', style: TextStyle(color: AppColors.textDark)),
-            TextSpan(text: 'MyHospital', style: TextStyle(color: AppColors.blue)),
-          ],
+      FadeInDown(
+        duration: const Duration(milliseconds: 800),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          decoration: BoxDecoration(
+            color: AppColors.blueLight,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.blue.withValues(alpha: 0.2)),
+          ),
+          child: Text('WHY MYHOSPITAL',
+              style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.blue, letterSpacing: 1.1)),
         ),
       ),
       const SizedBox(height: 14),
-      ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 580),
-        child: Text(
-          'We don\'t own hospitals, labs or pharmacies. We partner with the best — verified, rated, and held accountable — so you always get the finest care.',
+      FadeInUp(
+        delay: const Duration(milliseconds: 100),
+        duration: const Duration(milliseconds: 800),
+        child: RichText(
           textAlign: TextAlign.center,
-          style: GoogleFonts.inter(fontSize: 15.5, color: AppColors.textMid, height: 1.7),
+          text: TextSpan(
+            style: GoogleFonts.playfairDisplay(fontSize: 34, fontWeight: FontWeight.w700, color: AppColors.textDark),
+            children: const [
+              TextSpan(text: 'Why 50,000+ Patients\n'),
+              TextSpan(text: 'Choose ', style: TextStyle(color: AppColors.textDark)),
+              TextSpan(text: 'MyHospital', style: TextStyle(color: AppColors.blue)),
+            ],
+          ),
         ),
       ),
       const SizedBox(height: 14),
-      Container(width: 50, height: 3, decoration: BoxDecoration(
-          gradient: const LinearGradient(colors: [AppColors.blue, AppColors.blueMid]),
-          borderRadius: BorderRadius.circular(2))),
+      FadeInUp(
+        delay: const Duration(milliseconds: 200),
+        duration: const Duration(milliseconds: 800),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 580),
+          child: Text(
+            'We don\'t own hospitals, labs or pharmacies. We partner with the best — verified, rated, and held accountable — so you always get the finest care.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(fontSize: 15.5, color: AppColors.textMid, height: 1.7),
+          ),
+        ),
+      ),
+      const SizedBox(height: 14),
+      FadeIn(
+        delay: const Duration(milliseconds: 400),
+        child: Container(width: 50, height: 3, decoration: BoxDecoration(
+            gradient: const LinearGradient(colors: [AppColors.blue, AppColors.blueMid]),
+            borderRadius: BorderRadius.circular(2))),
+      ),
     ]);
   }
 }
@@ -111,7 +131,15 @@ class _TrustCards extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(children: _features.map((f) => _FeatureCard(feature: f)).toList());
+    return Column(
+      children: _features.asMap().entries.map((entry) {
+        return FadeInLeft(
+          delay: Duration(milliseconds: 100 + (entry.key * 150)),
+          duration: const Duration(milliseconds: 800),
+          child: _FeatureCard(feature: entry.value),
+        );
+      }).toList(),
+    );
   }
 }
 
@@ -261,8 +289,22 @@ class _MarketplaceStatsState extends State<_MarketplaceStats> {
             ),
           ),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('Network at a Glance', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white70)),
-            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Network at a Glance', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white70)),
+                SizedBox(
+                  width: 50,
+                  height: 50,
+                  child: Lottie.network(
+                    'https://lottie.host/79013589-3998-46fb-a035-7ff10a8b9eeb/xVzB0J9uQ0.json', // verified/shield lottie
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => const Icon(Icons.verified_user, color: Colors.blueAccent),
+                  ),
+                )
+              ]
+            ),
+            const SizedBox(height: 14),
             _NetworkStat(emoji: '👨‍⚕️', label: 'Verified Doctors', value: '2,000+', sub: 'Across 35+ specialties'),
             const SizedBox(height: 16),
             _NetworkStat(emoji: '🔬', label: 'NABL-accredited Labs', value: '300+', sub: 'Home collection available'),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../services/auth_service.dart';
 import '../theme/app_colors.dart';
 
 class MedicationsScreen extends StatefulWidget {
@@ -11,6 +13,8 @@ class MedicationsScreen extends StatefulWidget {
 class _MedicationsScreenState extends State<MedicationsScreen> with SingleTickerProviderStateMixin {
   late AnimationController _animCtrl;
   bool _showAddForm = false;
+  bool _authorized = kIsWeb;
+  bool _authorizing = false;
 
   final _meds = <_MedData>[
     _MedData(name: 'Metformin 500mg', type: 'Tablet', dosage: '1 tablet', frequency: 'Twice daily', instructions: 'Before breakfast & dinner', startDate: '2026-09-01', endDate: '2026-12-01', times: ['08:00 AM', '08:00 PM'], taken: [true, false]),
@@ -23,10 +27,38 @@ class _MedicationsScreenState extends State<MedicationsScreen> with SingleTicker
   void initState() {
     super.initState();
     _animCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 800))..forward();
+    if (!kIsWeb) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _authorize());
+    }
   }
 
   @override
   void dispose() { _animCtrl.dispose(); super.dispose(); }
+
+  Future<void> _authorize() async {
+    if (_authorizing || _authorized) return;
+    setState(() => _authorizing = true);
+    final result = await AuthService().confirmIdentity(
+      reason: 'Authenticate to view your medications',
+    );
+    if (!mounted) return;
+    setState(() {
+      _authorized = result == AuthResult.success;
+      _authorizing = false;
+    });
+    if (result != AuthResult.success) {
+      final message = switch (result) {
+        AuthResult.unavailable => 'Set up device biometrics or a screen lock to continue.',
+        AuthResult.lockedOut => 'Device authentication is locked. Try again later.',
+        AuthResult.cancelled => 'Authentication was cancelled.',
+        AuthResult.error => 'Could not authenticate. Please try again.',
+        AuthResult.success => '',
+      };
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +80,29 @@ class _MedicationsScreenState extends State<MedicationsScreen> with SingleTicker
         ],
         bottom: PreferredSize(preferredSize: const Size.fromHeight(1), child: Container(height: 1, color: AppColors.border)),
       ),
-      body: FadeTransition(
+      body: !_authorized
+          ? Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.lock_outline, size: 48, color: AppColors.blue),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Authenticate to view your medications',
+                    style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textDark),
+                  ),
+                  const SizedBox(height: 16),
+                  FilledButton.icon(
+                    onPressed: _authorizing ? null : _authorize,
+                    icon: _authorizing
+                        ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                        : const Icon(Icons.fingerprint_rounded),
+                    label: Text(_authorizing ? 'Authenticating…' : 'Authenticate'),
+                  ),
+                ],
+              ),
+            )
+          : FadeTransition(
         opacity: CurvedAnimation(parent: _animCtrl, curve: Curves.easeOut),
         child: SingleChildScrollView(
           padding: EdgeInsets.all(isWide ? 32 : 16),

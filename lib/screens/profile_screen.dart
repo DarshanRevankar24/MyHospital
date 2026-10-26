@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 import '../services/api_service.dart';
+import '../services/auth_service.dart';
 import '../theme/app_colors.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -14,6 +16,8 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
   late AnimationController _animCtrl;
   late AnimationController _breatheCtrl;
   bool _editing = false;
+  bool _profileAuthorized = kIsWeb;
+  bool _authorizingProfile = false;
   bool _loadingEmergencyCard = false;
   final _nameCtrl = TextEditingController(text: 'John Doe');
   final _emailCtrl = TextEditingController(text: 'john.doe@email.com');
@@ -26,12 +30,85 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
     super.initState();
     _animCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 800))..forward();
     _breatheCtrl = AnimationController(vsync: this, duration: const Duration(seconds: 3))..repeat(reverse: true);
+    if (!kIsWeb) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _authorizeProfile());
+    }
   }
 
   @override
   void dispose() { _animCtrl.dispose(); _breatheCtrl.dispose(); _nameCtrl.dispose(); _emailCtrl.dispose(); _phoneCtrl.dispose(); super.dispose(); }
 
+  Future<bool> _confirmIdentity(String reason) async {
+    if (kIsWeb) return true;
+    final result = await AuthService().confirmIdentity(reason: reason);
+    if (result == AuthResult.success) return true;
+    if (mounted) {
+      final message = switch (result) {
+        AuthResult.unavailable => 'Set up device biometrics or a screen lock to continue.',
+        AuthResult.lockedOut => 'Device authentication is locked. Try again later.',
+        AuthResult.cancelled => 'Authentication was cancelled.',
+        AuthResult.error => 'Could not authenticate. Please try again.',
+        AuthResult.success => '',
+      };
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
+      );
+    }
+    return false;
+  }
+
+  Future<void> _authorizeProfile() async {
+    if (_authorizingProfile || _profileAuthorized) return;
+    setState(() => _authorizingProfile = true);
+    final authorized = await _confirmIdentity(
+      'Authenticate to view your profile and health information',
+    );
+    if (mounted) {
+      setState(() {
+        _profileAuthorized = authorized;
+        _authorizingProfile = false;
+      });
+    }
+  }
+
+  Future<void> _setAppLockEnabled(bool enabled) async {
+    if (!await _confirmIdentity(
+      enabled
+          ? 'Authenticate to enable the MyHospital app lock'
+          : 'Authenticate to disable the MyHospital app lock',
+    )) {
+      return;
+    }
+    try {
+      await AuthService().setAppLockEnabled(enabled);
+    } catch (error) {
+      _showSecuritySettingsError(error);
+    }
+  }
+
+  Future<void> _setTimeoutLabel(String label) async {
+    try {
+      await AuthService().setTimeoutLabel(label);
+    } catch (error) {
+      _showSecuritySettingsError(error);
+    }
+  }
+
+  void _showSecuritySettingsError(Object error) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Could not update security settings: $error'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
   Future<void> _openEmergencyCard() async {
+    if (!await _confirmIdentity('Authenticate to access your emergency card')) {
+      return;
+    }
+    if (!mounted) return;
     setState(() => _loadingEmergencyCard = true);
     try {
       final profile = await ApiService.getCurrentUser();
@@ -111,7 +188,43 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
         ],
         bottom: PreferredSize(preferredSize: const Size.fromHeight(1), child: Container(height: 1, color: AppColors.border)),
       ),
-      body: FadeTransition(
+      body: !_profileAuthorized
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.lock_outline, size: 48, color: AppColors.blue),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Authenticate to view your profile',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textDark,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    FilledButton.icon(
+                      onPressed: _authorizingProfile ? null : _authorizeProfile,
+                      icon: _authorizingProfile
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.fingerprint_rounded),
+                      label: Text(
+                        _authorizingProfile ? 'Authenticating…' : 'Authenticate',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : FadeTransition(
         opacity: CurvedAnimation(parent: _animCtrl, curve: Curves.easeOut),
         child: SingleChildScrollView(
           padding: EdgeInsets.all(isWide ? 32 : 16),
@@ -132,7 +245,10 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                 Expanded(flex: 2, child: Column(children: [
                   _StatsCard(),
                   const SizedBox(height: 20),
-                  _QuickSettingsCard(),
+                  _QuickSettingsCard(
+                    onAppLockChanged: _setAppLockEnabled,
+                    onTimeoutChanged: _setTimeoutLabel,
+                  ),
                 ])),
               ])
             else Column(children: [
@@ -145,7 +261,10 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
               const SizedBox(height: 20),
               _StatsCard(),
               const SizedBox(height: 20),
-              _QuickSettingsCard(),
+              _QuickSettingsCard(
+                onAppLockChanged: _setAppLockEnabled,
+                onTimeoutChanged: _setTimeoutLabel,
+              ),
             ]),
             const SizedBox(height: 28),
             SizedBox(
@@ -379,6 +498,14 @@ class _StatRowState extends State<_StatRow> {
 }
 
 class _QuickSettingsCard extends StatelessWidget {
+  final ValueChanged<bool> onAppLockChanged;
+  final ValueChanged<String> onTimeoutChanged;
+
+  const _QuickSettingsCard({
+    required this.onAppLockChanged,
+    required this.onTimeoutChanged,
+  });
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -391,6 +518,64 @@ class _QuickSettingsCard extends StatelessWidget {
           Text('Settings', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textDark)),
         ]),
         const SizedBox(height: 16),
+        AnimatedBuilder(
+          animation: AuthService(),
+          builder: (context, _) {
+            final authService = AuthService();
+            return Column(children: [
+              Row(children: [
+                const Icon(Icons.fingerprint_rounded, size: 16, color: AppColors.textSoft),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Biometric app lock',
+                    style: GoogleFonts.inter(fontSize: 13, color: AppColors.textMid),
+                  ),
+                ),
+                Switch(
+                  value: authService.appLockEnabled,
+                  onChanged: onAppLockChanged,
+                  activeThumbColor: AppColors.blue,
+                ),
+              ]),
+              if (authService.appLockEnabled)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(children: [
+                    const Icon(Icons.timer_outlined, size: 16, color: AppColors.textSoft),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Lock after',
+                        style: GoogleFonts.inter(fontSize: 13, color: AppColors.textMid),
+                      ),
+                    ),
+                    DropdownButton<String>(
+                      value: authService.timeoutLabel,
+                      onChanged: (value) {
+                        if (value != null) onTimeoutChanged(value);
+                      },
+                      items: kTimeoutOptions.keys.map((label) => DropdownMenuItem(
+                        value: label,
+                        child: Text(label, style: GoogleFonts.inter(fontSize: 12)),
+                      )).toList(),
+                    ),
+                  ]                  ),
+                ),
+              if (authService.appLockEnabled)
+                Padding(
+                  padding: const EdgeInsets.only(left: 26, bottom: 12),
+                  child: Text(
+                    'MyHospital locks when you return to it. Biometric data stays with your device.',
+                    style: GoogleFonts.inter(
+                      fontSize: 11,
+                      color: AppColors.textSoft,
+                    ),
+                  ),
+                ),
+            ]);
+          },
+        ),
         _SettingToggle(label: 'Push Notifications', icon: Icons.notifications_outlined, value: true),
         _SettingToggle(label: 'SMS Reminders', icon: Icons.message_outlined, value: true),
         _SettingToggle(label: 'Email Updates', icon: Icons.email_outlined, value: false),

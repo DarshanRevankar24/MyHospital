@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../services/auth_service.dart';
 import '../theme/app_colors.dart';
 
 class PharmacyScreen extends StatefulWidget {
@@ -35,6 +37,44 @@ class _PharmacyScreenState extends State<PharmacyScreen> with SingleTickerProvid
 
   int get _cartTotal => _cart.entries.fold(0, (sum, e) => sum + _medicines[e.key].price * e.value);
   int get _cartCount => _cart.values.fold(0, (sum, v) => sum + v);
+
+  Future<void> _openPrescriptionUpload() async {
+    if (!kIsWeb) {
+      final result = await AuthService().confirmIdentity(
+        reason: 'Authenticate before accessing prescription services',
+      );
+      if (result != AuthResult.success) {
+        if (mounted) {
+          final message = switch (result) {
+            AuthResult.unavailable => 'Set up device biometrics or a screen lock to continue.',
+            AuthResult.lockedOut => 'Device authentication is locked. Try again later.',
+            AuthResult.cancelled => 'Authentication was cancelled.',
+            AuthResult.error => 'Could not authenticate. Please try again.',
+            AuthResult.success => '',
+          };
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
+          );
+        }
+        return;
+      }
+    }
+
+    if (!mounted) return;
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Prescription upload'),
+        content: const Text('Prescription uploads are not available yet.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +113,7 @@ class _PharmacyScreenState extends State<PharmacyScreen> with SingleTickerProvid
             const SizedBox(height: 24),
 
             // Upload Prescription banner
-            _UploadBanner(),
+            _UploadBanner(onTap: _openPrescriptionUpload),
             const SizedBox(height: 24),
 
             Container(
@@ -157,6 +197,10 @@ class _GradientHeader extends StatelessWidget {
 }
 
 class _UploadBanner extends StatefulWidget {
+  final VoidCallback onTap;
+
+  const _UploadBanner({required this.onTap});
+
   @override
   State<_UploadBanner> createState() => _UploadBannerState();
 }
@@ -169,31 +213,34 @@ class _UploadBannerState extends State<_UploadBanner> {
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       cursor: SystemMouseCursors.click,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: _hovered ? AppColors.blueLight : Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: _hovered ? AppColors.blue.withValues(alpha: 0.3) : AppColors.border, style: BorderStyle.solid),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: _hovered ? AppColors.blueLight : Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: _hovered ? AppColors.blue.withValues(alpha: 0.3) : AppColors.border, style: BorderStyle.solid),
+          ),
+          child: Row(children: [
+            Container(
+              width: 50, height: 50,
+              decoration: BoxDecoration(color: const Color(0xFFFFF3E0), borderRadius: BorderRadius.circular(14)),
+              child: const Center(child: Text('📋', style: TextStyle(fontSize: 24))),
+            ),
+            const SizedBox(width: 16),
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text('Upload Prescription', style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textDark)),
+              Text('Upload your prescription and we\'ll prepare your order', style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSoft)),
+            ])),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              decoration: BoxDecoration(gradient: LinearGradient(colors: [AppColors.blue, AppColors.blueMid]), borderRadius: BorderRadius.circular(10)),
+              child: Text('Upload', style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white)),
+            ),
+          ]),
         ),
-        child: Row(children: [
-          Container(
-            width: 50, height: 50,
-            decoration: BoxDecoration(color: const Color(0xFFFFF3E0), borderRadius: BorderRadius.circular(14)),
-            child: const Center(child: Text('📋', style: TextStyle(fontSize: 24))),
-          ),
-          const SizedBox(width: 16),
-          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('Upload Prescription', style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textDark)),
-            Text('Upload your prescription and we\'ll prepare your order', style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSoft)),
-          ])),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            decoration: BoxDecoration(gradient: LinearGradient(colors: [AppColors.blue, AppColors.blueMid]), borderRadius: BorderRadius.circular(10)),
-            child: Text('Upload', style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white)),
-          ),
-        ]),
       ),
     );
   }

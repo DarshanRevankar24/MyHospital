@@ -20,10 +20,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 // ── Result returned by every authenticate() call ──────────────────────────────
 enum AuthResult {
   success,
-  cancelled,       // user pressed back / cancel
-  unavailable,     // no enrolled biometric / hardware absent
-  lockedOut,       // device temporarily / permanently locked
-  error,           // any other platform error
+  cancelled, // user pressed back / cancel
+  unavailable, // no enrolled biometric / hardware absent
+  lockedOut, // device temporarily / permanently locked
+  error, // any other platform error
 }
 
 // ── Timeout options (label → seconds; 0 = never) ─────────────────────────────
@@ -51,22 +51,26 @@ class AuthService extends ChangeNotifier {
   // ── State ──────────────────────────────────────────────────────────────────
   bool _appLockEnabled = false;
   String _timeoutLabel = '1 minute';
-  bool _isLocked = false;          // true → lock screen should show
-  bool _isAuthenticating = false;  // guard against double-prompt
+  bool _isLocked = false; // true → lock screen should show
+  bool _isAuthenticating = false; // guard against double-prompt
   Timer? _inactivityTimer;
+  bool _wasPaused = false;
 
   // ── Getters ────────────────────────────────────────────────────────────────
   bool get appLockEnabled => _appLockEnabled;
-  bool get isLocked       => _isLocked;
+  bool get isLocked => _isLocked;
   bool get isAuthenticating => _isAuthenticating;
   String get timeoutLabel => _timeoutLabel;
-  int get timeoutSeconds  => kTimeoutOptions[_timeoutLabel] ?? 60;
+  int get timeoutSeconds => kTimeoutOptions[_timeoutLabel] ?? 60;
 
   // ── Initialise from SharedPreferences ─────────────────────────────────────
   Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
     _appLockEnabled = prefs.getBool(_kEnabled) ?? false;
-    _timeoutLabel   = prefs.getString(_kTimeout) ?? '1 minute';
+    final storedTimeout = prefs.getString(_kTimeout);
+    _timeoutLabel = kTimeoutOptions.containsKey(storedTimeout)
+        ? storedTimeout!
+        : '1 minute';
 
     // Lock on first launch if app lock is enabled
     if (_appLockEnabled) {
@@ -77,37 +81,55 @@ class AuthService extends ChangeNotifier {
 
   // ── Persist settings ───────────────────────────────────────────────────────
   Future<void> setAppLockEnabled(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_kEnabled, value);
     _appLockEnabled = value;
     if (!value) {
+      _wasPaused = false;
       _isLocked = false;
       _cancelTimer();
     } else {
-      _isLocked = true; // require immediate auth when user enables lock
+      _isLocked = false;
+      _resetTimer();
     }
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_kEnabled, value);
     notifyListeners();
   }
 
   Future<void> setTimeoutLabel(String label) async {
-    _timeoutLabel = label;
+    if (!kTimeoutOptions.containsKey(label)) {
+      throw ArgumentError.value(label, 'label', 'Unknown app-lock timeout.');
+    }
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_kTimeout, label);
+    _timeoutLabel = label;
+    if (_appLockEnabled && !_isLocked) {
+      _resetTimer();
+    }
     notifyListeners();
   }
 
   // ── Lifecycle hooks (called from main.dart AppLifecycleObserver) ──────────
   void onAppResumed() {
-    // If lock is enabled and the inactivity timer already fired → stay locked.
-    // If lock is enabled and the timer has NOT fired → unlock is fine; reset timer.
-    if (_appLockEnabled && !_isLocked) {
+    if (!_appLockEnabled) return;
+
+    final wasPaused = _wasPaused;
+    _wasPaused = false;
+    if (wasPaused) {
+      lock();
+    }
+    if (!_isLocked) {
       _resetTimer();
     }
   }
 
   void onAppPaused() {
     if (_appLockEnabled) {
-      _startTimer();
+      _wasPaused = true;
+      if (timeoutSeconds == 0) {
+        lock();
+      } else {
+        _startTimer();
+      }
     }
   }
 
@@ -124,6 +146,7 @@ class AuthService extends ChangeNotifier {
   Future<AuthResult> authenticate({
     String localizedReason = 'Authenticate to access MyHospital',
     bool stickyAuth = true,
+    bool updateLockState = true,
   }) async {
     if (_isAuthenticating) return AuthResult.cancelled;
 
@@ -133,10 +156,19 @@ class AuthService extends ChangeNotifier {
       canCheckBiometrics = await _localAuth.canCheckBiometrics;
     } on PlatformException {
       return AuthResult.unavailable;
+    } on MissingPluginException {
+      return AuthResult.unavailable;
     }
 
     if (!canCheckBiometrics) {
-      final isDeviceSupported = await _localAuth.isDeviceSupported();
+      bool isDeviceSupported;
+      try {
+        isDeviceSupported = await _localAuth.isDeviceSupported();
+      } on PlatformException {
+        return AuthResult.unavailable;
+      } on MissingPluginException {
+        return AuthResult.unavailable;
+      }
       if (!isDeviceSupported) return AuthResult.unavailable;
     }
 
@@ -152,9 +184,7 @@ class AuthService extends ChangeNotifier {
             biometricHint: 'Touch the sensor',
             cancelButton: 'Cancel',
           ),
-          IOSAuthMessages(
-            cancelButton: 'Cancel',
-          ),
+          IOSAuthMessages(cancelButton: 'Cancel'),
         ],
         options: AuthenticationOptions(
           stickyAuth: stickyAuth,
@@ -164,9 +194,11 @@ class AuthService extends ChangeNotifier {
       );
 
       if (success) {
-        _isLocked = false;
+        if (updateLockState) {
+          _isLocked = false;
+          _resetTimer();
+        }
         _isAuthenticating = false;
-        _resetTimer();
         notifyListeners();
         return AuthResult.success;
       } else {
@@ -187,6 +219,10 @@ class AuthService extends ChangeNotifier {
         return AuthResult.lockedOut;
       }
       return AuthResult.error;
+    } on MissingPluginException {
+      _isAuthenticating = false;
+      notifyListeners();
+      return AuthResult.unavailable;
     }
   }
 
@@ -195,11 +231,16 @@ class AuthService extends ChangeNotifier {
   Future<AuthResult> confirmIdentity({
     String reason = 'Confirm your identity to view this content',
   }) async {
-    return authenticate(localizedReason: reason, stickyAuth: false);
+    return authenticate(
+      localizedReason: reason,
+      stickyAuth: false,
+      updateLockState: false,
+    );
   }
 
   // ── Lock / Unlock helpers ─────────────────────────────────────────────────
   void lock() {
+    if (!_appLockEnabled) return;
     _isLocked = true;
     _cancelTimer();
     notifyListeners();
@@ -210,12 +251,7 @@ class AuthService extends ChangeNotifier {
     _cancelTimer();
     final secs = timeoutSeconds;
     if (secs < 0) return; // Never
-    if (secs == 0) {
-      // Immediately
-      _isLocked = true;
-      notifyListeners();
-      return;
-    }
+    if (secs == 0) return;
     _inactivityTimer = Timer(Duration(seconds: secs), () {
       _isLocked = true;
       notifyListeners();

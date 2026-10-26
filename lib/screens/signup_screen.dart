@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../services/demo_auth_service.dart';
 import '../theme/app_colors.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -61,15 +62,23 @@ class _SignupScreenState extends State<SignupScreen>
       return;
     }
     setState(() => _isLoading = true);
-    // Simulate network call — replace with real API when backend is ready
-    await Future.delayed(const Duration(seconds: 2));
-    if (mounted) {
+    try {
+      await DemoAuthService.instance.signUp(
+        name: '${_firstNameCtrl.text.trim()} ${_lastNameCtrl.text.trim()}',
+        email: _emailCtrl.text,
+        password: _passwordCtrl.text,
+      );
+      if (!mounted) return;
       setState(() => _isLoading = false);
       _showSnack('Account created! Welcome to MyHospital 🎉', isSuccess: true);
-      // Brief pause so the user sees the success message, then go to Home
       await Future.delayed(const Duration(milliseconds: 1200));
       if (mounted) {
         Navigator.of(context).pushNamedAndRemoveUntil('/dashboard', (route) => false);
+      }
+    } catch (error) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        _showSnack(error.toString());
       }
     }
   }
@@ -563,6 +572,22 @@ class _FormPanel extends StatelessWidget {
                         style: GoogleFonts.inter(fontSize: 12.5, color: AppColors.textSoft)),
                   ]),
                 ]),
+                const SizedBox(height: 12),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.blueLight,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    'Offline demo: this account is kept in memory for testing and is not sent to a server.',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: AppColors.textMid,
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 8),
                 Padding(
                   padding: const EdgeInsets.only(left: 18),

@@ -1,8 +1,8 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../services/api_service.dart';
 import '../services/auth_service.dart';
+import '../services/demo_auth_service.dart';
 import '../theme/app_colors.dart';
 
 /// Beautiful animated Login screen with glassmorphism, floating particles,
@@ -68,14 +68,17 @@ class _LoginScreenState extends State<LoginScreen>
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
     try {
-      await ApiService.login(_usernameCtrl.text.trim(), _passwordCtrl.text);
+      await DemoAuthService.instance.signIn(
+        _usernameCtrl.text,
+        _passwordCtrl.text,
+      );
       if (!mounted) return;
       Navigator.of(context).pushReplacementNamed('/dashboard');
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Sign in failed: $error'),
+            content: Text('$error'),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -330,7 +333,25 @@ class _LoginScreenState extends State<LoginScreen>
                 ),
               ],
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 20),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.blue.withValues(alpha: 0.14),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.blue.withValues(alpha: 0.28)),
+              ),
+              child: Text(
+                'DEMO MODE\nEmail: ${DemoAuthService.demoEmail}  ·  Password: ${DemoAuthService.demoPassword}',
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  height: 1.5,
+                  color: Colors.white70,
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
 
             // Username field
             _GlassField(

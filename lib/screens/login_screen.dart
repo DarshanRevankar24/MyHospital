@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/api_service.dart';
+import '../services/auth_service.dart';
 import '../theme/app_colors.dart';
 
 /// Beautiful animated Login screen with glassmorphism, floating particles,
@@ -20,6 +21,7 @@ class _LoginScreenState extends State<LoginScreen>
   final _passwordCtrl = TextEditingController();
   bool _obscure = true;
   bool _isLoading = false;
+  bool _isBiometricLoading = false;
 
   late AnimationController _bgCtrl;
   late AnimationController _formCtrl;
@@ -80,6 +82,57 @@ class _LoginScreenState extends State<LoginScreen>
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _loginWithBiometrics() async {
+    setState(() => _isBiometricLoading = true);
+    try {
+      final result = await AuthService().authenticate(
+        localizedReason: 'Use your phone lock, Face ID, or fingerprint to unlock MyHospital',
+      );
+
+      if (!mounted) return;
+
+      switch (result) {
+        case AuthResult.success:
+          Navigator.of(context).pushReplacementNamed('/dashboard');
+          break;
+        case AuthResult.unavailable:
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('No fingerprint or Face ID is available on this device.'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          break;
+        case AuthResult.lockedOut:
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Biometrics are temporarily locked. Use your device PIN or try again later.'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          break;
+        case AuthResult.cancelled:
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Biometric unlock cancelled.'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          break;
+        case AuthResult.error:
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Biometric unlock failed. Please try again.'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          break;
+      }
+    } finally {
+      if (mounted) setState(() => _isBiometricLoading = false);
     }
   }
 
@@ -325,6 +378,49 @@ class _LoginScreenState extends State<LoginScreen>
               icon: Icons.login_rounded,
               isLoading: _isLoading,
               onTap: _login,
+            ),
+            const SizedBox(height: 16),
+
+            // OS biometric unlock using the device lock / face / fingerprint
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(18),
+                  onTap: _isBiometricLoading ? null : _loginWithBiometrics,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (_isBiometricLoading)
+                          const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          )
+                        else
+                          const Icon(Icons.fingerprint_rounded, color: Colors.white),
+                        const SizedBox(width: 10),
+                        Text(
+                          _isBiometricLoading ? 'Checking device lock...' : 'Use Face ID / Fingerprint',
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
             const SizedBox(height: 24),
 

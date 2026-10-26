@@ -16,6 +16,8 @@ dependencies:
   lottie: ^3.6.1
   animate_do: ^5.1.0
   local_auth: ^2.3.0
+  local_auth_android: ^1.0.56
+  local_auth_darwin: ^1.6.1
   shared_preferences: ^2.3.5
   provider: ^6.1.2
   mobile_scanner: ^7.4.2

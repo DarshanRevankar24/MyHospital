@@ -518,7 +518,7 @@ class _QuickSettingsCard extends StatelessWidget {
           Text('Settings', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textDark)),
         ]),
         const SizedBox(height: 16),
-        AnimatedBuilder(
+        if (!kIsWeb) AnimatedBuilder(
           animation: AuthService(),
           builder: (context, _) {
             final authService = AuthService();

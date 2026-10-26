@@ -429,12 +429,18 @@ class _LoginScreenState extends State<LoginScreen>
                         else
                           const Icon(Icons.fingerprint_rounded, color: Colors.white),
                         const SizedBox(width: 10),
-                        Text(
-                          _isBiometricLoading ? 'Checking device lock...' : 'Use Face ID / Fingerprint',
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                        Flexible(
+                          child: Text(
+                            _isBiometricLoading
+                                ? 'Checking device lock...'
+                                : 'Use Face ID / Fingerprint',
+                            textAlign: TextAlign.center,
+                            softWrap: true,
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ],

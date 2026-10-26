@@ -9,6 +9,7 @@
 //   • Exposes authenticate() for any widget that wants biometric confirmation.
 //   • Never stores biometric templates; only a transient in-memory boolean.
 import 'dart:async';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
@@ -66,7 +67,7 @@ class AuthService extends ChangeNotifier {
   // ── Initialise from SharedPreferences ─────────────────────────────────────
   Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
-    _appLockEnabled = prefs.getBool(_kEnabled) ?? false;
+    _appLockEnabled = !kIsWeb && (prefs.getBool(_kEnabled) ?? false);
     final storedTimeout = prefs.getString(_kTimeout);
     _timeoutLabel = kTimeoutOptions.containsKey(storedTimeout)
         ? storedTimeout!

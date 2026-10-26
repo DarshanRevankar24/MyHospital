@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_colors.dart';
@@ -651,8 +650,13 @@ class _BannerDivider extends StatelessWidget {
 class _QuickActions extends StatelessWidget {
   static const _actions = [
     _ActionData(
+        emoji: '🚑',
+        label: 'Emergency\nAmbulance',
+        color: Color(0xFFFFEBEE),
+        route: '/ambulance'),
+    _ActionData(
         emoji: '🩺',
-        label: 'Consult\nDoctor',
+        label: 'Consult a\nDoctor',
         color: Color(0xFFE8F4FD),
         route: '/hospitals'),
     _ActionData(
@@ -675,11 +679,6 @@ class _QuickActions extends StatelessWidget {
         label: 'Blood\nBank',
         color: Color(0xFFFFEBEE),
         route: '/blood-bank'),
-    _ActionData(
-        emoji: '🚑',
-        label: 'Emergency\nAmb.',
-        color: Color(0xFFFFF3E0),
-        route: '/ambulance'),
   ];
 
   const _QuickActions();

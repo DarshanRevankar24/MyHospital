@@ -15,22 +15,16 @@ class _LabTestsScreenState extends State<LabTestsScreen>
   final Set<int> _selectedTests = {};
 
   static const _tests = [
-    _Test(name: 'Complete Blood Count (CBC)', price: 350, category: 'Hematology', turnaround: '4 hrs', popular: true),
-    _Test(name: 'Lipid Profile', price: 550, category: 'Biochemistry', turnaround: '6 hrs', popular: true),
-    _Test(name: 'Thyroid Profile (T3/T4/TSH)', price: 650, category: 'Endocrine', turnaround: '8 hrs', popular: true),
-    _Test(name: 'HbA1c (Diabetes)', price: 480, category: 'Diabetes', turnaround: '4 hrs', popular: false),
-    _Test(name: 'Liver Function Test', price: 520, category: 'Biochemistry', turnaround: '6 hrs', popular: false),
-    _Test(name: 'Kidney Function Test', price: 480, category: 'Biochemistry', turnaround: '6 hrs', popular: false),
-    _Test(name: 'Vitamin D', price: 750, category: 'Vitamins', turnaround: '12 hrs', popular: true),
-    _Test(name: 'Vitamin B12', price: 680, category: 'Vitamins', turnaround: '12 hrs', popular: false),
-    _Test(name: 'Iron Studies', price: 580, category: 'Hematology', turnaround: '8 hrs', popular: false),
-    _Test(name: 'Urine Routine', price: 200, category: 'Urinalysis', turnaround: '3 hrs', popular: false),
-  ];
-
-  static const _packages = [
-    _Package(name: 'Full Body Checkup', tests: 78, price: 1499, originalPrice: 3999, color: Color(0xFF1565C0)),
-    _Package(name: 'Diabetes Panel', tests: 12, price: 799, originalPrice: 1800, color: Color(0xFF2E7D32)),
-    _Package(name: 'Heart Health', tests: 15, price: 999, originalPrice: 2500, color: Color(0xFFB71C1C)),
+    _Test(name: 'Complete Blood Count (CBC)', category: 'Hematology', turnaround: '4 hrs', popular: true),
+    _Test(name: 'Lipid Profile', category: 'Biochemistry', turnaround: '6 hrs', popular: true),
+    _Test(name: 'Thyroid Profile (T3/T4/TSH)', category: 'Endocrine', turnaround: '8 hrs', popular: true),
+    _Test(name: 'HbA1c (Diabetes)', category: 'Diabetes', turnaround: '4 hrs', popular: false),
+    _Test(name: 'Liver Function Test', category: 'Biochemistry', turnaround: '6 hrs', popular: false),
+    _Test(name: 'Kidney Function Test', category: 'Biochemistry', turnaround: '6 hrs', popular: false),
+    _Test(name: 'Vitamin D', category: 'Vitamins', turnaround: '12 hrs', popular: true),
+    _Test(name: 'Vitamin B12', category: 'Vitamins', turnaround: '12 hrs', popular: false),
+    _Test(name: 'Iron Studies', category: 'Hematology', turnaround: '8 hrs', popular: false),
+    _Test(name: 'Urine Routine', category: 'Urinalysis', turnaround: '3 hrs', popular: false),
   ];
 
   @override
@@ -66,18 +60,6 @@ class _LabTestsScreenState extends State<LabTestsScreen>
             _GradientHeader(emoji: '🔬', title: 'Book Lab Tests', subtitle: '500+ tests from 300+ NABL-accredited labs'),
             const SizedBox(height: 24),
 
-            // Health Packages
-            Text('Popular Packages', style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textDark)),
-            const SizedBox(height: 14),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(children: _packages.map((p) => Padding(
-                padding: const EdgeInsets.only(right: 14),
-                child: _PackageCard(pkg: p),
-              )).toList()),
-            ),
-            const SizedBox(height: 28),
-
             // Search
             Container(
               decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.border)),
@@ -110,7 +92,6 @@ class _LabTestsScreenState extends State<LabTestsScreen>
               const SizedBox(height: 20),
               _SelectedSummary(
                 count: _selectedTests.length,
-                total: _selectedTests.fold(0, (sum, i) => sum + _tests[i].price),
                 onBook: () {
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                     content: Text('✅ ${_selectedTests.length} tests booked!', style: GoogleFonts.inter(color: Colors.white)),
@@ -131,16 +112,8 @@ class _LabTestsScreenState extends State<LabTestsScreen>
 
 class _Test {
   final String name, category, turnaround;
-  final int price;
   final bool popular;
-  const _Test({required this.name, required this.price, required this.category, required this.turnaround, required this.popular});
-}
-
-class _Package {
-  final String name;
-  final int tests, price, originalPrice;
-  final Color color;
-  const _Package({required this.name, required this.tests, required this.price, required this.originalPrice, required this.color});
+  const _Test({required this.name, required this.category, required this.turnaround, required this.popular});
 }
 
 class _GradientHeader extends StatelessWidget {
@@ -165,59 +138,6 @@ class _GradientHeader extends StatelessWidget {
           Text(subtitle, style: GoogleFonts.inter(fontSize: 13, color: Colors.white54)),
         ])),
       ]),
-    );
-  }
-}
-
-class _PackageCard extends StatefulWidget {
-  final _Package pkg;
-  const _PackageCard({required this.pkg});
-  @override
-  State<_PackageCard> createState() => _PackageCardState();
-}
-
-class _PackageCardState extends State<_PackageCard> {
-  bool _hovered = false;
-  @override
-  Widget build(BuildContext context) {
-    final p = widget.pkg;
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      cursor: SystemMouseCursors.click,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        transform: Matrix4.translationValues(0, _hovered ? -4 : 0, 0),
-        width: 260, padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [p.color, p.color.withValues(alpha: 0.8)]),
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: _hovered ? [BoxShadow(color: p.color.withValues(alpha: 0.3), blurRadius: 20, offset: const Offset(0, 8))] : [],
-        ),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(20)),
-            child: Text('${p.tests} tests', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white)),
-          ),
-          const SizedBox(height: 14),
-          Text(p.name, style: GoogleFonts.inter(fontSize: 17, fontWeight: FontWeight.w700, color: Colors.white)),
-          const SizedBox(height: 10),
-          Row(children: [
-            Text('₹${p.price}', style: GoogleFonts.inter(fontSize: 22, fontWeight: FontWeight.w800, color: Colors.white)),
-            const SizedBox(width: 8),
-            Text('₹${p.originalPrice}', style: GoogleFonts.inter(fontSize: 14, color: Colors.white54, decoration: TextDecoration.lineThrough, decorationColor: Colors.white54)),
-          ]),
-          const SizedBox(height: 6),
-          Text('${(100 - p.price * 100 ~/ p.originalPrice)}% off', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white70)),
-          const SizedBox(height: 16),
-          Container(
-            width: double.infinity, padding: const EdgeInsets.symmetric(vertical: 11),
-            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
-            child: Center(child: Text('Book Package', style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w700, color: p.color))),
-          ),
-        ]),
-      ),
     );
   }
 }
@@ -277,10 +197,7 @@ class _TestTileState extends State<_TestTile> {
               ]),
             ])),
             const SizedBox(width: 12),
-            Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-              Text('₹${t.price}', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textDark)),
-              const SizedBox(height: 4),
-              AnimatedContainer(
+            AnimatedContainer(
                 duration: const Duration(milliseconds: 150),
                 width: 24, height: 24,
                 decoration: BoxDecoration(
@@ -290,7 +207,6 @@ class _TestTileState extends State<_TestTile> {
                 ),
                 child: widget.isSelected ? const Icon(Icons.check_rounded, size: 14, color: Colors.white) : null,
               ),
-            ]),
           ]),
         ),
       ),
@@ -299,9 +215,9 @@ class _TestTileState extends State<_TestTile> {
 }
 
 class _SelectedSummary extends StatelessWidget {
-  final int count, total;
+  final int count;
   final VoidCallback onBook;
-  const _SelectedSummary({required this.count, required this.total, required this.onBook});
+  const _SelectedSummary({required this.count, required this.onBook});
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -314,7 +230,7 @@ class _SelectedSummary extends StatelessWidget {
       child: Row(children: [
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text('$count test${count > 1 ? 's' : ''} selected', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white)),
-          Text('Total: ₹$total', style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w800, color: Colors.white)),
+          Text('Choose a lab to continue', style: GoogleFonts.inter(fontSize: 12, color: Colors.white70)),
         ])),
         GestureDetector(
           onTap: onBook,

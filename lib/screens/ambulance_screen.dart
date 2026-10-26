@@ -16,6 +16,9 @@ class _AmbulanceScreenState extends State<AmbulanceScreen> with TickerProviderSt
   String _selectedType = 'ALS';
   bool _isRequesting = false;
   bool _requested = false;
+  bool _bookingForOther = false;
+  final _patientNameController = TextEditingController();
+  final _patientPhoneController = TextEditingController();
 
   @override
   void initState() {
@@ -26,7 +29,31 @@ class _AmbulanceScreenState extends State<AmbulanceScreen> with TickerProviderSt
   }
 
   @override
-  void dispose() { _animCtrl.dispose(); _pulseCtrl.dispose(); _radarCtrl.dispose(); super.dispose(); }
+  void dispose() {
+    _animCtrl.dispose();
+    _pulseCtrl.dispose();
+    _radarCtrl.dispose();
+    _patientNameController.dispose();
+    _patientPhoneController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _requestAmbulance() async {
+    if (_bookingForOther &&
+        (_patientNameController.text.trim().isEmpty ||
+            _patientPhoneController.text.trim().isEmpty)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Enter the patient name and contact number.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+    setState(() => _isRequesting = true);
+    await Future.delayed(const Duration(seconds: 2));
+    if (mounted) setState(() { _isRequesting = false; _requested = true; });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -120,6 +147,46 @@ class _AmbulanceScreenState extends State<AmbulanceScreen> with TickerProviderSt
                   Text('We\'ll dispatch the nearest ${_selectedType} ambulance to your location', style: GoogleFonts.inter(fontSize: 13, color: AppColors.textSoft)),
                   const SizedBox(height: 20),
 
+                  Text('Who needs the ambulance?', style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textDark)),
+                  const SizedBox(height: 10),
+                  Row(children: [
+                    Expanded(child: _BookingTargetOption(
+                      label: 'For me',
+                      icon: Icons.person_outline_rounded,
+                      selected: !_bookingForOther,
+                      onTap: () => setState(() => _bookingForOther = false),
+                    )),
+                    const SizedBox(width: 10),
+                    Expanded(child: _BookingTargetOption(
+                      label: 'For someone else',
+                      icon: Icons.people_outline_rounded,
+                      selected: _bookingForOther,
+                      onTap: () => setState(() => _bookingForOther = true),
+                    )),
+                  ]),
+                  if (_bookingForOther) ...[
+                    const SizedBox(height: 14),
+                    TextField(
+                      controller: _patientNameController,
+                      textCapitalization: TextCapitalization.words,
+                      decoration: const InputDecoration(
+                        labelText: 'Patient name',
+                        prefixIcon: Icon(Icons.person_outline),
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _patientPhoneController,
+                      keyboardType: TextInputType.phone,
+                      decoration: const InputDecoration(
+                        labelText: 'Patient contact number',
+                        prefixIcon: Icon(Icons.phone_outlined),
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 20),
                   Container(
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(color: AppColors.bg, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.border)),
@@ -136,11 +203,7 @@ class _AmbulanceScreenState extends State<AmbulanceScreen> with TickerProviderSt
                   const SizedBox(height: 20),
 
                   GestureDetector(
-                    onTap: _isRequesting ? null : () async {
-                      setState(() => _isRequesting = true);
-                      await Future.delayed(const Duration(seconds: 2));
-                      if (mounted) setState(() { _isRequesting = false; _requested = true; });
-                    },
+                    onTap: _isRequesting ? null : _requestAmbulance,
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
                       width: double.infinity, padding: const EdgeInsets.symmetric(vertical: 16),
@@ -164,6 +227,58 @@ class _AmbulanceScreenState extends State<AmbulanceScreen> with TickerProviderSt
               ),
             ],
           ]),
+        ),
+      ),
+    );
+  }
+}
+
+class _BookingTargetOption extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _BookingTargetOption({
+    required this.label,
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.blueLight : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: selected ? AppColors.blue : AppColors.border,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 18, color: selected ? AppColors.blue : AppColors.textSoft),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: selected ? AppColors.blue : AppColors.textMid,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

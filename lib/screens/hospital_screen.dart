@@ -1,7 +1,5 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../services/api_service.dart';
 import '../theme/app_colors.dart';
 
 /// Hospital listing and booking flow with animated cards,
@@ -19,11 +17,7 @@ class _HospitalScreenState extends State<HospitalScreen>
   String _searchQuery = '';
   String _cityQuery = '';
   String? _selectedSpecialty;
-  final List<Map<String, dynamic>> _directoryResults = [];
-  Timer? _searchTimer;
-  int _searchRequestId = 0;
-  bool _isSearchingDirectory = false;
-  String? _directorySearchError;
+  List<Map<String, String>> _directoryResults = [];
 
   static const _specialties = [
     'All', 'Cardiology', 'Orthopaedics', 'Neurology', 'Gynaecology',
@@ -40,6 +34,17 @@ class _HospitalScreenState extends State<HospitalScreen>
     _HospitalData(name: 'Sakra World', location: 'Devarabeesanahalli, Bengaluru', rating: 4.7, beds: 350, specialties: ['Neurology', 'Paediatrics', 'Dentistry'], img: '🏥', isOpen: true),
   ];
 
+  static const _doctors = [
+    {'name': 'Dr. Meera Sharma', 'specialty': 'Cardiology', 'hospital': 'Apollo Hospital', 'city': 'Bengaluru'},
+    {'name': 'Dr. Rohan Iyer', 'specialty': 'Neurology', 'hospital': 'Apollo Hospital', 'city': 'Bengaluru'},
+    {'name': 'Dr. Ananya Rao', 'specialty': 'Paediatrics', 'hospital': 'Manipal Hospital', 'city': 'Bengaluru'},
+    {'name': 'Dr. Vikram Shetty', 'specialty': 'Orthopaedics', 'hospital': 'Manipal Hospital', 'city': 'Bengaluru'},
+    {'name': 'Dr. Kavya Nair', 'specialty': 'Gynaecology', 'hospital': 'Fortis Hospital', 'city': 'Bengaluru'},
+    {'name': 'Dr. Arjun Menon', 'specialty': 'Oncology', 'hospital': 'Narayana Health', 'city': 'Bengaluru'},
+    {'name': 'Dr. Priya Das', 'specialty': 'Dermatology', 'hospital': 'Fortis Hospital', 'city': 'Bengaluru'},
+    {'name': 'Dr. Sanjay Kumar', 'specialty': 'ENT', 'hospital': 'Columbia Asia', 'city': 'Bengaluru'},
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -50,94 +55,28 @@ class _HospitalScreenState extends State<HospitalScreen>
 
   @override
   void dispose() {
-    _searchTimer?.cancel();
     _animCtrl.dispose();
     super.dispose();
   }
 
   void _scheduleDirectorySearch() {
-    final requestId = ++_searchRequestId;
-    _searchTimer?.cancel();
-    setState(() {
-      _directoryResults.clear();
-      _directorySearchError = null;
-      _isSearchingDirectory = false;
-    });
-    final query = _searchQuery.trim();
-    if (query.length < 2) return;
-
-    _searchTimer = Timer(const Duration(milliseconds: 350), () async {
-      if (!mounted || requestId != _searchRequestId) return;
-      setState(() => _isSearchingDirectory = true);
-      try {
-        final response = await ApiService.searchHospitalsAndDoctors(
-          query,
-          city: _cityQuery,
-        );
-        if (!mounted || requestId != _searchRequestId) return;
-        setState(() {
-          _directoryResults.addAll(_extractDirectoryResults(response));
-        });
-      } catch (error) {
-        if (!mounted || requestId != _searchRequestId) return;
-        setState(() => _directorySearchError = error.toString());
-      } finally {
-        if (mounted && requestId == _searchRequestId) {
-          setState(() => _isSearchingDirectory = false);
-        }
-      }
-    });
-  }
-
-  List<Map<String, dynamic>> _extractDirectoryResults(
-    Map<String, dynamic> response,
-  ) {
-    final results = <Map<String, dynamic>>[];
-    void collect(dynamic value) {
-      if (value is List) {
-        for (final item in value) {
-          if (item is Map) results.add(Map<String, dynamic>.from(item));
-        }
-      } else if (value is Map) {
-        for (final nested in value.values) {
-          collect(nested);
-        }
-      }
-    }
-
-    collect(response);
-    return results;
-  }
-
-  String _directoryResultText(
-    Map<String, dynamic> result,
-    List<String> keys,
-  ) {
-    for (final key in keys) {
-      final value = result[key];
-      if (value is String && value.trim().isNotEmpty) return value.trim();
-    }
-    return '';
+    final query = _searchQuery.trim().toLowerCase();
+    final city = _cityQuery.trim().toLowerCase();
+    _directoryResults = query.length < 2
+        ? []
+        : _doctors.where((doctor) {
+            final matchesQuery = doctor.values
+                .any((value) => value.toLowerCase().contains(query));
+            final matchesCity =
+                city.isEmpty || doctor['city']!.toLowerCase().contains(city);
+            return matchesQuery && matchesCity;
+          }).map((doctor) => Map<String, String>.from(doctor)).toList();
   }
 
   Widget _buildDirectoryResults() {
-    if (_isSearchingDirectory) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(16),
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
-    if (_directorySearchError != null) {
-      return Text(
-        'Directory search failed: $_directorySearchError',
-        style: GoogleFonts.inter(fontSize: 13, color: AppColors.accent),
-      );
-    }
     if (_directoryResults.isEmpty) {
       return Text(
-        'No hospital or doctor matches found in the directory.',
+        'No doctors match that name or hospital.',
         style: GoogleFonts.inter(fontSize: 13, color: AppColors.textSoft),
       );
     }
@@ -145,28 +84,13 @@ class _HospitalScreenState extends State<HospitalScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Hospital and doctor results',
+        Text('Doctors matching your search',
             style: GoogleFonts.inter(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
                 color: AppColors.textDark)),
         const SizedBox(height: 12),
         ..._directoryResults.map((result) {
-          final title = _directoryResultText(result, [
-            'doctor_name',
-            'hospital_name',
-            'provider_name',
-            'name',
-            'title',
-          ]);
-          final subtitle = [
-            _directoryResultText(result, [
-              'specialty',
-              'speciality',
-              'specialization',
-            ]),
-            _directoryResultText(result, ['address', 'city']),
-          ].where((part) => part.isNotEmpty).join(' · ');
           return Container(
             width: double.infinity,
             margin: const EdgeInsets.only(bottom: 10),
@@ -178,25 +102,25 @@ class _HospitalScreenState extends State<HospitalScreen>
             ),
             child: Row(
               children: [
-                const Icon(Icons.local_hospital_outlined, color: AppColors.blue),
+                const Icon(Icons.person_search_outlined, color: AppColors.blue),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        title.isEmpty ? 'Hospital or doctor' : title,
+                        result['name']!,
                         style: GoogleFonts.inter(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: AppColors.textDark),
                       ),
-                      if (subtitle.isNotEmpty) ...[
-                        const SizedBox(height: 4),
-                        Text(subtitle,
-                            style: GoogleFonts.inter(
-                                fontSize: 12, color: AppColors.textSoft)),
-                      ],
+                      const SizedBox(height: 4),
+                      Text(
+                        '${result['specialty']} · ${result['hospital']} · ${result['city']}',
+                        style: GoogleFonts.inter(
+                            fontSize: 12, color: AppColors.textSoft),
+                      ),
                     ],
                   ),
                 ),
@@ -213,8 +137,14 @@ class _HospitalScreenState extends State<HospitalScreen>
     final width = MediaQuery.of(context).size.width;
     final isWide = width > 900;
     final filtered = _hospitals.where((h) {
-      if (_searchQuery.isNotEmpty &&
-          !h.name.toLowerCase().contains(_searchQuery.toLowerCase())) {
+      final query = _searchQuery.trim().toLowerCase();
+      if (query.isNotEmpty &&
+          !h.name.toLowerCase().contains(query) &&
+          !h.location.toLowerCase().contains(query)) {
+        return false;
+      }
+      if (_cityQuery.trim().isNotEmpty &&
+          !h.location.toLowerCase().contains(_cityQuery.trim().toLowerCase())) {
         return false;
       }
       if (_selectedSpecialty != null &&
@@ -430,7 +360,7 @@ class _SearchFilterBar extends StatelessWidget {
             maxLength: 80,
             style: GoogleFonts.inter(fontSize: 14, color: AppColors.textDark),
             decoration: InputDecoration(
-              hintText: 'Search hospitals by name…',
+              hintText: 'Search hospital or doctor name…',
               hintStyle:
                   GoogleFonts.inter(fontSize: 14, color: AppColors.textSoft),
               prefixIcon: const Icon(Icons.search_rounded,

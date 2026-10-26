@@ -1,5 +1,10 @@
+import 'dart:convert';
+import 'package:flutter/foundation.dart'
+    show defaultTargetPlatform, kIsWeb, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
+import '../services/api_service.dart';
 import '../theme/app_colors.dart';
 
 class FamilyScreen extends StatefulWidget {
@@ -30,6 +35,183 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
 
   @override
   void dispose() { _animCtrl.dispose(); super.dispose(); }
+
+  Future<void> _createQrInvite() async {
+    var relation = 'spouse';
+    final selectedRelation = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) => AlertDialog(
+          title: const Text('Create family invite'),
+          content: DropdownButtonFormField<String>(
+            initialValue: relation,
+            decoration: const InputDecoration(labelText: 'Relationship'),
+            items: const [
+              'spouse',
+              'parent',
+              'child',
+              'sibling',
+              'grandparent',
+              'grandchild',
+              'other',
+            ].map((value) => DropdownMenuItem(
+              value: value,
+              child: Text(value[0].toUpperCase() + value.substring(1)),
+            )).toList(),
+            onChanged: (value) {
+              if (value != null) setDialogState(() => relation = value);
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(dialogContext, relation),
+              child: const Text('Create QR'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (selectedRelation == null) return;
+
+    try {
+      final invite = await ApiService.createFamilyQrInvite(selectedRelation);
+      final qrCode = invite['qr_code'];
+      if (qrCode is! String || !qrCode.startsWith('data:image/png;base64,')) {
+        throw const FormatException('The server returned an invalid QR image.');
+      }
+      final qrBytes = base64Decode(qrCode.substring(qrCode.indexOf(',') + 1));
+      if (!mounted) return;
+      await showDialog<void>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('Share this family invite'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.memory(qrBytes, width: 220, height: 220),
+              const SizedBox(height: 12),
+              const Text(
+                'Ask the other person to scan this QR code while signed in. '
+                'It can only be used once.',
+                textAlign: TextAlign.center,
+              ),
+              if (invite['expires_at'] != null) ...[
+                const SizedBox(height: 8),
+                Text('Expires: ${invite['expires_at']}'),
+              ],
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Done'),
+            ),
+          ],
+        ),
+      );
+    } catch (error) {
+      _showMessage('Could not create invite: $error');
+    }
+  }
+
+  Future<void> _redeemQrInvite() async {
+    final tokenController = TextEditingController();
+    final tokenOrScan = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Redeem family invite'),
+        content: TextField(
+          controller: tokenController,
+          minLines: 1,
+          maxLines: 3,
+          decoration: const InputDecoration(
+            labelText: 'Invite token',
+            hintText: 'Paste a token or scan a QR code',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          if (_supportsQrScanning)
+            TextButton.icon(
+              onPressed: () =>
+                  Navigator.pop(dialogContext, '__SCAN_FAMILY_QR__'),
+              icon: const Icon(Icons.qr_code_scanner),
+              label: const Text('Scan QR'),
+            ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, tokenController.text),
+            child: const Text('Redeem'),
+          ),
+        ],
+      ),
+    );
+    tokenController.dispose();
+    final token = tokenOrScan == '__SCAN_FAMILY_QR__'
+        ? await _scanFamilyInvite()
+        : tokenOrScan;
+    final normalizedToken = token?.trim();
+    if (normalizedToken == null || normalizedToken.isEmpty) return;
+    if (normalizedToken.length < 32 || normalizedToken.length > 128) {
+      _showMessage('Enter a valid family invite token.');
+      return;
+    }
+
+    try {
+      await ApiService.redeemFamilyQrInvite(normalizedToken);
+      _showMessage('Family invite redeemed successfully.');
+    } catch (error) {
+      _showMessage('Could not redeem invite: $error');
+    }
+  }
+
+  bool get _supportsQrScanning =>
+      kIsWeb ||
+      defaultTargetPlatform == TargetPlatform.android ||
+      defaultTargetPlatform == TargetPlatform.iOS;
+
+  Future<String?> _scanFamilyInvite() {
+    return showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Scan family invite'),
+        content: SizedBox(
+          width: 320,
+          height: 320,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: MobileScanner(
+              onDetect: (capture) {
+                if (capture.barcodes.isEmpty) return;
+                final value = capture.barcodes.first.rawValue?.trim();
+                if (value == null || value.isEmpty) return;
+                Navigator.pop(dialogContext, value);
+              },
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showMessage(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,6 +254,26 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
                   Text('${_members.length} connected · manage access & medications', style: GoogleFonts.inter(fontSize: 13, color: Colors.white70)),
                 ])),
               ]),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _createQrInvite,
+                    icon: const Icon(Icons.qr_code_2),
+                    label: const Text('Create QR invite'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _redeemQrInvite,
+                    icon: const Icon(Icons.qr_code_scanner),
+                    label: const Text('Redeem invite'),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 24),
 

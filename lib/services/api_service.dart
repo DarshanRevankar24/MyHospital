@@ -1,7 +1,18 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
 import 'api_client.dart';
+
+class ApiException implements Exception {
+  final int statusCode;
+  final String message;
+
+  const ApiException(this.statusCode, this.message);
+
+  @override
+  String toString() => message;
+}
 
 class ApiService {
   // Configured to point to the remote backend
@@ -35,15 +46,67 @@ class ApiService {
     }
   }
 
+  static Map<String, dynamic> _decodeMapResponse(http.Response response) {
+    final dynamic decoded;
+    try {
+      decoded = jsonDecode(response.body);
+    } on FormatException {
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        throw ApiException(
+          response.statusCode,
+          response.body.isEmpty
+              ? 'Request failed with status ${response.statusCode}.'
+              : response.body,
+        );
+      }
+      rethrow;
+    }
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      final error =
+          decoded is Map ? decoded['detail'] ?? decoded['message'] : null;
+      throw ApiException(
+        response.statusCode,
+        error?.toString() ?? 'Request failed with status ${response.statusCode}.',
+      );
+    }
+    if (decoded is! Map) {
+      throw const FormatException('The server returned an unexpected response.');
+    }
+    return Map<String, dynamic>.from(decoded);
+  }
+
+  static void _ensureSuccessful(http.Response response) {
+    if (response.statusCode >= 200 && response.statusCode < 300) return;
+    var message = response.body;
+    try {
+      final decoded = jsonDecode(response.body);
+      if (decoded is Map) {
+        message = (decoded['detail'] ?? decoded['message'] ?? message).toString();
+      }
+    } on FormatException {
+      // Preserve the response body when the server does not return JSON.
+    }
+    throw ApiException(
+      response.statusCode,
+      message.isEmpty
+          ? 'Request failed with status ${response.statusCode}.'
+          : message,
+    );
+  }
+
   // ── Auth ──
   static Future<Map<String, dynamic>> login(String username, String password) async {
     final response = await _client.post(
       Uri.parse('$baseUrl/api/v1/auth/login'),
       headers: _formHeaders,
-      body: 'username=$username&password=$password',
+      body: Uri(queryParameters: {
+        'username': username,
+        'password': password,
+      }).query,
     );
     _extractCookies(response);
-    return jsonDecode(response.body);
+    return _decodeMapResponse(response);
   }
 
   static Future<Map<String, dynamic>> logout() async {
@@ -86,7 +149,7 @@ class ApiService {
       Uri.parse('$baseUrl/api/v1/users/me'),
       headers: _headers,
     );
-    return jsonDecode(response.body);
+    return _decodeMapResponse(response);
   }
 
   static Future<Map<String, dynamic>> updateUser(String username, Map<String, dynamic> data) async {
@@ -258,13 +321,30 @@ class ApiService {
     return jsonDecode(response.body);
   }
 
-  static Future<Map<String, dynamic>> createLabBooking(Map<String, dynamic> data) async {
+  static Future<Map<String, dynamic>> createLabBooking(
+    Map<String, dynamic> data, {
+    String? prescriptionUrl,
+  }) async {
+    final payload = Map<String, dynamic>.from(data);
+    final normalizedPrescriptionUrl = prescriptionUrl?.trim();
+    if (normalizedPrescriptionUrl != null &&
+        normalizedPrescriptionUrl.isNotEmpty) {
+      if (normalizedPrescriptionUrl.length > 500 ||
+          !RegExp(r'^https?://\S+$').hasMatch(normalizedPrescriptionUrl)) {
+        throw ArgumentError.value(
+          prescriptionUrl,
+          'prescriptionUrl',
+          'Must be an HTTP or HTTPS URL up to 500 characters.',
+        );
+      }
+      payload['prescription_url'] = normalizedPrescriptionUrl;
+    }
     final response = await _client.post(
       Uri.parse('$baseUrl/api/v1/services/laboratory/bookings'),
       headers: _headers,
-      body: jsonEncode(data),
+      body: jsonEncode(payload),
     );
-    return jsonDecode(response.body);
+    return _decodeMapResponse(response);
   }
 
   static Future<Map<String, dynamic>> getLabBookings() async {
@@ -385,6 +465,81 @@ class ApiService {
       headers: _headers,
     );
     return jsonDecode(response.body);
+  }
+
+  // ── Additional OpenAPI features ──
+  static Future<Map<String, dynamic>> createFamilyQrInvite(
+    String relation,
+  ) async {
+    if (!const {
+      'spouse',
+      'parent',
+      'child',
+      'sibling',
+      'grandparent',
+      'grandchild',
+      'other',
+    }.contains(relation)) {
+      throw ArgumentError.value(relation, 'relation');
+    }
+    final response = await _client.post(
+      Uri.parse('$baseUrl/api/v1/family/qr-invites'),
+      headers: _headers,
+      body: jsonEncode({'relation': relation}),
+    );
+    return _decodeMapResponse(response);
+  }
+
+  static Future<Map<String, dynamic>> redeemFamilyQrInvite(String token) async {
+    final normalizedToken = token.trim();
+    if (normalizedToken.length < 32 || normalizedToken.length > 128) {
+      throw ArgumentError.value(token, 'token', 'Must be 32 to 128 characters.');
+    }
+    final response = await _client.post(
+      Uri.parse('$baseUrl/api/v1/family/qr-invites/redeem'),
+      headers: _headers,
+      body: jsonEncode({'token': normalizedToken}),
+    );
+    return _decodeMapResponse(response);
+  }
+
+  static Future<Uint8List> getEmergencyCard(String username) async {
+    final normalizedUsername = username.trim();
+    if (normalizedUsername.isEmpty) {
+      throw ArgumentError.value(username, 'username', 'Must not be empty.');
+    }
+    final uri = Uri.parse(
+      '$baseUrl/api/v1/users/${Uri.encodeComponent(normalizedUsername)}/emergency-card',
+    );
+    final response = await _client.get(uri, headers: _headers);
+    _ensureSuccessful(response);
+    if (response.bodyBytes.isEmpty) {
+      throw const FormatException('The server returned an empty emergency card.');
+    }
+    return response.bodyBytes;
+  }
+
+  static Future<Map<String, dynamic>> searchHospitalsAndDoctors(
+    String query, {
+    String? city,
+  }) async {
+    final normalizedQuery = query.trim();
+    if (normalizedQuery.length < 2 || normalizedQuery.length > 80) {
+      throw ArgumentError.value(
+        query,
+        'query',
+        'Must be between 2 and 80 characters.',
+      );
+    }
+    final params = <String, String>{'query': normalizedQuery};
+    final normalizedCity = city?.trim();
+    if (normalizedCity != null && normalizedCity.length >= 2) {
+      params['city'] = normalizedCity;
+    }
+    final uri = Uri.parse('$baseUrl/api/v1/services/hospital/search')
+        .replace(queryParameters: params);
+    final response = await _client.get(uri, headers: _headers);
+    return _decodeMapResponse(response);
   }
 
   // ── Metadata ──

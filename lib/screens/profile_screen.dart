@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:share_plus/share_plus.dart';
+import '../services/api_service.dart';
 import '../theme/app_colors.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -12,6 +14,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
   late AnimationController _animCtrl;
   late AnimationController _breatheCtrl;
   bool _editing = false;
+  bool _loadingEmergencyCard = false;
   final _nameCtrl = TextEditingController(text: 'John Doe');
   final _emailCtrl = TextEditingController(text: 'john.doe@email.com');
   final _phoneCtrl = TextEditingController(text: '+91 98765 43210');
@@ -27,6 +30,52 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
 
   @override
   void dispose() { _animCtrl.dispose(); _breatheCtrl.dispose(); _nameCtrl.dispose(); _emailCtrl.dispose(); _phoneCtrl.dispose(); super.dispose(); }
+
+  Future<void> _openEmergencyCard() async {
+    setState(() => _loadingEmergencyCard = true);
+    try {
+      final profile = await ApiService.getCurrentUser();
+      final username = profile['username'];
+      if (username is! String || username.trim().isEmpty) {
+        throw const FormatException(
+          'Your account profile does not include a username.',
+        );
+      }
+      final pdf = await ApiService.getEmergencyCard(username);
+      final result = await SharePlus.instance.share(
+        ShareParams(
+          title: 'MyHospital emergency QR card',
+          files: [
+            XFile.fromData(
+              pdf,
+              mimeType: 'application/pdf',
+              name: 'myhospital-emergency-card.pdf',
+            ),
+          ],
+          fileNameOverrides: const ['myhospital-emergency-card.pdf'],
+        ),
+      );
+      if (result.status == ShareResultStatus.unavailable && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Sharing is unavailable on this device.'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Could not open emergency card: $error'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _loadingEmergencyCard = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,6 +148,25 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
               _QuickSettingsCard(),
             ]),
             const SizedBox(height: 28),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: _loadingEmergencyCard ? null : _openEmergencyCard,
+                icon: _loadingEmergencyCard
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.qr_code_2),
+                label: Text(
+                  _loadingEmergencyCard
+                      ? 'Loading emergency card…'
+                      : 'Download / share emergency QR card',
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
             _DangerZone(),
           ]),
         ),

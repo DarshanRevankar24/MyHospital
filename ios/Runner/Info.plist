@@ -4,6 +4,8 @@
 <dict>
 	<key>NSFaceIDUsageDescription</key>
 	<string>MyHospital uses Face ID to protect your health records and private data.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>MyHospital uses the camera to scan family connection invite QR codes.</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>

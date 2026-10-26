@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../services/api_service.dart';
 import '../theme/app_colors.dart';
 
 /// Hospital listing and booking flow with animated cards,
@@ -15,7 +17,13 @@ class _HospitalScreenState extends State<HospitalScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _animCtrl;
   String _searchQuery = '';
+  String _cityQuery = '';
   String? _selectedSpecialty;
+  final List<Map<String, dynamic>> _directoryResults = [];
+  Timer? _searchTimer;
+  int _searchRequestId = 0;
+  bool _isSearchingDirectory = false;
+  String? _directorySearchError;
 
   static const _specialties = [
     'All', 'Cardiology', 'Orthopaedics', 'Neurology', 'Gynaecology',
@@ -42,8 +50,162 @@ class _HospitalScreenState extends State<HospitalScreen>
 
   @override
   void dispose() {
+    _searchTimer?.cancel();
     _animCtrl.dispose();
     super.dispose();
+  }
+
+  void _scheduleDirectorySearch() {
+    final requestId = ++_searchRequestId;
+    _searchTimer?.cancel();
+    setState(() {
+      _directoryResults.clear();
+      _directorySearchError = null;
+      _isSearchingDirectory = false;
+    });
+    final query = _searchQuery.trim();
+    if (query.length < 2) return;
+
+    _searchTimer = Timer(const Duration(milliseconds: 350), () async {
+      if (!mounted || requestId != _searchRequestId) return;
+      setState(() => _isSearchingDirectory = true);
+      try {
+        final response = await ApiService.searchHospitalsAndDoctors(
+          query,
+          city: _cityQuery,
+        );
+        if (!mounted || requestId != _searchRequestId) return;
+        setState(() {
+          _directoryResults.addAll(_extractDirectoryResults(response));
+        });
+      } catch (error) {
+        if (!mounted || requestId != _searchRequestId) return;
+        setState(() => _directorySearchError = error.toString());
+      } finally {
+        if (mounted && requestId == _searchRequestId) {
+          setState(() => _isSearchingDirectory = false);
+        }
+      }
+    });
+  }
+
+  List<Map<String, dynamic>> _extractDirectoryResults(
+    Map<String, dynamic> response,
+  ) {
+    final results = <Map<String, dynamic>>[];
+    void collect(dynamic value) {
+      if (value is List) {
+        for (final item in value) {
+          if (item is Map) results.add(Map<String, dynamic>.from(item));
+        }
+      } else if (value is Map) {
+        for (final nested in value.values) {
+          collect(nested);
+        }
+      }
+    }
+
+    collect(response);
+    return results;
+  }
+
+  String _directoryResultText(
+    Map<String, dynamic> result,
+    List<String> keys,
+  ) {
+    for (final key in keys) {
+      final value = result[key];
+      if (value is String && value.trim().isNotEmpty) return value.trim();
+    }
+    return '';
+  }
+
+  Widget _buildDirectoryResults() {
+    if (_isSearchingDirectory) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+    if (_directorySearchError != null) {
+      return Text(
+        'Directory search failed: $_directorySearchError',
+        style: GoogleFonts.inter(fontSize: 13, color: AppColors.accent),
+      );
+    }
+    if (_directoryResults.isEmpty) {
+      return Text(
+        'No hospital or doctor matches found in the directory.',
+        style: GoogleFonts.inter(fontSize: 13, color: AppColors.textSoft),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Hospital and doctor results',
+            style: GoogleFonts.inter(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textDark)),
+        const SizedBox(height: 12),
+        ..._directoryResults.map((result) {
+          final title = _directoryResultText(result, [
+            'doctor_name',
+            'hospital_name',
+            'provider_name',
+            'name',
+            'title',
+          ]);
+          final subtitle = [
+            _directoryResultText(result, [
+              'specialty',
+              'speciality',
+              'specialization',
+            ]),
+            _directoryResultText(result, ['address', 'city']),
+          ].where((part) => part.isNotEmpty).join(' · ');
+          return Container(
+            width: double.infinity,
+            margin: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.local_hospital_outlined, color: AppColors.blue),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title.isEmpty ? 'Hospital or doctor' : title,
+                        style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textDark),
+                      ),
+                      if (subtitle.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(subtitle,
+                            style: GoogleFonts.inter(
+                                fontSize: 12, color: AppColors.textSoft)),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
+      ],
+    );
   }
 
   @override
@@ -83,7 +245,14 @@ class _HospitalScreenState extends State<HospitalScreen>
 
               // Search & Filter
               _SearchFilterBar(
-                onSearchChanged: (v) => setState(() => _searchQuery = v),
+                onSearchChanged: (v) {
+                  setState(() => _searchQuery = v);
+                  _scheduleDirectorySearch();
+                },
+                onCityChanged: (v) {
+                  setState(() => _cityQuery = v);
+                  _scheduleDirectorySearch();
+                },
                 specialties: _specialties,
                 selectedSpecialty: _selectedSpecialty,
                 onSpecialtyChanged: (v) =>
@@ -91,8 +260,12 @@ class _HospitalScreenState extends State<HospitalScreen>
               ),
               const SizedBox(height: 24),
 
-              // Results count
-              Text('${filtered.length} hospitals found',
+              if (_searchQuery.trim().length >= 2) ...[
+                _buildDirectoryResults(),
+                const SizedBox(height: 24),
+              ],
+
+              Text('Featured hospitals',
                   style: GoogleFonts.inter(
                       fontSize: 13, color: AppColors.textSoft)),
               const SizedBox(height: 16),
@@ -223,12 +396,14 @@ class _GradientBanner extends StatelessWidget {
 // ── Search & Filter Bar
 class _SearchFilterBar extends StatelessWidget {
   final ValueChanged<String> onSearchChanged;
+  final ValueChanged<String> onCityChanged;
   final List<String> specialties;
   final String? selectedSpecialty;
   final ValueChanged<String?> onSpecialtyChanged;
 
   const _SearchFilterBar({
     required this.onSearchChanged,
+    required this.onCityChanged,
     required this.specialties,
     required this.selectedSpecialty,
     required this.onSpecialtyChanged,
@@ -252,6 +427,7 @@ class _SearchFilterBar extends StatelessWidget {
           ),
           child: TextField(
             onChanged: onSearchChanged,
+            maxLength: 80,
             style: GoogleFonts.inter(fontSize: 14, color: AppColors.textDark),
             decoration: InputDecoration(
               hintText: 'Search hospitals by name…',
@@ -259,6 +435,22 @@ class _SearchFilterBar extends StatelessWidget {
                   GoogleFonts.inter(fontSize: 14, color: AppColors.textSoft),
               prefixIcon: const Icon(Icons.search_rounded,
                   size: 20, color: AppColors.textSoft),
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(vertical: 16),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Container(
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.border)),
+          child: TextField(
+            onChanged: onCityChanged,
+            maxLength: 60,
+            style: GoogleFonts.inter(fontSize: 14, color: AppColors.textDark),
+            decoration: InputDecoration(
+              hintText: 'City (optional)',
+              hintStyle: GoogleFonts.inter(fontSize: 14, color: AppColors.textSoft),
+              prefixIcon: const Icon(Icons.location_city_outlined, size: 20, color: AppColors.textSoft),
               border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(vertical: 16),
             ),

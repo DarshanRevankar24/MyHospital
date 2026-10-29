@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../services/api_service.dart';
 import '../theme/app_colors.dart';
+import '../widgets/mobile_bottom_navigation.dart';
 
 /// The main patient dashboard after login — a stunning animated hub
 /// showing quick-action cards, health summary, upcoming appointments,
@@ -157,7 +158,15 @@ class _DashboardScreenState extends State<DashboardScreen>
           ),
         ],
       ),
-      bottomNavigationBar: isWide ? null : _buildMobileNavigation(),
+      bottomNavigationBar: isWide
+          ? null
+          : MobileBottomNavigation(
+              onScanQr: _scanQrCode,
+              onFamily: () => Navigator.of(context).pushNamed('/family'),
+              onBloodBank: () => Navigator.of(context).pushNamed('/blood-bank'),
+              onDocuments: () => Navigator.of(context).pushNamed('/profile'),
+              onHistory: _showRecentActivity,
+            ),
       floatingActionButton: isWide
           ? null
           : GestureDetector(
@@ -171,55 +180,6 @@ class _DashboardScreenState extends State<DashboardScreen>
               ),
             ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-    );
-  }
-
-  Widget _buildMobileNavigation() {
-    return BottomAppBar(
-      color: Colors.white,
-      surfaceTintColor: Colors.white,
-      shape: const CircularNotchedRectangle(),
-      notchMargin: 7,
-      child: Row(
-        children: [
-          Expanded(
-            child: _MobileNavAction(
-              icon: Icons.qr_code_scanner_rounded,
-              label: 'Scan QR',
-              onTap: _scanQrCode,
-            ),
-          ),
-          Expanded(
-            child: _MobileNavAction(
-              icon: Icons.people_outline_rounded,
-              label: 'Family',
-              onTap: () => Navigator.of(context).pushNamed('/family'),
-            ),
-          ),
-          const SizedBox(width: 64),
-          Expanded(
-            child: _MobileNavAction(
-              icon: Icons.bloodtype_outlined,
-              label: 'Blood',
-              onTap: () => Navigator.of(context).pushNamed('/blood-bank'),
-            ),
-          ),
-          Expanded(
-            child: _MobileNavAction(
-              icon: Icons.description_outlined,
-              label: 'Docs',
-              onTap: () => Navigator.of(context).pushNamed('/profile'),
-            ),
-          ),
-          Expanded(
-            child: _MobileNavAction(
-              icon: Icons.history_rounded,
-              label: 'History',
-              onTap: _showRecentActivity,
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -368,50 +328,6 @@ class _DashboardScreenState extends State<DashboardScreen>
         ),
       );
     }
-  }
-}
-
-class _MobileNavAction extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  const _MobileNavAction({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: label,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 5),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 20, color: AppColors.textMid),
-              const SizedBox(height: 3),
-              Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.inter(
-                  fontSize: 9,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textMid,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }
 

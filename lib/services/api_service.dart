@@ -19,27 +19,27 @@ class ApiService {
   static const String baseUrl = 'http://54.162.11.222:8000';
   static String? _sessionCookie;
   static String? _csrfToken;
-  
+
   // Cross-platform client that enables withCredentials on Web
   static final http.Client _client = getClient();
 
   static Map<String, String> get _headers => {
-        'Content-Type': 'application/json',
-        // On web, cookies are automatically attached by the browser
-        // Setting 'Cookie' manually on web throws a security error
-        if (!kIsWeb && _sessionCookie != null) 'Cookie': _sessionCookie!,
-        if (_csrfToken != null) 'X-CSRF-Token': _csrfToken!,
-      };
+    'Content-Type': 'application/json',
+    // On web, cookies are automatically attached by the browser
+    // Setting 'Cookie' manually on web throws a security error
+    if (!kIsWeb && _sessionCookie != null) 'Cookie': _sessionCookie!,
+    if (_csrfToken != null) 'X-CSRF-Token': _csrfToken!,
+  };
 
   static Map<String, String> get _formHeaders => {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        if (!kIsWeb && _sessionCookie != null) 'Cookie': _sessionCookie!,
-        if (_csrfToken != null) 'X-CSRF-Token': _csrfToken!,
-      };
+    'Content-Type': 'application/x-www-form-urlencoded',
+    if (!kIsWeb && _sessionCookie != null) 'Cookie': _sessionCookie!,
+    if (_csrfToken != null) 'X-CSRF-Token': _csrfToken!,
+  };
 
   static void _extractCookies(http.Response response) {
     if (kIsWeb) return; // Browser handles Set-Cookie natively
-    
+
     final setCookie = response.headers['set-cookie'];
     if (setCookie != null) {
       _sessionCookie = setCookie.split(';').first;
@@ -63,15 +63,19 @@ class ApiService {
     }
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
-      final error =
-          decoded is Map ? decoded['detail'] ?? decoded['message'] : null;
+      final error = decoded is Map
+          ? decoded['detail'] ?? decoded['message']
+          : null;
       throw ApiException(
         response.statusCode,
-        error?.toString() ?? 'Request failed with status ${response.statusCode}.',
+        error?.toString() ??
+            'Request failed with status ${response.statusCode}.',
       );
     }
     if (decoded is! Map) {
-      throw const FormatException('The server returned an unexpected response.');
+      throw const FormatException(
+        'The server returned an unexpected response.',
+      );
     }
     return Map<String, dynamic>.from(decoded);
   }
@@ -82,7 +86,8 @@ class ApiService {
     try {
       final decoded = jsonDecode(response.body);
       if (decoded is Map) {
-        message = (decoded['detail'] ?? decoded['message'] ?? message).toString();
+        message = (decoded['detail'] ?? decoded['message'] ?? message)
+            .toString();
       }
     } on FormatException {
       // Preserve the response body when the server does not return JSON.
@@ -96,14 +101,16 @@ class ApiService {
   }
 
   // ── Auth ──
-  static Future<Map<String, dynamic>> login(String username, String password) async {
+  static Future<Map<String, dynamic>> login(
+    String username,
+    String password,
+  ) async {
     final response = await _client.post(
       Uri.parse('$baseUrl/api/v1/auth/login'),
       headers: _formHeaders,
-      body: Uri(queryParameters: {
-        'username': username,
-        'password': password,
-      }).query,
+      body: Uri(
+        queryParameters: {'username': username, 'password': password},
+      ).query,
     );
     _extractCookies(response);
     return _decodeMapResponse(response);
@@ -127,15 +134,22 @@ class ApiService {
     return jsonDecode(response.body);
   }
 
-  static Future<Map<String, dynamic>> getGoogleOAuthUrl({String? redirectUri}) async {
-    final uri = Uri.parse('$baseUrl/api/v1/auth/oauth/google')
-        .replace(queryParameters: redirectUri != null ? {'redirect_uri': redirectUri} : null);
+  static Future<Map<String, dynamic>> getGoogleOAuthUrl({
+    String? redirectUri,
+  }) async {
+    final uri = Uri.parse('$baseUrl/api/v1/auth/oauth/google').replace(
+      queryParameters: redirectUri != null
+          ? {'redirect_uri': redirectUri}
+          : null,
+    );
     final response = await _client.get(uri, headers: _headers);
     return jsonDecode(response.body);
   }
 
   // ── Users ──
-  static Future<Map<String, dynamic>> createUser(Map<String, dynamic> data) async {
+  static Future<Map<String, dynamic>> createUser(
+    Map<String, dynamic> data,
+  ) async {
     final response = await _client.post(
       Uri.parse('$baseUrl/api/v1/users/'),
       headers: _headers,
@@ -152,7 +166,10 @@ class ApiService {
     return _decodeMapResponse(response);
   }
 
-  static Future<Map<String, dynamic>> updateUser(String username, Map<String, dynamic> data) async {
+  static Future<Map<String, dynamic>> updateUser(
+    String username,
+    Map<String, dynamic> data,
+  ) async {
     final response = await _client.patch(
       Uri.parse('$baseUrl/api/v1/users/$username'),
       headers: _headers,
@@ -170,7 +187,9 @@ class ApiService {
     return jsonDecode(response.body);
   }
 
-  static Future<Map<String, dynamic>> addMedication(Map<String, dynamic> data) async {
+  static Future<Map<String, dynamic>> addMedication(
+    Map<String, dynamic> data,
+  ) async {
     final response = await _client.post(
       Uri.parse('$baseUrl/api/v1/medications/'),
       headers: _headers,
@@ -179,7 +198,10 @@ class ApiService {
     return jsonDecode(response.body);
   }
 
-  static Future<Map<String, dynamic>> updateMedication(int id, Map<String, dynamic> data) async {
+  static Future<Map<String, dynamic>> updateMedication(
+    int id,
+    Map<String, dynamic> data,
+  ) async {
     final response = await _client.patch(
       Uri.parse('$baseUrl/api/v1/medications/$id'),
       headers: _headers,
@@ -197,7 +219,9 @@ class ApiService {
   }
 
   // ── Family ──
-  static Future<Map<String, dynamic>> sendFamilyRequest(Map<String, dynamic> data) async {
+  static Future<Map<String, dynamic>> sendFamilyRequest(
+    Map<String, dynamic> data,
+  ) async {
     final response = await _client.post(
       Uri.parse('$baseUrl/api/v1/family/request'),
       headers: _headers,
@@ -214,7 +238,9 @@ class ApiService {
     return jsonDecode(response.body);
   }
 
-  static Future<Map<String, dynamic>> acceptFamilyRequest(int connectionId) async {
+  static Future<Map<String, dynamic>> acceptFamilyRequest(
+    int connectionId,
+  ) async {
     final response = await _client.post(
       Uri.parse('$baseUrl/api/v1/family/requests/$connectionId/accept'),
       headers: _headers,
@@ -222,7 +248,9 @@ class ApiService {
     return jsonDecode(response.body);
   }
 
-  static Future<Map<String, dynamic>> rejectFamilyRequest(int connectionId) async {
+  static Future<Map<String, dynamic>> rejectFamilyRequest(
+    int connectionId,
+  ) async {
     final response = await _client.post(
       Uri.parse('$baseUrl/api/v1/family/requests/$connectionId/reject'),
       headers: _headers,
@@ -235,10 +263,19 @@ class ApiService {
       Uri.parse('$baseUrl/api/v1/family/members'),
       headers: _headers,
     );
-    return jsonDecode(response.body);
+    _ensureSuccessful(response);
+    final decoded = jsonDecode(response.body);
+    if (decoded is! List) {
+      throw const FormatException(
+        'The server returned an unexpected family member list.',
+      );
+    }
+    return List<dynamic>.from(decoded);
   }
 
-  static Future<Map<String, dynamic>> removeFamilyMember(int connectionId) async {
+  static Future<Map<String, dynamic>> removeFamilyMember(
+    int connectionId,
+  ) async {
     final response = await _client.delete(
       Uri.parse('$baseUrl/api/v1/family/members/$connectionId'),
       headers: _headers,
@@ -247,9 +284,14 @@ class ApiService {
   }
 
   // ── Hospital Services ──
-  static Future<Map<String, dynamic>> getHospitals({int page = 1, int itemsPerPage = 10}) async {
+  static Future<Map<String, dynamic>> getHospitals({
+    int page = 1,
+    int itemsPerPage = 10,
+  }) async {
     final response = await _client.get(
-      Uri.parse('$baseUrl/api/v1/services/hospital/?page=$page&items_per_page=$itemsPerPage'),
+      Uri.parse(
+        '$baseUrl/api/v1/services/hospital/?page=$page&items_per_page=$itemsPerPage',
+      ),
       headers: _headers,
     );
     return jsonDecode(response.body);
@@ -271,15 +313,22 @@ class ApiService {
     return jsonDecode(response.body);
   }
 
-  static Future<Map<String, dynamic>> getDoctorSlots(int providerId, int doctorId) async {
+  static Future<Map<String, dynamic>> getDoctorSlots(
+    int providerId,
+    int doctorId,
+  ) async {
     final response = await _client.get(
-      Uri.parse('$baseUrl/api/v1/services/hospital/$providerId/doctors/$doctorId/slots'),
+      Uri.parse(
+        '$baseUrl/api/v1/services/hospital/$providerId/doctors/$doctorId/slots',
+      ),
       headers: _headers,
     );
     return jsonDecode(response.body);
   }
 
-  static Future<Map<String, dynamic>> createHospitalBooking(Map<String, dynamic> data) async {
+  static Future<Map<String, dynamic>> createHospitalBooking(
+    Map<String, dynamic> data,
+  ) async {
     final response = await _client.post(
       Uri.parse('$baseUrl/api/v1/services/hospital/bookings'),
       headers: _headers,
@@ -297,9 +346,14 @@ class ApiService {
   }
 
   // ── Lab Services ──
-  static Future<Map<String, dynamic>> getLabs({int page = 1, int itemsPerPage = 10}) async {
+  static Future<Map<String, dynamic>> getLabs({
+    int page = 1,
+    int itemsPerPage = 10,
+  }) async {
     final response = await _client.get(
-      Uri.parse('$baseUrl/api/v1/services/laboratory/?page=$page&items_per_page=$itemsPerPage'),
+      Uri.parse(
+        '$baseUrl/api/v1/services/laboratory/?page=$page&items_per_page=$itemsPerPage',
+      ),
       headers: _headers,
     );
     return jsonDecode(response.body);
@@ -315,7 +369,9 @@ class ApiService {
 
   static Future<Map<String, dynamic>> searchLabTests(String query) async {
     final response = await _client.get(
-      Uri.parse('$baseUrl/api/v1/services/laboratory/tests/search?query=$query'),
+      Uri.parse(
+        '$baseUrl/api/v1/services/laboratory/tests/search?query=$query',
+      ),
       headers: _headers,
     );
     return jsonDecode(response.body);
@@ -356,9 +412,14 @@ class ApiService {
   }
 
   // ── Pharmacy Services ──
-  static Future<Map<String, dynamic>> getPharmacies({int page = 1, int itemsPerPage = 10}) async {
+  static Future<Map<String, dynamic>> getPharmacies({
+    int page = 1,
+    int itemsPerPage = 10,
+  }) async {
     final response = await _client.get(
-      Uri.parse('$baseUrl/api/v1/services/pharmacy/?page=$page&items_per_page=$itemsPerPage'),
+      Uri.parse(
+        '$baseUrl/api/v1/services/pharmacy/?page=$page&items_per_page=$itemsPerPage',
+      ),
       headers: _headers,
     );
     return jsonDecode(response.body);
@@ -366,13 +427,17 @@ class ApiService {
 
   static Future<Map<String, dynamic>> searchMedicines(String query) async {
     final response = await _client.get(
-      Uri.parse('$baseUrl/api/v1/services/pharmacy/medicines/search?query=$query'),
+      Uri.parse(
+        '$baseUrl/api/v1/services/pharmacy/medicines/search?query=$query',
+      ),
       headers: _headers,
     );
     return jsonDecode(response.body);
   }
 
-  static Future<Map<String, dynamic>> createPharmacyOrder(Map<String, dynamic> data) async {
+  static Future<Map<String, dynamic>> createPharmacyOrder(
+    Map<String, dynamic> data,
+  ) async {
     final response = await _client.post(
       Uri.parse('$baseUrl/api/v1/services/pharmacy/orders'),
       headers: _headers,
@@ -390,23 +455,34 @@ class ApiService {
   }
 
   // ── Blood Bank Services ──
-  static Future<Map<String, dynamic>> getBloodBanks({int page = 1, int itemsPerPage = 10}) async {
+  static Future<Map<String, dynamic>> getBloodBanks({
+    int page = 1,
+    int itemsPerPage = 10,
+  }) async {
     final response = await _client.get(
-      Uri.parse('$baseUrl/api/v1/services/blood-bank/?page=$page&items_per_page=$itemsPerPage'),
+      Uri.parse(
+        '$baseUrl/api/v1/services/blood-bank/?page=$page&items_per_page=$itemsPerPage',
+      ),
       headers: _headers,
     );
     return jsonDecode(response.body);
   }
 
-  static Future<Map<String, dynamic>> searchBloodStock(String bloodGroup) async {
+  static Future<Map<String, dynamic>> searchBloodStock(
+    String bloodGroup,
+  ) async {
     final response = await _client.get(
-      Uri.parse('$baseUrl/api/v1/services/blood-bank/stock/search?blood_group=$bloodGroup'),
+      Uri.parse(
+        '$baseUrl/api/v1/services/blood-bank/stock/search?blood_group=$bloodGroup',
+      ),
       headers: _headers,
     );
     return jsonDecode(response.body);
   }
 
-  static Future<Map<String, dynamic>> createBloodRequest(Map<String, dynamic> data) async {
+  static Future<Map<String, dynamic>> createBloodRequest(
+    Map<String, dynamic> data,
+  ) async {
     final response = await _client.post(
       Uri.parse('$baseUrl/api/v1/services/blood-bank/requests'),
       headers: _headers,
@@ -424,30 +500,52 @@ class ApiService {
   }
 
   // ── Ambulance Services ──
-  static Future<Map<String, dynamic>> getAmbulanceProviders({int page = 1, int itemsPerPage = 10}) async {
+  static Future<Map<String, dynamic>> getAmbulanceProviders({
+    int page = 1,
+    int itemsPerPage = 10,
+  }) async {
     final response = await _client.get(
-      Uri.parse('$baseUrl/api/v1/services/ambulance/?page=$page&items_per_page=$itemsPerPage'),
+      Uri.parse(
+        '$baseUrl/api/v1/services/ambulance/?page=$page&items_per_page=$itemsPerPage',
+      ),
       headers: _headers,
     );
     return jsonDecode(response.body);
   }
 
-  static Future<Map<String, dynamic>> getAvailableAmbulances({double? lat, double? lng}) async {
+  static Future<Map<String, dynamic>> getAvailableAmbulances({
+    double? lat,
+    double? lng,
+  }) async {
     final params = <String, String>{};
     if (lat != null) params['latitude'] = lat.toString();
     if (lng != null) params['longitude'] = lng.toString();
-    final uri = Uri.parse('$baseUrl/api/v1/services/ambulance/available').replace(queryParameters: params);
+    final uri = Uri.parse(
+      '$baseUrl/api/v1/services/ambulance/available',
+    ).replace(queryParameters: params);
     final response = await _client.get(uri, headers: _headers);
     return jsonDecode(response.body);
   }
 
-  static Future<Map<String, dynamic>> createAmbulanceRequest(Map<String, dynamic> data) async {
+  static Future<Map<String, dynamic>> createAmbulanceRequest(
+    Map<String, dynamic> data,
+  ) async {
     final response = await _client.post(
       Uri.parse('$baseUrl/api/v1/services/ambulance/requests'),
       headers: _headers,
       body: jsonEncode(data),
     );
-    return jsonDecode(response.body);
+    return _decodeMapResponse(response);
+  }
+
+  static Future<Map<String, dynamic>> cancelAmbulanceRequest(
+    int requestId,
+  ) async {
+    final response = await _client.delete(
+      Uri.parse('$baseUrl/api/v1/services/ambulance/requests/$requestId'),
+      headers: _headers,
+    );
+    return _decodeMapResponse(response);
   }
 
   static Future<Map<String, dynamic>> getAmbulanceRequests() async {
@@ -493,7 +591,11 @@ class ApiService {
   static Future<Map<String, dynamic>> redeemFamilyQrInvite(String token) async {
     final normalizedToken = token.trim();
     if (normalizedToken.length < 32 || normalizedToken.length > 128) {
-      throw ArgumentError.value(token, 'token', 'Must be 32 to 128 characters.');
+      throw ArgumentError.value(
+        token,
+        'token',
+        'Must be 32 to 128 characters.',
+      );
     }
     final response = await _client.post(
       Uri.parse('$baseUrl/api/v1/family/qr-invites/redeem'),
@@ -514,7 +616,9 @@ class ApiService {
     final response = await _client.get(uri, headers: _headers);
     _ensureSuccessful(response);
     if (response.bodyBytes.isEmpty) {
-      throw const FormatException('The server returned an empty emergency card.');
+      throw const FormatException(
+        'The server returned an empty emergency card.',
+      );
     }
     return response.bodyBytes;
   }
@@ -536,8 +640,9 @@ class ApiService {
     if (normalizedCity != null && normalizedCity.length >= 2) {
       params['city'] = normalizedCity;
     }
-    final uri = Uri.parse('$baseUrl/api/v1/services/hospital/search')
-        .replace(queryParameters: params);
+    final uri = Uri.parse(
+      '$baseUrl/api/v1/services/hospital/search',
+    ).replace(queryParameters: params);
     final response = await _client.get(uri, headers: _headers);
     return _decodeMapResponse(response);
   }

@@ -10,28 +10,41 @@ class TopBar extends StatelessWidget {
     return Container(
       color: AppColors.navyDark,
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-      child: Row(children: [
-        // Left: marketplace info
-        Expanded(
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(children: [
-              _TopBarItem(icon: Icons.location_on_outlined, text: 'Bengaluru · Mumbai · Delhi · Chennai · Hyderabad'),
-              const SizedBox(width: 24),
-              _TopBarItem(icon: Icons.verified_outlined, text: '2,000+ Verified Doctors'),
-              const SizedBox(width: 24),
-              _TopBarItem(icon: Icons.local_shipping_outlined, text: 'Medicines in 2 hours'),
-            ]),
+      child: Row(
+        children: [
+          // Left: marketplace info
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _TopBarItem(
+                    icon: Icons.location_on_outlined,
+                    text: 'Bengaluru · Mumbai · Delhi · Chennai · Hyderabad',
+                  ),
+                  const SizedBox(width: 24),
+                  _TopBarItem(
+                    icon: Icons.verified_outlined,
+                    text: '2,000+ Verified Doctors',
+                  ),
+                  const SizedBox(width: 24),
+                  _TopBarItem(
+                    icon: Icons.local_shipping_outlined,
+                    text: 'Medicines in 2 hours',
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
-        const SizedBox(width: 16),
-        // Right: partner links + emergency
-        _TopBarLink(text: 'For Partners'),
-        const SizedBox(width: 16),
-        _TopBarLink(text: 'Become a Provider'),
-        const SizedBox(width: 12),
-        _EmergencyBadge(),
-      ]),
+          const SizedBox(width: 16),
+          // Right: partner links + emergency
+          _TopBarLink(text: 'For Partners'),
+          const SizedBox(width: 16),
+          _TopBarLink(text: 'Become a Provider'),
+          const SizedBox(width: 12),
+          _EmergencyBadge(),
+        ],
+      ),
     );
   }
 }
@@ -43,11 +56,21 @@ class _TopBarItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(mainAxisSize: MainAxisSize.min, children: [
-      Icon(icon, size: 13, color: Colors.white54),
-      const SizedBox(width: 5),
-      Text(text, style: GoogleFonts.inter(color: Colors.white54, fontSize: 11.5, letterSpacing: 0.2)),
-    ]);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 13, color: Colors.white54),
+        const SizedBox(width: 5),
+        Text(
+          text,
+          style: GoogleFonts.inter(
+            color: Colors.white54,
+            fontSize: 11.5,
+            letterSpacing: 0.2,
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -68,12 +91,17 @@ class _TopBarLinkState extends State<_TopBarLink> {
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: () {},
-        child: Text(widget.text,
-            style: GoogleFonts.inter(
-                color: _hovered ? Colors.white : Colors.white54,
-                fontSize: 11.5,
-                fontWeight: FontWeight.w500,
-                decoration: _hovered ? TextDecoration.underline : TextDecoration.none)),
+        child: Text(
+          widget.text,
+          style: GoogleFonts.inter(
+            color: _hovered ? Colors.white : Colors.white54,
+            fontSize: 11.5,
+            fontWeight: FontWeight.w500,
+            decoration: _hovered
+                ? TextDecoration.underline
+                : TextDecoration.none,
+          ),
+        ),
       ),
     );
   }
@@ -88,8 +116,22 @@ class _EmergencyBadge extends StatelessWidget {
         color: AppColors.accent,
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Text('🚨  Emergency: 108',
-          style: GoogleFonts.inter(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.3)),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.emergency_outlined, size: 14, color: Colors.white),
+          const SizedBox(width: 5),
+          Text(
+            'Emergency: 108',
+            style: GoogleFonts.inter(
+              color: Colors.white,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.3,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

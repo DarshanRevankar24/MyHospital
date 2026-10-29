@@ -290,7 +290,7 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
                 setState(() {
                   _showAddForm = false;
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text('✅ Request sent to $name!', style: GoogleFonts.inter(color: Colors.white)),
+                    content: Text('Request sent to $name!', style: GoogleFonts.inter(color: Colors.white)),
                     backgroundColor: const Color(0xFF4ADE80), behavior: SnackBarBehavior.floating,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ));

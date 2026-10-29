@@ -20,30 +20,50 @@ class _AppointmentSectionState extends State<AppointmentSection> {
   bool _error = false;
 
   static const _specialties = [
-    'General Physician', 'Cardiologist', 'Dermatologist', 'Gynaecologist',
-    'Orthopaedic', 'Neurologist', 'Paediatrician', 'Psychiatrist',
-    'Ophthalmologist', 'ENT Specialist', 'Diabetologist', 'Urologist',
+    'General Physician',
+    'Cardiologist',
+    'Dermatologist',
+    'Gynaecologist',
+    'Orthopaedic',
+    'Neurologist',
+    'Paediatrician',
+    'Psychiatrist',
+    'Ophthalmologist',
+    'ENT Specialist',
+    'Diabetologist',
+    'Urologist',
   ];
 
   void _submit() {
     if (_nameCtrl.text.trim().isEmpty ||
         _phoneCtrl.text.trim().isEmpty ||
         _selectedSpecialty == null) {
-      setState(() { _error = true; _btnText = '⚠️  Please fill all fields'; });
+      setState(() {
+        _error = true;
+        _btnText = 'Please fill all fields';
+      });
       Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) setState(() { _error = false; _btnText = 'Find Doctors Now →'; });
+        if (mounted)
+          setState(() {
+            _error = false;
+            _btnText = 'Find Doctors Now →';
+          });
       });
       return;
     }
-    setState(() { _success = true; _btnText = '✅  Request Sent!'; });
+    setState(() {
+      _success = true;
+      _btnText = 'Request Sent!';
+    });
     Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) setState(() {
-        _success = false;
-        _btnText = 'Find Doctors Now →';
-        _nameCtrl.clear();
-        _phoneCtrl.clear();
-        _selectedSpecialty = null;
-      });
+      if (mounted)
+        setState(() {
+          _success = false;
+          _btnText = 'Find Doctors Now →';
+          _nameCtrl.clear();
+          _phoneCtrl.clear();
+          _selectedSpecialty = null;
+        });
     });
   }
 
@@ -69,44 +89,56 @@ class _AppointmentSectionState extends State<AppointmentSection> {
         ),
       ),
       padding: EdgeInsets.symmetric(horizontal: isWide ? 64 : 24, vertical: 80),
-      child: Column(children: [
-        // Section header
-        _SectionHeader(),
-        const SizedBox(height: 56),
+      child: Column(
+        children: [
+          // Section header
+          _SectionHeader(),
+          const SizedBox(height: 56),
 
-        // How it works steps
-        isWide
-            ? Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Expanded(child: _StepsColumn()),
-                const SizedBox(width: 56),
-                SizedBox(width: 360, child: _QuickConsultCard(
-                  nameCtrl: _nameCtrl,
-                  phoneCtrl: _phoneCtrl,
-                  selectedSpecialty: _selectedSpecialty,
-                  onSpecialtyChanged: (v) => setState(() => _selectedSpecialty = v),
-                  onSubmit: _submit,
-                  btnText: _btnText,
-                  success: _success,
-                  error: _error,
-                  specialties: _specialties,
-                )),
-              ])
-            : Column(children: [
-                _StepsColumn(),
-                const SizedBox(height: 40),
-                _QuickConsultCard(
-                  nameCtrl: _nameCtrl,
-                  phoneCtrl: _phoneCtrl,
-                  selectedSpecialty: _selectedSpecialty,
-                  onSpecialtyChanged: (v) => setState(() => _selectedSpecialty = v),
-                  onSubmit: _submit,
-                  btnText: _btnText,
-                  success: _success,
-                  error: _error,
-                  specialties: _specialties,
+          // How it works steps
+          isWide
+              ? Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: _StepsColumn()),
+                    const SizedBox(width: 56),
+                    SizedBox(
+                      width: 360,
+                      child: _QuickConsultCard(
+                        nameCtrl: _nameCtrl,
+                        phoneCtrl: _phoneCtrl,
+                        selectedSpecialty: _selectedSpecialty,
+                        onSpecialtyChanged: (v) =>
+                            setState(() => _selectedSpecialty = v),
+                        onSubmit: _submit,
+                        btnText: _btnText,
+                        success: _success,
+                        error: _error,
+                        specialties: _specialties,
+                      ),
+                    ),
+                  ],
+                )
+              : Column(
+                  children: [
+                    _StepsColumn(),
+                    const SizedBox(height: 40),
+                    _QuickConsultCard(
+                      nameCtrl: _nameCtrl,
+                      phoneCtrl: _phoneCtrl,
+                      selectedSpecialty: _selectedSpecialty,
+                      onSpecialtyChanged: (v) =>
+                          setState(() => _selectedSpecialty = v),
+                      onSubmit: _submit,
+                      btnText: _btnText,
+                      success: _success,
+                      error: _error,
+                      specialties: _specialties,
+                    ),
+                  ],
                 ),
-              ]),
-      ]),
+        ],
+      ),
     );
   }
 }
@@ -114,50 +146,70 @@ class _AppointmentSectionState extends State<AppointmentSection> {
 class _SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Column(children: [
-      FadeInDown(
-        duration: const Duration(milliseconds: 800),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-          decoration: BoxDecoration(
-            color: AppColors.blue.withValues(alpha: 0.18),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppColors.blue.withValues(alpha: 0.3)),
-          ),
-          child: Text('HOW IT WORKS',
+    return Column(
+      children: [
+        FadeInDown(
+          duration: const Duration(milliseconds: 800),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppColors.blue.withValues(alpha: 0.18),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: AppColors.blue.withValues(alpha: 0.3)),
+            ),
+            child: Text(
+              'HOW IT WORKS',
               style: GoogleFonts.inter(
-                  fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white70, letterSpacing: 1.1)),
-        ),
-      ),
-      const SizedBox(height: 14),
-      FadeInUp(
-        delay: const Duration(milliseconds: 100),
-        duration: const Duration(milliseconds: 800),
-        child: RichText(
-          textAlign: TextAlign.center,
-          text: TextSpan(
-            style: GoogleFonts.playfairDisplay(fontSize: 34, fontWeight: FontWeight.w700, color: Colors.white, height: 1.2),
-            children: const [
-              TextSpan(text: 'Healthcare in\n'),
-              TextSpan(text: '3 Simple Steps', style: TextStyle(color: AppColors.blueMid)),
-            ],
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: Colors.white70,
+                letterSpacing: 1.1,
+              ),
+            ),
           ),
         ),
-      ),
-      const SizedBox(height: 14),
-      FadeInUp(
-        delay: const Duration(milliseconds: 200),
-        duration: const Duration(milliseconds: 800),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 560),
-          child: Text(
-            'Whether you need a doctor, a lab test or medicines — we connect you instantly with the best partners near you.',
+        const SizedBox(height: 14),
+        FadeInUp(
+          delay: const Duration(milliseconds: 100),
+          duration: const Duration(milliseconds: 800),
+          child: RichText(
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(fontSize: 15, color: Colors.white60, height: 1.7),
+            text: TextSpan(
+              style: GoogleFonts.playfairDisplay(
+                fontSize: 34,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+                height: 1.2,
+              ),
+              children: const [
+                TextSpan(text: 'Healthcare in\n'),
+                TextSpan(
+                  text: '3 Simple Steps',
+                  style: TextStyle(color: AppColors.blueMid),
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-    ]);
+        const SizedBox(height: 14),
+        FadeInUp(
+          delay: const Duration(milliseconds: 200),
+          duration: const Duration(milliseconds: 800),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 560),
+            child: Text(
+              'Whether you need a doctor, a lab test or medicines — we connect you instantly with the best partners near you.',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(
+                fontSize: 15,
+                color: Colors.white60,
+                height: 1.7,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -165,23 +217,26 @@ class _StepsColumn extends StatelessWidget {
   static const _steps = [
     _Step(
       number: '01',
-      emoji: '🔍',
+      icon: Icons.search_rounded,
       title: 'Search & Discover',
-      desc: 'Search for doctors by specialty, labs by test name, or medicines by brand. Filter by location, ratings, price and availability.',
+      desc:
+          'Search for doctors by specialty, labs by test name, or medicines by brand. Filter by location, ratings, price and availability.',
       color: AppColors.blueMid,
     ),
     _Step(
       number: '02',
-      emoji: '📅',
+      icon: Icons.calendar_month_outlined,
       title: 'Book or Order',
-      desc: 'Pick a consultation slot, schedule a home lab collection, or place your medicine order — all in under 60 seconds.',
+      desc:
+          'Pick a consultation slot, schedule a home lab collection, or place your medicine order — all in under 60 seconds.',
       color: Color(0xFF4ADE80),
     ),
     _Step(
       number: '03',
-      emoji: '✅',
+      icon: Icons.task_alt_rounded,
       title: 'Track & Manage',
-      desc: 'Track your doctor in real time, get digital lab reports, reorder medicines with one tap, and manage all your health records.',
+      desc:
+          'Track your doctor in real time, get digital lab reports, reorder medicines with one tap, and manage all your health records.',
       color: Color(0xFFFBBF24),
     ),
   ];
@@ -206,11 +261,17 @@ class _StepsColumn extends StatelessWidget {
 
 class _Step {
   final String number;
-  final String emoji;
+  final IconData icon;
   final String title;
   final String desc;
   final Color color;
-  const _Step({required this.number, required this.emoji, required this.title, required this.desc, required this.color});
+  const _Step({
+    required this.number,
+    required this.icon,
+    required this.title,
+    required this.desc,
+    required this.color,
+  });
 }
 
 class _StepItem extends StatefulWidget {
@@ -227,66 +288,113 @@ class _StepItemState extends State<_StepItem> {
   @override
   Widget build(BuildContext context) {
     final s = widget.step;
-    return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      // Left: number + connector line
-      Column(children: [
-        MouseRegion(
-          onEnter: (_) => setState(() => _hovered = true),
-          onExit: (_) => setState(() => _hovered = false),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            width: 56, height: 56,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: _hovered ? s.color : s.color.withValues(alpha: 0.15),
-              border: Border.all(color: s.color.withValues(alpha: 0.5), width: 1.5),
-              boxShadow: _hovered ? [BoxShadow(color: s.color.withValues(alpha: 0.35), blurRadius: 16, offset: const Offset(0, 4))] : [],
-            ),
-            child: Center(
-              child: Text(s.emoji, style: const TextStyle(fontSize: 22)),
-            ),
-          ),
-        ),
-        if (!widget.isLast)
-          Container(
-            width: 1, height: 60,
-            margin: const EdgeInsets.symmetric(vertical: 4),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter, end: Alignment.bottomCenter,
-                colors: [s.color.withValues(alpha: 0.5), Colors.transparent],
-              ),
-            ),
-          ),
-      ]),
-      const SizedBox(width: 22),
-
-      // Right: content
-      Expanded(
-        child: Padding(
-          padding: EdgeInsets.only(bottom: widget.isLast ? 0 : 48),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Row(children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Left: number + connector line
+        Column(
+          children: [
+            MouseRegion(
+              onEnter: (_) => setState(() => _hovered = true),
+              onExit: (_) => setState(() => _hovered = false),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 56,
+                height: 56,
                 decoration: BoxDecoration(
-                  color: s.color.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(8),
+                  shape: BoxShape.circle,
+                  color: _hovered ? s.color : s.color.withValues(alpha: 0.15),
+                  border: Border.all(
+                    color: s.color.withValues(alpha: 0.5),
+                    width: 1.5,
+                  ),
+                  boxShadow: _hovered
+                      ? [
+                          BoxShadow(
+                            color: s.color.withValues(alpha: 0.35),
+                            blurRadius: 16,
+                            offset: const Offset(0, 4),
+                          ),
+                        ]
+                      : [],
                 ),
-                child: Text('Step ${s.number}',
-                    style: GoogleFonts.inter(fontSize: 10.5, fontWeight: FontWeight.w700, color: s.color, letterSpacing: 0.5)),
+                child: Center(child: Icon(s.icon, size: 24, color: s.color)),
               ),
-            ]),
-            const SizedBox(height: 8),
-            Text(s.title,
-                style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white)),
-            const SizedBox(height: 6),
-            Text(s.desc,
-                style: GoogleFonts.inter(fontSize: 14, color: Colors.white60, height: 1.65)),
-          ]),
+            ),
+            if (!widget.isLast)
+              Container(
+                width: 1,
+                height: 60,
+                margin: const EdgeInsets.symmetric(vertical: 4),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      s.color.withValues(alpha: 0.5),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
+          ],
         ),
-      ),
-    ]);
+        const SizedBox(width: 22),
+
+        // Right: content
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(bottom: widget.isLast ? 0 : 48),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: s.color.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        'Step ${s.number}',
+                        style: GoogleFonts.inter(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w700,
+                          color: s.color,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  s.title,
+                  style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  s.desc,
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    color: Colors.white60,
+                    height: 1.65,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -321,52 +429,116 @@ class _QuickConsultCard extends StatelessWidget {
         color: Colors.white.withValues(alpha: 0.07),
         border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
         borderRadius: BorderRadius.circular(24),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 32, offset: const Offset(0, 12))],
-      ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(children: [
-          Container(
-            width: 44, height: 44,
-            decoration: BoxDecoration(color: AppColors.blue.withValues(alpha: 0.25), borderRadius: BorderRadius.circular(12)),
-            child: const Icon(Icons.medical_services_outlined, color: Colors.white70, size: 22),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 32,
+            offset: const Offset(0, 12),
           ),
-          const SizedBox(width: 12),
-          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('Quick Consult Request',
-                style: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 15, color: Colors.white)),
-            Text('We\'ll match you in < 2 minutes',
-                style: GoogleFonts.inter(fontSize: 11.5, color: Colors.white38)),
-          ])),
-          // Heartbeat/Pulse Lottie next to Quick Consult form
-          SizedBox(
-            width: 44, height: 44,
-            child: Lottie.network(
-              'https://lottie.host/80cf3f1e-f3a7-47b7-bd6b-5dd31bb438e1/1xI2xPZ6jM.json', 
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => const SizedBox(),
-            ),
-          )
-        ]),
-        const SizedBox(height: 22),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: AppColors.blue.withValues(alpha: 0.25),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.medical_services_outlined,
+                  color: Colors.white70,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Quick Consult Request',
+                      style: GoogleFonts.inter(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Text(
+                      'We\'ll match you in < 2 minutes',
+                      style: GoogleFonts.inter(
+                        fontSize: 11.5,
+                        color: Colors.white38,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Heartbeat/Pulse Lottie next to Quick Consult form
+              SizedBox(
+                width: 44,
+                height: 44,
+                child: Lottie.network(
+                  'https://lottie.host/80cf3f1e-f3a7-47b7-bd6b-5dd31bb438e1/1xI2xPZ6jM.json',
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) =>
+                      const SizedBox(),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 22),
 
-        _ApptInput(controller: nameCtrl, hint: 'Your Full Name', icon: Icons.person_outline),
-        const SizedBox(height: 12),
-        _ApptInput(controller: phoneCtrl, hint: 'Mobile Number', icon: Icons.phone_outlined, keyboardType: TextInputType.phone),
-        const SizedBox(height: 12),
-        _SpecialtyDropdown(selected: selectedSpecialty, specialties: specialties, onChanged: onSpecialtyChanged),
-        const SizedBox(height: 20),
+          _ApptInput(
+            controller: nameCtrl,
+            hint: 'Your Full Name',
+            icon: Icons.person_outline,
+          ),
+          const SizedBox(height: 12),
+          _ApptInput(
+            controller: phoneCtrl,
+            hint: 'Mobile Number',
+            icon: Icons.phone_outlined,
+            keyboardType: TextInputType.phone,
+          ),
+          const SizedBox(height: 12),
+          _SpecialtyDropdown(
+            selected: selectedSpecialty,
+            specialties: specialties,
+            onChanged: onSpecialtyChanged,
+          ),
+          const SizedBox(height: 20),
 
-        _ConsultSubmitButton(text: btnText, success: success, error: error, onTap: onSubmit),
-        const SizedBox(height: 16),
+          _ConsultSubmitButton(
+            text: btnText,
+            success: success,
+            error: error,
+            onTap: onSubmit,
+          ),
+          const SizedBox(height: 16),
 
-        // Trust line
-        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          const Icon(Icons.shield_outlined, size: 13, color: Colors.white38),
-          const SizedBox(width: 6),
-          Text('100% confidential · No spam calls',
-              style: GoogleFonts.inter(fontSize: 11.5, color: Colors.white38)),
-        ]),
-      ]),
+          // Trust line
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.shield_outlined,
+                size: 13,
+                color: Colors.white38,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                '100% confidential · No spam calls',
+                style: GoogleFonts.inter(fontSize: 11.5, color: Colors.white38),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -396,8 +568,14 @@ class _ApptInput extends StatelessWidget {
         prefixIcon: Icon(icon, size: 18, color: AppColors.textSoft),
         filled: true,
         fillColor: Colors.white.withValues(alpha: 0.92),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 14,
+        ),
       ),
     );
   }
@@ -408,7 +586,11 @@ class _SpecialtyDropdown extends StatelessWidget {
   final List<String> specialties;
   final ValueChanged<String?> onChanged;
 
-  const _SpecialtyDropdown({required this.selected, required this.specialties, required this.onChanged});
+  const _SpecialtyDropdown({
+    required this.selected,
+    required this.specialties,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -421,13 +603,30 @@ class _SpecialtyDropdown extends StatelessWidget {
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: selected,
-          hint: Text('Select Specialty', style: GoogleFonts.inter(fontSize: 13.5, color: AppColors.textSoft)),
+          hint: Text(
+            'Select Specialty',
+            style: GoogleFonts.inter(fontSize: 13.5, color: AppColors.textSoft),
+          ),
           isExpanded: true,
-          icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.textSoft, size: 20),
-          items: specialties.map((d) => DropdownMenuItem(
-            value: d,
-            child: Text(d, style: GoogleFonts.inter(fontSize: 13.5, color: AppColors.textDark)),
-          )).toList(),
+          icon: const Icon(
+            Icons.keyboard_arrow_down_rounded,
+            color: AppColors.textSoft,
+            size: 20,
+          ),
+          items: specialties
+              .map(
+                (d) => DropdownMenuItem(
+                  value: d,
+                  child: Text(
+                    d,
+                    style: GoogleFonts.inter(
+                      fontSize: 13.5,
+                      color: AppColors.textDark,
+                    ),
+                  ),
+                ),
+              )
+              .toList(),
           onChanged: onChanged,
         ),
       ),
@@ -440,7 +639,12 @@ class _ConsultSubmitButton extends StatefulWidget {
   final bool success;
   final bool error;
   final VoidCallback onTap;
-  const _ConsultSubmitButton({required this.text, required this.success, required this.error, required this.onTap});
+  const _ConsultSubmitButton({
+    required this.text,
+    required this.success,
+    required this.error,
+    required this.onTap,
+  });
   @override
   State<_ConsultSubmitButton> createState() => _ConsultSubmitButtonState();
 }
@@ -451,9 +655,12 @@ class _ConsultSubmitButtonState extends State<_ConsultSubmitButton> {
   @override
   Widget build(BuildContext context) {
     Color bg;
-    if (widget.success) bg = const Color(0xFF4ADE80);
-    else if (widget.error) bg = AppColors.accent;
-    else bg = AppColors.blue;
+    if (widget.success)
+      bg = const Color(0xFF4ADE80);
+    else if (widget.error)
+      bg = AppColors.accent;
+    else
+      bg = AppColors.blue;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
@@ -468,10 +675,26 @@ class _ConsultSubmitButtonState extends State<_ConsultSubmitButton> {
           decoration: BoxDecoration(
             color: bg,
             borderRadius: BorderRadius.circular(12),
-            boxShadow: _hovered ? [BoxShadow(color: bg.withValues(alpha: 0.4), blurRadius: 14, offset: const Offset(0, 6))] : [],
+            boxShadow: _hovered
+                ? [
+                    BoxShadow(
+                      color: bg.withValues(alpha: 0.4),
+                      blurRadius: 14,
+                      offset: const Offset(0, 6),
+                    ),
+                  ]
+                : [],
           ),
-          child: Center(child: Text(widget.text,
-              style: GoogleFonts.inter(fontSize: 14.5, fontWeight: FontWeight.w700, color: Colors.white))),
+          child: Center(
+            child: Text(
+              widget.text,
+              style: GoogleFonts.inter(
+                fontSize: 14.5,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+            ),
+          ),
         ),
       ),
     );

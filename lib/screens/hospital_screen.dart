@@ -20,37 +20,135 @@ class _HospitalScreenState extends State<HospitalScreen>
   List<Map<String, String>> _directoryResults = [];
 
   static const _specialties = [
-    'All', 'Cardiology', 'Orthopaedics', 'Neurology', 'Gynaecology',
-    'Paediatrics', 'Dermatology', 'Ophthalmology', 'ENT', 'Oncology',
-    'Dentistry', 'Emergency',
+    'All',
+    'Cardiology',
+    'Orthopaedics',
+    'Neurology',
+    'Gynaecology',
+    'Paediatrics',
+    'Dermatology',
+    'Ophthalmology',
+    'ENT',
+    'Oncology',
+    'Dentistry',
+    'Emergency',
   ];
 
   static const _hospitals = [
-    _HospitalData(name: 'Apollo Hospital', location: 'Bannerghatta Road, Bengaluru', rating: 4.8, beds: 450, specialties: ['Cardiology', 'Neurology', 'Oncology'], img: '🏥', isOpen: true),
-    _HospitalData(name: 'Manipal Hospital', location: 'HAL Airport Road, Bengaluru', rating: 4.7, beds: 600, specialties: ['Orthopaedics', 'Paediatrics', 'Emergency'], img: '🏥', isOpen: true),
-    _HospitalData(name: 'Fortis Hospital', location: 'Rajajinagar, Bengaluru', rating: 4.6, beds: 320, specialties: ['Cardiology', 'Gynaecology', 'Dermatology'], img: '🏥', isOpen: true),
-    _HospitalData(name: 'Narayana Health', location: 'Bommasandra, Bengaluru', rating: 4.9, beds: 800, specialties: ['Cardiology', 'Oncology', 'Emergency'], img: '🏥', isOpen: false),
-    _HospitalData(name: 'Columbia Asia', location: 'Hebbal, Bengaluru', rating: 4.5, beds: 200, specialties: ['Orthopaedics', 'ENT', 'Ophthalmology'], img: '🏥', isOpen: true),
-    _HospitalData(name: 'Sakra World', location: 'Devarabeesanahalli, Bengaluru', rating: 4.7, beds: 350, specialties: ['Neurology', 'Paediatrics', 'Dentistry'], img: '🏥', isOpen: true),
+    _HospitalData(
+      name: 'Apollo Hospital',
+      location: 'Bannerghatta Road, Bengaluru',
+      rating: 4.8,
+      beds: 450,
+      specialties: ['Cardiology', 'Neurology', 'Oncology'],
+      img: Icons.local_hospital_outlined,
+      isOpen: true,
+    ),
+    _HospitalData(
+      name: 'Manipal Hospital',
+      location: 'HAL Airport Road, Bengaluru',
+      rating: 4.7,
+      beds: 600,
+      specialties: ['Orthopaedics', 'Paediatrics', 'Emergency'],
+      img: Icons.local_hospital_outlined,
+      isOpen: true,
+    ),
+    _HospitalData(
+      name: 'Fortis Hospital',
+      location: 'Rajajinagar, Bengaluru',
+      rating: 4.6,
+      beds: 320,
+      specialties: ['Cardiology', 'Gynaecology', 'Dermatology'],
+      img: Icons.local_hospital_outlined,
+      isOpen: true,
+    ),
+    _HospitalData(
+      name: 'Narayana Health',
+      location: 'Bommasandra, Bengaluru',
+      rating: 4.9,
+      beds: 800,
+      specialties: ['Cardiology', 'Oncology', 'Emergency'],
+      img: Icons.local_hospital_outlined,
+      isOpen: false,
+    ),
+    _HospitalData(
+      name: 'Columbia Asia',
+      location: 'Hebbal, Bengaluru',
+      rating: 4.5,
+      beds: 200,
+      specialties: ['Orthopaedics', 'ENT', 'Ophthalmology'],
+      img: Icons.local_hospital_outlined,
+      isOpen: true,
+    ),
+    _HospitalData(
+      name: 'Sakra World',
+      location: 'Devarabeesanahalli, Bengaluru',
+      rating: 4.7,
+      beds: 350,
+      specialties: ['Neurology', 'Paediatrics', 'Dentistry'],
+      img: Icons.local_hospital_outlined,
+      isOpen: true,
+    ),
   ];
 
   static const _doctors = [
-    {'name': 'Dr. Meera Sharma', 'specialty': 'Cardiology', 'hospital': 'Apollo Hospital', 'city': 'Bengaluru'},
-    {'name': 'Dr. Rohan Iyer', 'specialty': 'Neurology', 'hospital': 'Apollo Hospital', 'city': 'Bengaluru'},
-    {'name': 'Dr. Ananya Rao', 'specialty': 'Paediatrics', 'hospital': 'Manipal Hospital', 'city': 'Bengaluru'},
-    {'name': 'Dr. Vikram Shetty', 'specialty': 'Orthopaedics', 'hospital': 'Manipal Hospital', 'city': 'Bengaluru'},
-    {'name': 'Dr. Kavya Nair', 'specialty': 'Gynaecology', 'hospital': 'Fortis Hospital', 'city': 'Bengaluru'},
-    {'name': 'Dr. Arjun Menon', 'specialty': 'Oncology', 'hospital': 'Narayana Health', 'city': 'Bengaluru'},
-    {'name': 'Dr. Priya Das', 'specialty': 'Dermatology', 'hospital': 'Fortis Hospital', 'city': 'Bengaluru'},
-    {'name': 'Dr. Sanjay Kumar', 'specialty': 'ENT', 'hospital': 'Columbia Asia', 'city': 'Bengaluru'},
+    {
+      'name': 'Dr. Meera Sharma',
+      'specialty': 'Cardiology',
+      'hospital': 'Apollo Hospital',
+      'city': 'Bengaluru',
+    },
+    {
+      'name': 'Dr. Rohan Iyer',
+      'specialty': 'Neurology',
+      'hospital': 'Apollo Hospital',
+      'city': 'Bengaluru',
+    },
+    {
+      'name': 'Dr. Ananya Rao',
+      'specialty': 'Paediatrics',
+      'hospital': 'Manipal Hospital',
+      'city': 'Bengaluru',
+    },
+    {
+      'name': 'Dr. Vikram Shetty',
+      'specialty': 'Orthopaedics',
+      'hospital': 'Manipal Hospital',
+      'city': 'Bengaluru',
+    },
+    {
+      'name': 'Dr. Kavya Nair',
+      'specialty': 'Gynaecology',
+      'hospital': 'Fortis Hospital',
+      'city': 'Bengaluru',
+    },
+    {
+      'name': 'Dr. Arjun Menon',
+      'specialty': 'Oncology',
+      'hospital': 'Narayana Health',
+      'city': 'Bengaluru',
+    },
+    {
+      'name': 'Dr. Priya Das',
+      'specialty': 'Dermatology',
+      'hospital': 'Fortis Hospital',
+      'city': 'Bengaluru',
+    },
+    {
+      'name': 'Dr. Sanjay Kumar',
+      'specialty': 'ENT',
+      'hospital': 'Columbia Asia',
+      'city': 'Bengaluru',
+    },
   ];
 
   @override
   void initState() {
     super.initState();
     _animCtrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 800))
-      ..forward();
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    )..forward();
   }
 
   @override
@@ -64,13 +162,18 @@ class _HospitalScreenState extends State<HospitalScreen>
     final city = _cityQuery.trim().toLowerCase();
     _directoryResults = query.length < 2
         ? []
-        : _doctors.where((doctor) {
-            final matchesQuery = doctor.values
-                .any((value) => value.toLowerCase().contains(query));
-            final matchesCity =
-                city.isEmpty || doctor['city']!.toLowerCase().contains(city);
-            return matchesQuery && matchesCity;
-          }).map((doctor) => Map<String, String>.from(doctor)).toList();
+        : _doctors
+              .where((doctor) {
+                final matchesQuery = doctor.values.any(
+                  (value) => value.toLowerCase().contains(query),
+                );
+                final matchesCity =
+                    city.isEmpty ||
+                    doctor['city']!.toLowerCase().contains(city);
+                return matchesQuery && matchesCity;
+              })
+              .map((doctor) => Map<String, String>.from(doctor))
+              .toList();
   }
 
   Widget _buildDirectoryResults() {
@@ -84,11 +187,14 @@ class _HospitalScreenState extends State<HospitalScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Doctors matching your search',
-            style: GoogleFonts.inter(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textDark)),
+        Text(
+          'Doctors matching your search',
+          style: GoogleFonts.inter(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textDark,
+          ),
+        ),
         const SizedBox(height: 12),
         ..._directoryResults.map((result) {
           return Container(
@@ -111,15 +217,18 @@ class _HospitalScreenState extends State<HospitalScreen>
                       Text(
                         result['name']!,
                         style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textDark),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textDark,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         '${result['specialty']} · ${result['hospital']} · ${result['city']}',
                         style: GoogleFonts.inter(
-                            fontSize: 12, color: AppColors.textSoft),
+                          fontSize: 12,
+                          color: AppColors.textSoft,
+                        ),
                       ),
                     ],
                   ),
@@ -167,7 +276,7 @@ class _HospitalScreenState extends State<HospitalScreen>
             children: [
               // Header
               _GradientBanner(
-                emoji: '🏥',
+                emoji: Icons.local_hospital_outlined,
                 title: 'Find Hospitals',
                 subtitle: 'Browse 150+ verified partner hospitals near you',
               ),
@@ -195,9 +304,13 @@ class _HospitalScreenState extends State<HospitalScreen>
                 const SizedBox(height: 24),
               ],
 
-              Text('Featured hospitals',
-                  style: GoogleFonts.inter(
-                      fontSize: 13, color: AppColors.textSoft)),
+              Text(
+                'Featured hospitals',
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  color: AppColors.textSoft,
+                ),
+              ),
               const SizedBox(height: 16),
 
               // Hospital Cards
@@ -208,12 +321,13 @@ class _HospitalScreenState extends State<HospitalScreen>
                     spacing: 18,
                     runSpacing: 18,
                     children: filtered
-                        .map((h) => SizedBox(
-                              width: (constraints.maxWidth -
-                                      (cols - 1) * 18) /
-                                  cols,
-                              child: _HospitalCard(hospital: h),
-                            ))
+                        .map(
+                          (h) => SizedBox(
+                            width:
+                                (constraints.maxWidth - (cols - 1) * 18) / cols,
+                            child: _HospitalCard(hospital: h),
+                          ),
+                        )
                         .toList(),
                   );
                 },
@@ -234,11 +348,14 @@ class _HospitalScreenState extends State<HospitalScreen>
         color: AppColors.textMid,
         onPressed: () => Navigator.of(context).pop(),
       ),
-      title: Text('Hospitals',
-          style: GoogleFonts.inter(
-              fontSize: 17,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textDark)),
+      title: Text(
+        'Hospitals',
+        style: GoogleFonts.inter(
+          fontSize: 17,
+          fontWeight: FontWeight.w700,
+          color: AppColors.textDark,
+        ),
+      ),
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
         child: Container(height: 1, color: AppColors.border),
@@ -248,7 +365,8 @@ class _HospitalScreenState extends State<HospitalScreen>
 }
 
 class _HospitalData {
-  final String name, location, img;
+  final String name, location;
+  final IconData img;
   final double rating;
   final int beds;
   final List<String> specialties;
@@ -266,9 +384,13 @@ class _HospitalData {
 
 // ── Gradient Banner for section headers
 class _GradientBanner extends StatelessWidget {
-  final String emoji, title, subtitle;
-  const _GradientBanner(
-      {required this.emoji, required this.title, required this.subtitle});
+  final IconData emoji;
+  final String title, subtitle;
+  const _GradientBanner({
+    required this.emoji,
+    required this.title,
+    required this.subtitle,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -283,9 +405,10 @@ class _GradientBanner extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-              color: AppColors.navy.withValues(alpha: 0.25),
-              blurRadius: 20,
-              offset: const Offset(0, 8)),
+            color: AppColors.navy.withValues(alpha: 0.25),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
         ],
       ),
       child: Row(
@@ -297,23 +420,26 @@ class _GradientBanner extends StatelessWidget {
               color: Colors.white.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Center(
-                child: Text(emoji, style: const TextStyle(fontSize: 28))),
+            child: Center(child: Icon(emoji, size: 30, color: Colors.white)),
           ),
           const SizedBox(width: 20),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title,
-                    style: GoogleFonts.playfairDisplay(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white)),
+                Text(
+                  title,
+                  style: GoogleFonts.playfairDisplay(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
                 const SizedBox(height: 4),
-                Text(subtitle,
-                    style: GoogleFonts.inter(
-                        fontSize: 13, color: Colors.white54)),
+                Text(
+                  subtitle,
+                  style: GoogleFonts.inter(fontSize: 13, color: Colors.white54),
+                ),
               ],
             ),
           ),
@@ -350,9 +476,10 @@ class _SearchFilterBar extends StatelessWidget {
             border: Border.all(color: AppColors.border),
             boxShadow: [
               BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2)),
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
             ],
           ),
           child: TextField(
@@ -361,10 +488,15 @@ class _SearchFilterBar extends StatelessWidget {
             style: GoogleFonts.inter(fontSize: 14, color: AppColors.textDark),
             decoration: InputDecoration(
               hintText: 'Search hospital or doctor name…',
-              hintStyle:
-                  GoogleFonts.inter(fontSize: 14, color: AppColors.textSoft),
-              prefixIcon: const Icon(Icons.search_rounded,
-                  size: 20, color: AppColors.textSoft),
+              hintStyle: GoogleFonts.inter(
+                fontSize: 14,
+                color: AppColors.textSoft,
+              ),
+              prefixIcon: const Icon(
+                Icons.search_rounded,
+                size: 20,
+                color: AppColors.textSoft,
+              ),
               border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(vertical: 16),
             ),
@@ -372,15 +504,26 @@ class _SearchFilterBar extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         Container(
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.border)),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppColors.border),
+          ),
           child: TextField(
             onChanged: onCityChanged,
             maxLength: 60,
             style: GoogleFonts.inter(fontSize: 14, color: AppColors.textDark),
             decoration: InputDecoration(
               hintText: 'City (optional)',
-              hintStyle: GoogleFonts.inter(fontSize: 14, color: AppColors.textSoft),
-              prefixIcon: const Icon(Icons.location_city_outlined, size: 20, color: AppColors.textSoft),
+              hintStyle: GoogleFonts.inter(
+                fontSize: 14,
+                color: AppColors.textSoft,
+              ),
+              prefixIcon: const Icon(
+                Icons.location_city_outlined,
+                size: 20,
+                color: AppColors.textSoft,
+              ),
               border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(vertical: 16),
             ),
@@ -391,15 +534,15 @@ class _SearchFilterBar extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           child: Row(
             children: specialties.map((s) {
-              final active = s == selectedSpecialty ||
+              final active =
+                  s == selectedSpecialty ||
                   (s == 'All' && selectedSpecialty == null);
               return Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: _FilterChip(
                   label: s,
                   isActive: active,
-                  onTap: () =>
-                      onSpecialtyChanged(s == 'All' ? null : s),
+                  onTap: () => onSpecialtyChanged(s == 'All' ? null : s),
                 ),
               );
             }).toList(),
@@ -414,8 +557,11 @@ class _FilterChip extends StatefulWidget {
   final String label;
   final bool isActive;
   final VoidCallback onTap;
-  const _FilterChip(
-      {required this.label, required this.isActive, required this.onTap});
+  const _FilterChip({
+    required this.label,
+    required this.isActive,
+    required this.onTap,
+  });
   @override
   State<_FilterChip> createState() => _FilterChipState();
 }
@@ -437,25 +583,30 @@ class _FilterChipState extends State<_FilterChip> {
             color: widget.isActive ? AppColors.blue : Colors.white,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-                color: widget.isActive
-                    ? AppColors.blue
-                    : _hovered
-                        ? AppColors.blue.withValues(alpha: 0.3)
-                        : AppColors.border),
+              color: widget.isActive
+                  ? AppColors.blue
+                  : _hovered
+                  ? AppColors.blue.withValues(alpha: 0.3)
+                  : AppColors.border,
+            ),
             boxShadow: widget.isActive
                 ? [
                     BoxShadow(
-                        color: AppColors.blue.withValues(alpha: 0.25),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2))
+                      color: AppColors.blue.withValues(alpha: 0.25),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
                   ]
                 : [],
           ),
-          child: Text(widget.label,
-              style: GoogleFonts.inter(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w600,
-                  color: widget.isActive ? Colors.white : AppColors.textMid)),
+          child: Text(
+            widget.label,
+            style: GoogleFonts.inter(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w600,
+              color: widget.isActive ? Colors.white : AppColors.textMid,
+            ),
+          ),
         ),
       ),
     );
@@ -484,8 +635,9 @@ class _HospitalCardState extends State<_HospitalCard> {
         onTap: () {
           // Show booking dialog
           showDialog(
-              context: context,
-              builder: (_) => _BookingDialog(hospital: h));
+            context: context,
+            builder: (_) => _BookingDialog(hospital: h),
+          );
         },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 240),
@@ -495,19 +647,22 @@ class _HospitalCardState extends State<_HospitalCard> {
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-                color: _hovered ? Colors.transparent : AppColors.border),
+              color: _hovered ? Colors.transparent : AppColors.border,
+            ),
             boxShadow: _hovered
                 ? [
                     BoxShadow(
-                        color: AppColors.blue.withValues(alpha: 0.12),
-                        blurRadius: 28,
-                        offset: const Offset(0, 10))
+                      color: AppColors.blue.withValues(alpha: 0.12),
+                      blurRadius: 28,
+                      offset: const Offset(0, 10),
+                    ),
                   ]
                 : [
                     BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.03),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2))
+                      color: Colors.black.withValues(alpha: 0.03),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
                   ],
           ),
           child: Column(
@@ -526,32 +681,41 @@ class _HospitalCardState extends State<_HospitalCard> {
                       color: const Color(0xFFF3E8FF),
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    child: const Center(
-                        child:
-                            Text('🏥', style: TextStyle(fontSize: 26))),
+                    child: Center(
+                      child: Icon(h.img, size: 28, color: AppColors.blue),
+                    ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(h.name,
-                            style: GoogleFonts.inter(
-                                fontSize: 17,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.textDark)),
+                        Text(
+                          h.name,
+                          style: GoogleFonts.inter(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textDark,
+                          ),
+                        ),
                         const SizedBox(height: 3),
                         Row(
                           children: [
-                            Icon(Icons.location_on_outlined,
-                                size: 13, color: AppColors.textSoft),
+                            Icon(
+                              Icons.location_on_outlined,
+                              size: 13,
+                              color: AppColors.textSoft,
+                            ),
                             const SizedBox(width: 3),
                             Expanded(
-                              child: Text(h.location,
-                                  style: GoogleFonts.inter(
-                                      fontSize: 12,
-                                      color: AppColors.textSoft),
-                                  overflow: TextOverflow.ellipsis),
+                              child: Text(
+                                h.location,
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  color: AppColors.textSoft,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ],
                         ),
@@ -562,31 +726,42 @@ class _HospitalCardState extends State<_HospitalCard> {
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 5),
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
                         decoration: BoxDecoration(
                           color: h.isOpen
                               ? const Color(0xFFEDF7ED)
                               : const Color(0xFFFFF8E1),
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: Text(h.isOpen ? '● Open' : '● Closed',
-                            style: GoogleFonts.inter(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: h.isOpen
-                                    ? const Color(0xFF2E7D32)
-                                    : const Color(0xFFE65100))),
+                        child: Text(
+                          h.isOpen ? '● Open' : '● Closed',
+                          style: GoogleFonts.inter(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: h.isOpen
+                                ? const Color(0xFF2E7D32)
+                                : const Color(0xFFE65100),
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 6),
                       Row(
                         children: [
-                          const Icon(Icons.star_rounded,
-                              size: 14, color: Color(0xFFFBBF24)),
-                          Text(' ${h.rating}',
-                              style: GoogleFonts.inter(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.textDark)),
+                          const Icon(
+                            Icons.star_rounded,
+                            size: 14,
+                            color: Color(0xFFFBBF24),
+                          ),
+                          Text(
+                            ' ${h.rating}',
+                            style: GoogleFonts.inter(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textDark,
+                            ),
+                          ),
                         ],
                       ),
                     ],
@@ -599,19 +774,26 @@ class _HospitalCardState extends State<_HospitalCard> {
                 spacing: 6,
                 runSpacing: 6,
                 children: h.specialties
-                    .map((s) => Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 5),
-                          decoration: BoxDecoration(
-                            color: AppColors.blueLight,
-                            borderRadius: BorderRadius.circular(20),
+                    .map(
+                      (s) => Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.blueLight,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          s,
+                          style: GoogleFonts.inter(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.blue,
                           ),
-                          child: Text(s,
-                              style: GoogleFonts.inter(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.blue)),
-                        ))
+                        ),
+                      ),
+                    )
                     .toList(),
               ),
               const SizedBox(height: 14),
@@ -621,28 +803,36 @@ class _HospitalCardState extends State<_HospitalCard> {
                   _MiniInfo(icon: Icons.bed_outlined, text: '${h.beds} beds'),
                   const SizedBox(width: 16),
                   _MiniInfo(
-                      icon: Icons.local_parking_outlined,
-                      text: 'Parking'),
+                    icon: Icons.local_parking_outlined,
+                    text: 'Parking',
+                  ),
                   const Spacer(),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 8),
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                          colors: [AppColors.blue, AppColors.blueMid]),
+                        colors: [AppColors.blue, AppColors.blueMid],
+                      ),
                       borderRadius: BorderRadius.circular(10),
                       boxShadow: [
                         BoxShadow(
-                            color: AppColors.blue.withValues(alpha: 0.2),
-                            blurRadius: 8,
-                            offset: const Offset(0, 3)),
+                          color: AppColors.blue.withValues(alpha: 0.2),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        ),
                       ],
                     ),
-                    child: Text('Book Now',
-                        style: GoogleFonts.inter(
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white)),
+                    child: Text(
+                      'Book Now',
+                      style: GoogleFonts.inter(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -666,9 +856,10 @@ class _MiniInfo extends StatelessWidget {
       children: [
         Icon(icon, size: 14, color: AppColors.textSoft),
         const SizedBox(width: 4),
-        Text(text,
-            style: GoogleFonts.inter(
-                fontSize: 12, color: AppColors.textSoft)),
+        Text(
+          text,
+          style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSoft),
+        ),
       ],
     );
   }
@@ -698,17 +889,25 @@ class _BookingDialogState extends State<_BookingDialog>
   ];
 
   static const _slots = [
-    '09:00 AM', '09:30 AM', '10:00 AM', '10:30 AM',
-    '11:00 AM', '02:00 PM', '02:30 PM', '03:00 PM',
-    '04:00 PM', '04:30 PM',
+    '09:00 AM',
+    '09:30 AM',
+    '10:00 AM',
+    '10:30 AM',
+    '11:00 AM',
+    '02:00 PM',
+    '02:30 PM',
+    '03:00 PM',
+    '04:00 PM',
+    '04:30 PM',
   ];
 
   @override
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 400))
-      ..forward();
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    )..forward();
   }
 
   @override
@@ -731,9 +930,10 @@ class _BookingDialogState extends State<_BookingDialog>
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.15),
-                  blurRadius: 40,
-                  offset: const Offset(0, 16)),
+                color: Colors.black.withValues(alpha: 0.15),
+                blurRadius: 40,
+                offset: const Offset(0, 16),
+              ),
             ],
           ),
           child: Column(
@@ -751,30 +951,43 @@ class _BookingDialogState extends State<_BookingDialog>
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: const Center(
-                        child: Text('🏥',
-                            style: TextStyle(fontSize: 22))),
+                      child: Icon(
+                        Icons.local_hospital_outlined,
+                        size: 25,
+                        color: AppColors.blue,
+                      ),
+                    ),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(widget.hospital.name,
-                            style: GoogleFonts.inter(
-                                fontSize: 17,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.textDark)),
-                        Text('Book an Appointment',
-                            style: GoogleFonts.inter(
-                                fontSize: 12,
-                                color: AppColors.textSoft)),
+                        Text(
+                          widget.hospital.name,
+                          style: GoogleFonts.inter(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textDark,
+                          ),
+                        ),
+                        Text(
+                          'Book an Appointment',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: AppColors.textSoft,
+                          ),
+                        ),
                       ],
                     ),
                   ),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close_rounded,
-                        size: 20, color: AppColors.textSoft),
+                    icon: const Icon(
+                      Icons.close_rounded,
+                      size: 20,
+                      color: AppColors.textSoft,
+                    ),
                   ),
                 ],
               ),
@@ -800,48 +1013,45 @@ class _BookingDialogState extends State<_BookingDialog>
                         },
                       )
                     : _step == 1
-                        ? _SlotPicker(
-                            key: const ValueKey(1),
-                            slots: _slots,
-                            selected: _selectedSlot,
-                            onSelect: (s) {
-                              setState(() {
-                                _selectedSlot = s;
-                                _step = 2;
-                              });
-                            },
-                          )
-                        : _ConfirmBooking(
-                            key: const ValueKey(2),
-                            hospital: widget.hospital.name,
-                            doctor: _selectedDoctor!,
-                            slot: _selectedSlot!,
-                            isBooking: _isBooking,
-                            onConfirm: () async {
-                              setState(() => _isBooking = true);
-                              await Future.delayed(
-                                  const Duration(seconds: 2));
-                              if (mounted) {
-                                Navigator.pop(context);
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(SnackBar(
-                                  content: Text(
-                                      '✅ Appointment booked successfully!',
-                                      style: GoogleFonts.inter(
-                                          color: Colors.white)),
-                                  backgroundColor:
-                                      const Color(0xFF4ADE80),
-                                  behavior:
-                                      SnackBarBehavior.floating,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(12)),
-                                ));
-                              }
-                            },
-                            onBack: () =>
-                                setState(() => _step = 1),
-                          ),
+                    ? _SlotPicker(
+                        key: const ValueKey(1),
+                        slots: _slots,
+                        selected: _selectedSlot,
+                        onSelect: (s) {
+                          setState(() {
+                            _selectedSlot = s;
+                            _step = 2;
+                          });
+                        },
+                      )
+                    : _ConfirmBooking(
+                        key: const ValueKey(2),
+                        hospital: widget.hospital.name,
+                        doctor: _selectedDoctor!,
+                        slot: _selectedSlot!,
+                        isBooking: _isBooking,
+                        onConfirm: () async {
+                          setState(() => _isBooking = true);
+                          await Future.delayed(const Duration(seconds: 2));
+                          if (mounted) {
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Appointment booked successfully!',
+                                  style: GoogleFonts.inter(color: Colors.white),
+                                ),
+                                backgroundColor: const Color(0xFF4ADE80),
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                        onBack: () => setState(() => _step = 1),
+                      ),
               ),
             ],
           ),
@@ -871,32 +1081,36 @@ class _StepIndicator extends StatelessWidget {
                   shape: BoxShape.circle,
                   color: active ? AppColors.blue : AppColors.bg,
                   border: Border.all(
-                      color:
-                          active ? AppColors.blue : AppColors.border),
+                    color: active ? AppColors.blue : AppColors.border,
+                  ),
                 ),
                 child: Center(
                   child: active && i < step
-                      ? const Icon(Icons.check_rounded,
-                          size: 14, color: Colors.white)
-                      : Text('${i + 1}',
+                      ? const Icon(
+                          Icons.check_rounded,
+                          size: 14,
+                          color: Colors.white,
+                        )
+                      : Text(
+                          '${i + 1}',
                           style: GoogleFonts.inter(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: active
-                                  ? Colors.white
-                                  : AppColors.textSoft)),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: active ? Colors.white : AppColors.textSoft,
+                          ),
+                        ),
                 ),
               ),
               const SizedBox(width: 6),
               Expanded(
-                child: Text(labels[i],
-                    style: GoogleFonts.inter(
-                        fontSize: 11,
-                        fontWeight:
-                            active ? FontWeight.w600 : FontWeight.w500,
-                        color: active
-                            ? AppColors.textDark
-                            : AppColors.textSoft)),
+                child: Text(
+                  labels[i],
+                  style: GoogleFonts.inter(
+                    fontSize: 11,
+                    fontWeight: active ? FontWeight.w600 : FontWeight.w500,
+                    color: active ? AppColors.textDark : AppColors.textSoft,
+                  ),
+                ),
               ),
             ],
           ),
@@ -910,27 +1124,34 @@ class _DoctorPicker extends StatelessWidget {
   final List<String> doctors;
   final String? selected;
   final ValueChanged<String> onSelect;
-  const _DoctorPicker(
-      {super.key,
-      required this.doctors,
-      required this.selected,
-      required this.onSelect});
+  const _DoctorPicker({
+    super.key,
+    required this.doctors,
+    required this.selected,
+    required this.onSelect,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Select a Doctor',
-            style: GoogleFonts.inter(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textDark)),
+        Text(
+          'Select a Doctor',
+          style: GoogleFonts.inter(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textDark,
+          ),
+        ),
         const SizedBox(height: 14),
-        ...doctors.map((d) => _DoctorTile(
+        ...doctors.map(
+          (d) => _DoctorTile(
             doctor: d,
             isSelected: d == selected,
-            onTap: () => onSelect(d))),
+            onTap: () => onSelect(d),
+          ),
+        ),
       ],
     );
   }
@@ -940,8 +1161,11 @@ class _DoctorTile extends StatefulWidget {
   final String doctor;
   final bool isSelected;
   final VoidCallback onTap;
-  const _DoctorTile(
-      {required this.doctor, required this.isSelected, required this.onTap});
+  const _DoctorTile({
+    required this.doctor,
+    required this.isSelected,
+    required this.onTap,
+  });
   @override
   State<_DoctorTile> createState() => _DoctorTileState();
 }
@@ -966,11 +1190,12 @@ class _DoctorTileState extends State<_DoctorTile> {
                 : AppColors.bg,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-                color: widget.isSelected
-                    ? AppColors.blue
-                    : _hovered
-                        ? AppColors.blue.withValues(alpha: 0.3)
-                        : AppColors.border),
+              color: widget.isSelected
+                  ? AppColors.blue
+                  : _hovered
+                  ? AppColors.blue.withValues(alpha: 0.3)
+                  : AppColors.border,
+            ),
           ),
           child: Row(
             children: [
@@ -979,39 +1204,46 @@ class _DoctorTileState extends State<_DoctorTile> {
                 height: 40,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                      colors: [AppColors.blue, AppColors.blueMid]),
+                    colors: [AppColors.blue, AppColors.blueMid],
+                  ),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Center(
-                    child: Text(
-                        widget.doctor
-                            .split(' ')
-                            .where((w) =>
-                                w.length > 1 && w[0] == w[0].toUpperCase())
-                            .map((w) => w[0])
-                            .take(2)
-                            .join(),
-                        style: GoogleFonts.inter(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white))),
+                  child: Text(
+                    widget.doctor
+                        .split(' ')
+                        .where(
+                          (w) => w.length > 1 && w[0] == w[0].toUpperCase(),
+                        )
+                        .map((w) => w[0])
+                        .take(2)
+                        .join(),
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: Text(widget.doctor,
-                    style: GoogleFonts.inter(
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textDark)),
+                child: Text(
+                  widget.doctor,
+                  style: GoogleFonts.inter(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textDark,
+                  ),
+                ),
               ),
               Icon(
-                  widget.isSelected
-                      ? Icons.check_circle_rounded
-                      : Icons.circle_outlined,
-                  size: 20,
-                  color: widget.isSelected
-                      ? AppColors.blue
-                      : AppColors.textSoft),
+                widget.isSelected
+                    ? Icons.check_circle_rounded
+                    : Icons.circle_outlined,
+                size: 20,
+                color: widget.isSelected ? AppColors.blue : AppColors.textSoft,
+              ),
             ],
           ),
         ),
@@ -1024,30 +1256,39 @@ class _SlotPicker extends StatelessWidget {
   final List<String> slots;
   final String? selected;
   final ValueChanged<String> onSelect;
-  const _SlotPicker(
-      {super.key,
-      required this.slots,
-      required this.selected,
-      required this.onSelect});
+  const _SlotPicker({
+    super.key,
+    required this.slots,
+    required this.selected,
+    required this.onSelect,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Pick a Time Slot',
-            style: GoogleFonts.inter(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textDark)),
+        Text(
+          'Pick a Time Slot',
+          style: GoogleFonts.inter(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textDark,
+          ),
+        ),
         const SizedBox(height: 14),
         Wrap(
           spacing: 10,
           runSpacing: 10,
-          children: slots.map((s) => _SlotChip(
-              slot: s,
-              isSelected: s == selected,
-              onTap: () => onSelect(s))).toList(),
+          children: slots
+              .map(
+                (s) => _SlotChip(
+                  slot: s,
+                  isSelected: s == selected,
+                  onTap: () => onSelect(s),
+                ),
+              )
+              .toList(),
         ),
       ],
     );
@@ -1058,8 +1299,11 @@ class _SlotChip extends StatefulWidget {
   final String slot;
   final bool isSelected;
   final VoidCallback onTap;
-  const _SlotChip(
-      {required this.slot, required this.isSelected, required this.onTap});
+  const _SlotChip({
+    required this.slot,
+    required this.isSelected,
+    required this.onTap,
+  });
   @override
   State<_SlotChip> createState() => _SlotChipState();
 }
@@ -1081,29 +1325,30 @@ class _SlotChipState extends State<_SlotChip> {
             color: widget.isSelected
                 ? AppColors.blue
                 : _hovered
-                    ? AppColors.blueLight
-                    : Colors.white,
+                ? AppColors.blueLight
+                : Colors.white,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-                color: widget.isSelected
-                    ? AppColors.blue
-                    : AppColors.border),
+              color: widget.isSelected ? AppColors.blue : AppColors.border,
+            ),
             boxShadow: widget.isSelected
                 ? [
                     BoxShadow(
-                        color: AppColors.blue.withValues(alpha: 0.25),
-                        blurRadius: 8,
-                        offset: const Offset(0, 3))
+                      color: AppColors.blue.withValues(alpha: 0.25),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
                   ]
                 : [],
           ),
-          child: Text(widget.slot,
-              style: GoogleFonts.inter(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: widget.isSelected
-                      ? Colors.white
-                      : AppColors.textMid)),
+          child: Text(
+            widget.slot,
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: widget.isSelected ? Colors.white : AppColors.textMid,
+            ),
+          ),
         ),
       ),
     );
@@ -1129,11 +1374,14 @@ class _ConfirmBooking extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Confirm Booking',
-            style: GoogleFonts.inter(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textDark)),
+        Text(
+          'Confirm Booking',
+          style: GoogleFonts.inter(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textDark,
+          ),
+        ),
         const SizedBox(height: 16),
         _ConfirmRow(label: 'Hospital', value: hospital),
         _ConfirmRow(label: 'Doctor', value: doctor),
@@ -1152,11 +1400,15 @@ class _ConfirmBooking extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Center(
-                      child: Text('← Back',
-                          style: GoogleFonts.inter(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textMid))),
+                    child: Text(
+                      '← Back',
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textMid,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -1169,14 +1421,15 @@ class _ConfirmBooking extends StatelessWidget {
                   height: 48,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                        colors: [AppColors.blue, AppColors.blueMid]),
+                      colors: [AppColors.blue, AppColors.blueMid],
+                    ),
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                          color:
-                              AppColors.blue.withValues(alpha: 0.25),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4)),
+                        color: AppColors.blue.withValues(alpha: 0.25),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
                     ],
                   ),
                   child: Center(
@@ -1185,13 +1438,18 @@ class _ConfirmBooking extends StatelessWidget {
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
-                                strokeWidth: 2.5,
-                                color: Colors.white))
-                        : Text('✓ Confirm Booking',
+                              strokeWidth: 2.5,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Text(
+                            'Confirm Booking',
                             style: GoogleFonts.inter(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white)),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
                   ),
                 ),
               ),
@@ -1215,16 +1473,23 @@ class _ConfirmRow extends StatelessWidget {
         children: [
           SizedBox(
             width: 80,
-            child: Text(label,
-                style: GoogleFonts.inter(
-                    fontSize: 12.5, color: AppColors.textSoft)),
+            child: Text(
+              label,
+              style: GoogleFonts.inter(
+                fontSize: 12.5,
+                color: AppColors.textSoft,
+              ),
+            ),
           ),
           Expanded(
-            child: Text(value,
-                style: GoogleFonts.inter(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textDark)),
+            child: Text(
+              value,
+              style: GoogleFonts.inter(
+                fontSize: 13.5,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textDark,
+              ),
+            ),
           ),
         ],
       ),

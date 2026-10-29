@@ -246,7 +246,11 @@ class _MedicationsScreenState extends State<MedicationsScreen>
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: const Center(
-                              child: Text('💊', style: TextStyle(fontSize: 28)),
+                              child: Icon(
+                                Icons.medication_outlined,
+                                size: 30,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 20),
@@ -534,7 +538,11 @@ class _MedicationCardState extends State<_MedicationCard> {
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: const Center(
-                      child: Text('💊', style: TextStyle(fontSize: 22)),
+                      child: Icon(
+                        Icons.medication_outlined,
+                        size: 24,
+                        color: AppColors.blue,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 14),

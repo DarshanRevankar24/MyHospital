@@ -169,7 +169,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
             onTap: () {
               if (_editing) {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text('✅ Profile updated!', style: GoogleFonts.inter(color: Colors.white)),
+                  content: Text('Profile updated!', style: GoogleFonts.inter(color: Colors.white)),
                   backgroundColor: const Color(0xFF4ADE80), behavior: SnackBarBehavior.floating,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ));
@@ -336,7 +336,7 @@ class _ProfileHeader extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
           decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20)),
-          child: Text('✨ Premium Member', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white70)),
+          child: Text('Premium Member', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white70)),
         ),
       ]),
     );

@@ -98,7 +98,7 @@ class _BloodBankScreenState extends State<BloodBankScreen> with SingleTickerProv
               onGroupChanged: (v) => setState(() => _selectedGroup = v),
               onSubmit: () {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text('✅ Blood request submitted! You\'ll receive a call shortly.', style: GoogleFonts.inter(color: Colors.white)),
+                  content: Text('Blood request submitted! You\'ll receive a call shortly.', style: GoogleFonts.inter(color: Colors.white)),
                   backgroundColor: const Color(0xFF4ADE80), behavior: SnackBarBehavior.floating,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ));

@@ -25,7 +25,7 @@ class NavBar extends StatelessWidget {
     return SizedBox(
       height: 68,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Row(
           children: [
             // ── Left: Nav Links
@@ -201,9 +201,13 @@ class _BookButtonState extends State<_BookButton> {
             ),
             borderRadius: BorderRadius.circular(10),
             boxShadow: _hovered
-                ? [BoxShadow(
-                    color: AppColors.blue.withValues(alpha: 0.35),
-                    blurRadius: 12, offset: const Offset(0, 4))]
+                ? [
+                    BoxShadow(
+                      color: AppColors.blue.withValues(alpha: 0.35),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ]
                 : [],
           ),
           child: Text(
@@ -265,12 +269,12 @@ class _LogoProfileMenuState extends State<_LogoProfileMenu> {
               link: _layerLink,
               showWhenUnlinked: false,
               offset: const Offset(-140, 64),
-                child: Material(
-                  elevation: 16,
-                  borderRadius: BorderRadius.circular(18),
-                  shadowColor: AppColors.blue.withValues(alpha: 0.2),
-                  child: _ProfileDropdown(onClose: _close),
-                ),
+              child: Material(
+                elevation: 16,
+                borderRadius: BorderRadius.circular(18),
+                shadowColor: AppColors.blue.withValues(alpha: 0.2),
+                child: _ProfileDropdown(onClose: _close),
+              ),
             ),
           ],
         ),
@@ -280,7 +284,8 @@ class _LogoProfileMenuState extends State<_LogoProfileMenu> {
 
   @override
   void dispose() {
-    _close();
+    _overlayEntry?.remove();
+    _overlayEntry = null;
     super.dispose();
   }
 
@@ -322,7 +327,11 @@ class _LogoProfileMenuState extends State<_LogoProfileMenu> {
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Container(
                         color: AppColors.navyMid,
-                        child: const Icon(Icons.local_hospital, color: Colors.white, size: 18),
+                        child: const Icon(
+                          Icons.local_hospital,
+                          color: Colors.white,
+                          size: 18,
+                        ),
                       ),
                     ),
                   ),
@@ -411,7 +420,7 @@ class _ProfileDropdown extends StatelessWidget {
                         color: AppColors.blue.withValues(alpha: 0.35),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
-                      )
+                      ),
                     ],
                   ),
                   padding: const EdgeInsets.all(2.5),
@@ -437,24 +446,36 @@ class _ProfileDropdown extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('John Doe',
-                          style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                              color: Colors.white)),
+                      const Text(
+                        'John Doe',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                          color: Colors.white,
+                        ),
+                      ),
                       const SizedBox(height: 2),
-                      const Text('john.doe@email.com',
-                          style: TextStyle(fontSize: 11, color: Colors.white54)),
+                      const Text(
+                        'john.doe@email.com',
+                        style: TextStyle(fontSize: 11, color: Colors.white54),
+                      ),
                       const SizedBox(height: 5),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.blue.withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: const Text(
-                          '🏥  Patient',
-                          style: TextStyle(fontSize: 10, color: Colors.white70, fontWeight: FontWeight.w600),
+                          'Patient',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.white70,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ],
@@ -468,12 +489,36 @@ class _ProfileDropdown extends StatelessWidget {
             padding: const EdgeInsets.all(8),
             child: Column(
               children: [
-                _DropdownItem(icon: Icons.dashboard_outlined, label: 'Dashboard', route: '/dashboard'),
-                _DropdownItem(icon: Icons.person_outline, label: 'My Profile', route: '/profile'),
-                _DropdownItem(icon: Icons.calendar_today_outlined, label: 'My Appointments', route: '/hospitals'),
-                _DropdownItem(icon: Icons.medication_outlined, label: 'Medications', route: '/medications'),
-                _DropdownItem(icon: Icons.people_outline, label: 'Family', route: '/family'),
-                _DropdownItem(icon: Icons.settings_outlined, label: 'Settings', route: '/profile'),
+                _DropdownItem(
+                  icon: Icons.dashboard_outlined,
+                  label: 'Dashboard',
+                  route: '/dashboard',
+                ),
+                _DropdownItem(
+                  icon: Icons.person_outline,
+                  label: 'My Profile',
+                  route: '/profile',
+                ),
+                _DropdownItem(
+                  icon: Icons.calendar_today_outlined,
+                  label: 'My Appointments',
+                  route: '/hospitals',
+                ),
+                _DropdownItem(
+                  icon: Icons.medication_outlined,
+                  label: 'Medications',
+                  route: '/medications',
+                ),
+                _DropdownItem(
+                  icon: Icons.people_outline,
+                  label: 'Family',
+                  route: '/family',
+                ),
+                _DropdownItem(
+                  icon: Icons.settings_outlined,
+                  label: 'Settings',
+                  route: '/profile',
+                ),
                 const Divider(height: 16, color: AppColors.border),
                 _DropdownItem(
                   icon: Icons.logout,
@@ -513,7 +558,9 @@ class _DropdownItemState extends State<_DropdownItem> {
   @override
   Widget build(BuildContext context) {
     final color = widget.isDestructive ? AppColors.accent : AppColors.textMid;
-    final hoverBg = widget.isDestructive ? AppColors.accentSoft : AppColors.tealLight;
+    final hoverBg = widget.isDestructive
+        ? AppColors.accentSoft
+        : AppColors.tealLight;
     final hoverColor = widget.isDestructive ? AppColors.accent : AppColors.teal;
 
     return MouseRegion(
@@ -534,8 +581,11 @@ class _DropdownItemState extends State<_DropdownItem> {
           ),
           child: Row(
             children: [
-              Icon(widget.icon,
-                  size: 16, color: _hovered ? hoverColor : color.withOpacity(0.65)),
+              Icon(
+                widget.icon,
+                size: 16,
+                color: _hovered ? hoverColor : color.withOpacity(0.65),
+              ),
               const SizedBox(width: 10),
               Text(
                 widget.label,

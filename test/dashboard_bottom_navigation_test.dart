@@ -6,6 +6,7 @@ void main() {
   testWidgets('mobile bottom bar displays all navigation actions', (
     tester,
   ) async {
+    var emergencyTapped = false;
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -16,27 +17,24 @@ void main() {
         home: Scaffold(
           body: const SizedBox.expand(),
           bottomNavigationBar: MobileBottomNavigation(
+            onHome: _noop,
             onScanQr: _noop,
             onFamily: _noop,
+            onEmergency: () => emergencyTapped = true,
             onBloodBank: _noop,
             onDocuments: _noop,
             onHistory: _noop,
           ),
-          floatingActionButton: FloatingActionButton(
-            tooltip: 'Emergency options',
-            onPressed: _noop,
-            child: const Icon(Icons.add_rounded),
-          ),
-          floatingActionButtonLocation:
-              FloatingActionButtonLocation.centerDocked,
         ),
       ),
     );
     await tester.pump(const Duration(milliseconds: 900));
 
     final bottomIcons = [
-      Icons.qr_code_scanner_rounded,
+      Icons.home_outlined,
+      Icons.qr_code_scanner_outlined,
       Icons.people_outline_rounded,
+      Icons.add_rounded,
       Icons.bloodtype_outlined,
       Icons.description_outlined,
       Icons.history_rounded,
@@ -52,7 +50,8 @@ void main() {
       expect(iconRect.height, greaterThan(0));
       expect(iconRect.bottom, lessThanOrEqualTo(844));
     }
-    expect(find.byTooltip('Emergency options'), findsOneWidget);
+    await tester.tap(find.byTooltip('Emergency options'));
+    expect(emergencyTapped, isTrue);
   });
 }
 

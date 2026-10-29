@@ -21,6 +21,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     with TickerProviderStateMixin {
   late AnimationController _staggerCtrl;
   late AnimationController _breatheCtrl;
+  final GlobalKey _homeSectionKey = GlobalKey();
   final GlobalKey _historySectionKey = GlobalKey();
   int _selectedNav = 0;
 
@@ -79,7 +80,10 @@ class _DashboardScreenState extends State<DashboardScreen>
                         // Greeting
                         FadeTransition(
                           opacity: _staggerFade(0.0, 0.3),
-                          child: _GreetingBanner(breatheAnim: _breatheCtrl),
+                          child: _GreetingBanner(
+                            key: _homeSectionKey,
+                            breatheAnim: _breatheCtrl,
+                          ),
                         ),
                         const SizedBox(height: 28),
 
@@ -161,25 +165,24 @@ class _DashboardScreenState extends State<DashboardScreen>
       bottomNavigationBar: isWide
           ? null
           : MobileBottomNavigation(
+              onHome: _showDashboardHome,
               onScanQr: _scanQrCode,
               onFamily: () => Navigator.of(context).pushNamed('/family'),
+              onEmergency: _showEmergencyActions,
               onBloodBank: () => Navigator.of(context).pushNamed('/blood-bank'),
               onDocuments: () => Navigator.of(context).pushNamed('/profile'),
               onHistory: _showRecentActivity,
             ),
-      floatingActionButton: isWide
-          ? null
-          : GestureDetector(
-              onLongPress: _showEmergencyActions,
-              child: FloatingActionButton(
-                tooltip: 'Emergency options',
-                onPressed: _showEmergencyActions,
-                backgroundColor: AppColors.accent,
-                foregroundColor: Colors.white,
-                child: const Icon(Icons.add_rounded, size: 30),
-              ),
-            ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+    );
+  }
+
+  void _showDashboardHome() {
+    final sectionContext = _homeSectionKey.currentContext;
+    if (sectionContext == null) return;
+    Scrollable.ensureVisible(
+      sectionContext,
+      duration: const Duration(milliseconds: 450),
+      curve: Curves.easeInOut,
     );
   }
 
@@ -729,7 +732,7 @@ class _TopBarIconState extends State<_TopBarIcon> {
 // ── Greeting Banner
 class _GreetingBanner extends StatelessWidget {
   final AnimationController breatheAnim;
-  const _GreetingBanner({required this.breatheAnim});
+  const _GreetingBanner({super.key, required this.breatheAnim});
 
   @override
   Widget build(BuildContext context) {

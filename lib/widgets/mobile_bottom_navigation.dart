@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../theme/app_colors.dart';
 
 class MobileBottomNavigation extends StatelessWidget {
+  final VoidCallback onHome;
   final VoidCallback onScanQr;
   final VoidCallback onFamily;
+  final VoidCallback onEmergency;
   final VoidCallback onBloodBank;
   final VoidCallback onDocuments;
   final VoidCallback onHistory;
 
   const MobileBottomNavigation({
     super.key,
+    required this.onHome,
     required this.onScanQr,
     required this.onFamily,
+    required this.onEmergency,
     required this.onBloodBank,
     required this.onDocuments,
     required this.onHistory,
@@ -22,49 +25,48 @@ class MobileBottomNavigation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BottomAppBar(
-      height: 76,
+      height: 64,
       color: Colors.white,
       surfaceTintColor: Colors.white,
-      shape: const CircularNotchedRectangle(),
-      notchMargin: 7,
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+      elevation: 10,
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       child: Row(
         children: [
-          Expanded(
-            child: _MobileNavAction(
-              icon: Icons.qr_code_scanner_rounded,
-              label: 'Scan QR',
-              onTap: onScanQr,
-            ),
+          _MobileNavAction(
+            icon: Icons.home_outlined,
+            label: 'Home',
+            onTap: onHome,
           ),
-          Expanded(
-            child: _MobileNavAction(
-              icon: Icons.people_outline_rounded,
-              label: 'Family',
-              onTap: onFamily,
-            ),
+          _MobileNavAction(
+            icon: Icons.qr_code_scanner_outlined,
+            label: 'Scan QR',
+            onTap: onScanQr,
           ),
-          const SizedBox(width: 64),
-          Expanded(
-            child: _MobileNavAction(
-              icon: Icons.bloodtype_outlined,
-              label: 'Blood',
-              onTap: onBloodBank,
-            ),
+          _MobileNavAction(
+            icon: Icons.people_outline_rounded,
+            label: 'Family',
+            onTap: onFamily,
           ),
-          Expanded(
-            child: _MobileNavAction(
-              icon: Icons.description_outlined,
-              label: 'Docs',
-              onTap: onDocuments,
-            ),
+          _MobileNavAction(
+            icon: Icons.add_rounded,
+            label: 'Emergency options',
+            onTap: onEmergency,
+            isEmergency: true,
           ),
-          Expanded(
-            child: _MobileNavAction(
-              icon: Icons.history_rounded,
-              label: 'History',
-              onTap: onHistory,
-            ),
+          _MobileNavAction(
+            icon: Icons.bloodtype_outlined,
+            label: 'Blood bank',
+            onTap: onBloodBank,
+          ),
+          _MobileNavAction(
+            icon: Icons.description_outlined,
+            label: 'Documents',
+            onTap: onDocuments,
+          ),
+          _MobileNavAction(
+            icon: Icons.history_rounded,
+            label: 'History',
+            onTap: onHistory,
           ),
         ],
       ),
@@ -76,41 +78,43 @@ class _MobileNavAction extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final bool isEmergency;
 
   const _MobileNavAction({
     required this.icon,
     required this.label,
     required this.onTap,
+    this.isEmergency = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: label,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: onTap,
-        child: SizedBox(
-          width: double.infinity,
-          height: double.infinity,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 25, color: AppColors.blue),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.inter(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textDark,
-                ),
+    return Expanded(
+      child: Semantics(
+        button: true,
+        label: label,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(isEmergency ? 24 : 14),
+          onTap: onTap,
+          child: Tooltip(
+            message: label,
+            child: SizedBox(
+              width: double.infinity,
+              height: double.infinity,
+              child: Center(
+                child: isEmergency
+                    ? Container(
+                        width: 40,
+                        height: 40,
+                        decoration: const BoxDecoration(
+                          color: AppColors.accent,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(icon, size: 27, color: Colors.white),
+                      )
+                    : Icon(icon, size: 25, color: AppColors.textDark),
               ),
-            ],
+            ),
           ),
         ),
       ),

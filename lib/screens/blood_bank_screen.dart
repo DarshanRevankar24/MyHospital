@@ -60,7 +60,13 @@ class _BloodBankScreenState extends State<BloodBankScreen> with SingleTickerProv
               ),
               child: Row(children: [
                 Container(width: 60, height: 60, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(16)),
-                  child: const Center(child: Text('🩸', style: TextStyle(fontSize: 28)))),
+                  child: const Center(
+                    child: Icon(
+                      Icons.bloodtype_rounded,
+                      size: 30,
+                      color: Colors.white,
+                    ),
+                  )),
                 const SizedBox(width: 20),
                 Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text('Blood Bank', style: GoogleFonts.playfairDisplay(fontSize: 24, fontWeight: FontWeight.w700, color: Colors.white)),
@@ -174,7 +180,13 @@ class _BloodGroupCardState extends State<_BloodGroupCard> with SingleTickerProvi
               Container(
                 width: 48, height: 48,
                 decoration: BoxDecoration(shape: BoxShape.circle, color: urgencyColor.withValues(alpha: 0.12)),
-                child: Center(child: Text('🩸', style: TextStyle(fontSize: s.urgency == 'urgent' ? 24 : 20))),
+                child: Center(
+                  child: Icon(
+                    Icons.bloodtype_rounded,
+                    size: s.urgency == 'urgent' ? 24 : 20,
+                    color: urgencyColor,
+                  ),
+                ),
               ),
             ]),
             const SizedBox(height: 10),
@@ -276,7 +288,23 @@ class _BloodRequestFormState extends State<_BloodRequestForm> {
               borderRadius: BorderRadius.circular(12),
               boxShadow: [BoxShadow(color: AppColors.accent.withValues(alpha: 0.25), blurRadius: 12, offset: const Offset(0, 4))],
             ),
-            child: Center(child: Text('🩸 Submit Blood Request', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white))),
+            child: Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.bloodtype_rounded, size: 18, color: Colors.white),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Submit Blood Request',
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ]),

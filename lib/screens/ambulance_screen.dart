@@ -289,9 +289,10 @@ class _AmbulanceScreenState extends State<AmbulanceScreen>
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                                 child: const Center(
-                                  child: Text(
-                                    '🚑',
-                                    style: TextStyle(fontSize: 30),
+                                  child: Icon(
+                                    Icons.emergency_rounded,
+                                    size: 32,
+                                    color: Colors.white,
                                   ),
                                 ),
                               ),
@@ -385,7 +386,7 @@ class _AmbulanceScreenState extends State<AmbulanceScreen>
                         label: 'Advanced Life Support',
                         desc:
                             'ICU on wheels — ventilator, monitor, defibrillator',
-                        icon: '🏥',
+                        icon: Icons.local_hospital_outlined,
                         isSelected: _selectedType == 'ALS',
                         onTap: () => setState(() => _selectedType = 'ALS'),
                       ),
@@ -397,7 +398,7 @@ class _AmbulanceScreenState extends State<AmbulanceScreen>
                         label: 'Basic Life Support',
                         desc:
                             'First aid kit, oxygen, stretcher, basic equipment',
-                        icon: '🚑',
+                        icon: Icons.emergency_rounded,
                         isSelected: _selectedType == 'BLS',
                         onTap: () => setState(() => _selectedType = 'BLS'),
                       ),
@@ -665,12 +666,23 @@ class _AmbulanceScreenState extends State<AmbulanceScreen>
                       ),
                       const SizedBox(height: 14),
                       Center(
-                        child: Text(
-                          '📞 Or call 108 for immediate help',
-                          style: GoogleFonts.inter(
-                            fontSize: 12,
-                            color: AppColors.textSoft,
-                          ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.phone_outlined,
+                              size: 15,
+                              color: AppColors.textSoft,
+                            ),
+                            const SizedBox(width: 5),
+                            Text(
+                              'Or call 108 for immediate help',
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                color: AppColors.textSoft,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -813,7 +825,8 @@ class _BookingTargetOption extends StatelessWidget {
 }
 
 class _TypeCard extends StatefulWidget {
-  final String type, label, desc, icon;
+  final String type, label, desc;
+  final IconData icon;
   final bool isSelected;
   final VoidCallback onTap;
   const _TypeCard({
@@ -869,7 +882,7 @@ class _TypeCardState extends State<_TypeCard> {
             children: [
               Row(
                 children: [
-                  Text(widget.icon, style: const TextStyle(fontSize: 28)),
+                  Icon(widget.icon, size: 28, color: AppColors.textDark),
                   const Spacer(),
                   if (widget.isSelected)
                     Container(
@@ -996,7 +1009,11 @@ class _TrackingCard extends StatelessWidget {
                     color: AppColors.accent.withValues(alpha: 0.1),
                   ),
                   child: const Center(
-                    child: Text('🚑', style: TextStyle(fontSize: 28)),
+                    child: Icon(
+                      Icons.emergency_rounded,
+                      size: 30,
+                      color: AppColors.accent,
+                    ),
                   ),
                 ),
               ],

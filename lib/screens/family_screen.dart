@@ -246,7 +246,13 @@ class _FamilyScreenState extends State<FamilyScreen> with SingleTickerProviderSt
               ),
               child: Row(children: [
                 Container(width: 60, height: 60, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(16)),
-                  child: const Center(child: Text('👨‍👩‍👧‍👦', style: TextStyle(fontSize: 26)))),
+                  child: const Center(
+                    child: Icon(
+                      Icons.family_restroom_rounded,
+                      size: 30,
+                      color: Colors.white,
+                    ),
+                  )),
                 const SizedBox(width: 20),
                 Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text('Family Hub', style: GoogleFonts.playfairDisplay(fontSize: 24, fontWeight: FontWeight.w700, color: Colors.white)),
@@ -391,7 +397,29 @@ class _FamilyCardState extends State<_FamilyCard> {
                       color: m.docAccess ? const Color(0xFFEDF7ED) : const Color(0xFFFFF8E1),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Text(m.docAccess ? '🔓 Doc Access' : '🔒 Restricted', style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w600, color: m.docAccess ? const Color(0xFF2E7D32) : const Color(0xFFE65100))),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          m.docAccess ? Icons.lock_open : Icons.lock_outline,
+                          size: 12,
+                          color: m.docAccess
+                              ? const Color(0xFF2E7D32)
+                              : const Color(0xFFE65100),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          m.docAccess ? 'Doc Access' : 'Restricted',
+                          style: GoogleFonts.inter(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: m.docAccess
+                                ? const Color(0xFF2E7D32)
+                                : const Color(0xFFE65100),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ]),
               ])),

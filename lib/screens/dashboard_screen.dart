@@ -1,5 +1,9 @@
+import 'package:flutter/foundation.dart'
+    show defaultTargetPlatform, kIsWeb, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
+import '../services/api_service.dart';
 import '../theme/app_colors.dart';
 
 /// The main patient dashboard after login — a stunning animated hub
@@ -16,17 +20,20 @@ class _DashboardScreenState extends State<DashboardScreen>
     with TickerProviderStateMixin {
   late AnimationController _staggerCtrl;
   late AnimationController _breatheCtrl;
+  final GlobalKey _historySectionKey = GlobalKey();
   int _selectedNav = 0;
 
   @override
   void initState() {
     super.initState();
     _staggerCtrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 1400))
-      ..forward();
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    )..forward();
     _breatheCtrl = AnimationController(
-        vsync: this, duration: const Duration(seconds: 4))
-      ..repeat(reverse: true);
+      vsync: this,
+      duration: const Duration(seconds: 4),
+    )..repeat(reverse: true);
   }
 
   @override
@@ -36,10 +43,10 @@ class _DashboardScreenState extends State<DashboardScreen>
     super.dispose();
   }
 
-  Animation<double> _staggerFade(double start, double end) =>
-      CurvedAnimation(
-          parent: _staggerCtrl,
-          curve: Interval(start, end, curve: Curves.easeOut));
+  Animation<double> _staggerFade(double start, double end) => CurvedAnimation(
+    parent: _staggerCtrl,
+    curve: Interval(start, end, curve: Curves.easeOut),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -51,11 +58,12 @@ class _DashboardScreenState extends State<DashboardScreen>
       body: Row(
         children: [
           // Side nav for wide screens
-          if (isWide) _SideNav(
-            selected: _selectedNav,
-            onTap: (i) => setState(() => _selectedNav = i),
-            onLogout: () => Navigator.of(context).pushReplacementNamed('/'),
-          ),
+          if (isWide)
+            _SideNav(
+              selected: _selectedNav,
+              onTap: (i) => setState(() => _selectedNav = i),
+              onLogout: () => Navigator.of(context).pushReplacementNamed('/'),
+            ),
           // Main content
           Expanded(
             child: Column(
@@ -86,24 +94,26 @@ class _DashboardScreenState extends State<DashboardScreen>
                           opacity: _staggerFade(0.2, 0.5),
                           child: isWide
                               ? Row(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Expanded(
-                                        flex: 3,
-                                        child: _HealthOverviewCard()),
+                                      flex: 3,
+                                      child: _HealthOverviewCard(),
+                                    ),
                                     const SizedBox(width: 20),
                                     Expanded(
-                                        flex: 2,
-                                        child:
-                                            _UpcomingAppointments()),
+                                      flex: 2,
+                                      child: _UpcomingAppointments(),
+                                    ),
                                   ],
                                 )
-                              : Column(children: [
-                                  _HealthOverviewCard(),
-                                  const SizedBox(height: 20),
-                                  _UpcomingAppointments(),
-                                ]),
+                              : Column(
+                                  children: [
+                                    _HealthOverviewCard(),
+                                    const SizedBox(height: 20),
+                                    _UpcomingAppointments(),
+                                  ],
+                                ),
                         ),
                         const SizedBox(height: 28),
 
@@ -112,31 +122,30 @@ class _DashboardScreenState extends State<DashboardScreen>
                           opacity: _staggerFade(0.3, 0.6),
                           child: isWide
                               ? Row(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Expanded(
-                                        flex: 3,
-                                        child:
-                                            _MedicationReminders()),
+                                      flex: 3,
+                                      child: _MedicationReminders(),
+                                    ),
                                     const SizedBox(width: 20),
-                                    Expanded(
-                                        flex: 2,
-                                        child: _FamilyGlance()),
+                                    Expanded(flex: 2, child: _FamilyGlance()),
                                   ],
                                 )
-                              : Column(children: [
-                                  _MedicationReminders(),
-                                  const SizedBox(height: 20),
-                                  _FamilyGlance(),
-                                ]),
+                              : Column(
+                                  children: [
+                                    _MedicationReminders(),
+                                    const SizedBox(height: 20),
+                                    _FamilyGlance(),
+                                  ],
+                                ),
                         ),
                         const SizedBox(height: 28),
 
                         // Recent Activity
                         FadeTransition(
                           opacity: _staggerFade(0.4, 0.7),
-                          child: _RecentActivity(),
+                          child: _RecentActivity(key: _historySectionKey),
                         ),
                         const SizedBox(height: 32),
                       ],
@@ -147,6 +156,260 @@ class _DashboardScreenState extends State<DashboardScreen>
             ),
           ),
         ],
+      ),
+      bottomNavigationBar: isWide ? null : _buildMobileNavigation(),
+      floatingActionButton: isWide
+          ? null
+          : GestureDetector(
+              onLongPress: _showEmergencyActions,
+              child: FloatingActionButton(
+                tooltip: 'Emergency options',
+                onPressed: _showEmergencyActions,
+                backgroundColor: AppColors.accent,
+                foregroundColor: Colors.white,
+                child: const Icon(Icons.add_rounded, size: 30),
+              ),
+            ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+    );
+  }
+
+  Widget _buildMobileNavigation() {
+    return BottomAppBar(
+      color: Colors.white,
+      surfaceTintColor: Colors.white,
+      shape: const CircularNotchedRectangle(),
+      notchMargin: 7,
+      child: Row(
+        children: [
+          Expanded(
+            child: _MobileNavAction(
+              icon: Icons.qr_code_scanner_rounded,
+              label: 'Scan QR',
+              onTap: _scanQrCode,
+            ),
+          ),
+          Expanded(
+            child: _MobileNavAction(
+              icon: Icons.people_outline_rounded,
+              label: 'Family',
+              onTap: () => Navigator.of(context).pushNamed('/family'),
+            ),
+          ),
+          const SizedBox(width: 64),
+          Expanded(
+            child: _MobileNavAction(
+              icon: Icons.bloodtype_outlined,
+              label: 'Blood',
+              onTap: () => Navigator.of(context).pushNamed('/blood-bank'),
+            ),
+          ),
+          Expanded(
+            child: _MobileNavAction(
+              icon: Icons.description_outlined,
+              label: 'Docs',
+              onTap: () => Navigator.of(context).pushNamed('/profile'),
+            ),
+          ),
+          Expanded(
+            child: _MobileNavAction(
+              icon: Icons.history_rounded,
+              label: 'History',
+              onTap: _showRecentActivity,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showRecentActivity() {
+    final sectionContext = _historySectionKey.currentContext;
+    if (sectionContext == null) return;
+    Scrollable.ensureVisible(
+      sectionContext,
+      duration: const Duration(milliseconds: 450),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  Future<void> _showEmergencyActions() async {
+    final action = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(
+                Icons.emergency_rounded,
+                color: AppColors.accent,
+              ),
+              title: const Text('Book an ambulance'),
+              onTap: () => Navigator.pop(sheetContext, '/ambulance'),
+            ),
+            ListTile(
+              leading: const Icon(
+                Icons.bloodtype_outlined,
+                color: AppColors.accent,
+              ),
+              title: const Text('Go to blood bank'),
+              onTap: () => Navigator.pop(sheetContext, '/blood-bank'),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+    if (!mounted || action == null) return;
+    await Navigator.of(context).pushNamed(action);
+  }
+
+  Future<void> _scanQrCode() async {
+    if (!kIsWeb &&
+        defaultTargetPlatform != TargetPlatform.android &&
+        defaultTargetPlatform != TargetPlatform.iOS) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('QR scanning is available on mobile devices.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    final scannedValue = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Scan QR code'),
+        content: SizedBox(
+          width: 320,
+          height: 320,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: MobileScanner(
+              onDetect: (capture) {
+                if (capture.barcodes.isEmpty) return;
+                final value = capture.barcodes.first.rawValue?.trim();
+                if (value == null || value.isEmpty) return;
+                Navigator.pop(dialogContext, value);
+              },
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
+    if (!mounted || scannedValue == null) return;
+
+    final isInviteToken =
+        scannedValue.length >= 32 && scannedValue.length <= 128;
+    final redeemInvite = isInviteToken
+        ? await showDialog<bool>(
+            context: context,
+            builder: (dialogContext) => AlertDialog(
+              title: const Text('Family invite detected'),
+              content: const Text(
+                'Do you want to redeem this family invitation?',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext, false),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.pop(dialogContext, true),
+                  child: const Text('Redeem'),
+                ),
+              ],
+            ),
+          )
+        : false;
+    if (!mounted || redeemInvite != true) {
+      if (mounted && !isInviteToken) {
+        await showDialog<void>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: const Text('QR code scanned'),
+            content: SelectableText(scannedValue),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: const Text('Close'),
+              ),
+            ],
+          ),
+        );
+      }
+      return;
+    }
+
+    try {
+      await ApiService.redeemFamilyQrInvite(scannedValue);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Family invitation redeemed.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } on Exception catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Could not redeem family invitation: $error'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+}
+
+class _MobileNavAction extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _MobileNavAction({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: label,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 5),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 20, color: AppColors.textMid),
+              const SizedBox(height: 3),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.inter(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textMid,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -184,9 +447,10 @@ class _SideNav extends StatelessWidget {
         color: AppColors.navyDark,
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withValues(alpha: 0.15),
-              blurRadius: 20,
-              offset: const Offset(4, 0)),
+            color: Colors.black.withValues(alpha: 0.15),
+            blurRadius: 20,
+            offset: const Offset(4, 0),
+          ),
         ],
       ),
       child: Column(
@@ -202,35 +466,47 @@ class _SideNav extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: const LinearGradient(
-                        colors: [Color(0xFFB8C8D8), Color(0xFF6A7F94)]),
+                      colors: [Color(0xFFB8C8D8), Color(0xFF6A7F94)],
+                    ),
                     boxShadow: [
                       BoxShadow(
-                          color: AppColors.blue.withValues(alpha: 0.3),
-                          blurRadius: 12)
+                        color: AppColors.blue.withValues(alpha: 0.3),
+                        blurRadius: 12,
+                      ),
                     ],
                   ),
                   padding: const EdgeInsets.all(2),
                   child: ClipOval(
-                    child: Image.asset('web/hospital_logo.png',
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const Icon(
-                            Icons.local_hospital,
-                            color: Colors.white,
-                            size: 18)),
+                    child: Image.asset(
+                      'web/hospital_logo.png',
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => const Icon(
+                        Icons.local_hospital,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('MyHospital',
-                        style: GoogleFonts.playfairDisplay(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white)),
-                    Text('Patient Portal',
-                        style: GoogleFonts.inter(
-                            fontSize: 10, color: Colors.white38)),
+                    Text(
+                      'MyHospital',
+                      style: GoogleFonts.playfairDisplay(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Text(
+                      'Patient Portal',
+                      style: GoogleFonts.inter(
+                        fontSize: 10,
+                        color: Colors.white38,
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -238,9 +514,10 @@ class _SideNav extends StatelessWidget {
           ),
 
           Container(
-              height: 1,
-              margin: const EdgeInsets.symmetric(horizontal: 20),
-              color: Colors.white.withValues(alpha: 0.06)),
+            height: 1,
+            margin: const EdgeInsets.symmetric(horizontal: 20),
+            color: Colors.white.withValues(alpha: 0.06),
+          ),
           const SizedBox(height: 8),
 
           // Nav items
@@ -321,13 +598,13 @@ class _SideNavItemState extends State<_SideNavItem> {
     final color = widget.isDestructive
         ? AppColors.accent
         : isActive
-            ? Colors.white
-            : Colors.white54;
+        ? Colors.white
+        : Colors.white54;
     final bgColor = isActive
         ? AppColors.blue.withValues(alpha: 0.2)
         : _hovered
-            ? Colors.white.withValues(alpha: 0.05)
-            : Colors.transparent;
+        ? Colors.white.withValues(alpha: 0.05)
+        : Colors.transparent;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
@@ -344,26 +621,32 @@ class _SideNavItemState extends State<_SideNavItem> {
             borderRadius: BorderRadius.circular(12),
             border: isActive
                 ? Border.all(
-                    color: AppColors.blue.withValues(alpha: 0.3), width: 1)
+                    color: AppColors.blue.withValues(alpha: 0.3),
+                    width: 1,
+                  )
                 : null,
           ),
           child: Row(
             children: [
               Icon(widget.item.icon, size: 18, color: color),
               const SizedBox(width: 12),
-              Text(widget.item.label,
-                  style: GoogleFonts.inter(
-                      fontSize: 13,
-                      fontWeight:
-                          isActive ? FontWeight.w600 : FontWeight.w500,
-                      color: color)),
+              Text(
+                widget.item.label,
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                  color: color,
+                ),
+              ),
               if (isActive) ...[
                 const Spacer(),
                 Container(
                   width: 6,
                   height: 6,
                   decoration: const BoxDecoration(
-                      color: AppColors.blueMid, shape: BoxShape.circle),
+                    color: AppColors.blueMid,
+                    shape: BoxShape.circle,
+                  ),
                 ),
               ],
             ],
@@ -382,15 +665,15 @@ class _DashTopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(
-          horizontal: isWide ? 32 : 16, vertical: 16),
+      padding: EdgeInsets.symmetric(horizontal: isWide ? 32 : 16, vertical: 16),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 10,
-              offset: const Offset(0, 2)),
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
         ],
       ),
       child: Row(
@@ -398,8 +681,11 @@ class _DashTopBar extends StatelessWidget {
           if (!isWide)
             Padding(
               padding: const EdgeInsets.only(right: 12),
-              child: Icon(Icons.menu_rounded,
-                  color: AppColors.textMid, size: 24),
+              child: Icon(
+                Icons.menu_rounded,
+                color: AppColors.textMid,
+                size: 24,
+              ),
             ),
           Expanded(
             child: Container(
@@ -411,16 +697,22 @@ class _DashTopBar extends StatelessWidget {
               ),
               child: TextField(
                 style: GoogleFonts.inter(
-                    fontSize: 13.5, color: AppColors.textDark),
+                  fontSize: 13.5,
+                  color: AppColors.textDark,
+                ),
                 decoration: InputDecoration(
                   hintText: 'Search appointments, medicines, doctors…',
                   hintStyle: GoogleFonts.inter(
-                      fontSize: 13.5, color: AppColors.textSoft),
-                  prefixIcon: const Icon(Icons.search_rounded,
-                      size: 20, color: AppColors.textSoft),
+                    fontSize: 13.5,
+                    color: AppColors.textSoft,
+                  ),
+                  prefixIcon: const Icon(
+                    Icons.search_rounded,
+                    size: 20,
+                    color: AppColors.textSoft,
+                  ),
                   border: InputBorder.none,
-                  contentPadding:
-                      const EdgeInsets.symmetric(vertical: 12),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
                 ),
               ),
             ),
@@ -436,14 +728,18 @@ class _DashTopBar extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: const LinearGradient(
-                  colors: [AppColors.blue, AppColors.blueMid]),
+                colors: [AppColors.blue, AppColors.blueMid],
+              ),
             ),
             child: Center(
-              child: Text('JD',
-                  style: GoogleFonts.inter(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white)),
+              child: Text(
+                'JD',
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+              ),
             ),
           ),
         ],
@@ -479,10 +775,11 @@ class _TopBarIconState extends State<_TopBarIcon> {
               color: _hovered ? AppColors.blueLight : Colors.transparent,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(widget.icon,
-                size: 20,
-                color:
-                    _hovered ? AppColors.blue : AppColors.textSoft),
+            child: Icon(
+              widget.icon,
+              size: 20,
+              color: _hovered ? AppColors.blue : AppColors.textSoft,
+            ),
           ),
           if (widget.badge != null)
             Positioned(
@@ -492,13 +789,18 @@ class _TopBarIconState extends State<_TopBarIcon> {
                 width: 16,
                 height: 16,
                 decoration: const BoxDecoration(
-                    color: AppColors.accent, shape: BoxShape.circle),
+                  color: AppColors.accent,
+                  shape: BoxShape.circle,
+                ),
                 child: Center(
-                  child: Text(widget.badge!,
-                      style: GoogleFonts.inter(
-                          fontSize: 9,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white)),
+                  child: Text(
+                    widget.badge!,
+                    style: GoogleFonts.inter(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -526,9 +828,10 @@ class _GreetingBanner extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-              color: AppColors.navy.withValues(alpha: 0.3),
-              blurRadius: 24,
-              offset: const Offset(0, 8)),
+            color: AppColors.navy.withValues(alpha: 0.3),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+          ),
         ],
       ),
       child: Stack(
@@ -545,7 +848,9 @@ class _GreetingBanner extends StatelessWidget {
                   width: 180,
                   height: 180,
                   decoration: const BoxDecoration(
-                      shape: BoxShape.circle, color: AppColors.blueMid),
+                    shape: BoxShape.circle,
+                    color: AppColors.blueMid,
+                  ),
                 ),
               ),
             ),
@@ -558,41 +863,51 @@ class _GreetingBanner extends StatelessWidget {
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 5),
+                        horizontal: 12,
+                        vertical: 5,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.blue.withValues(alpha: 0.18),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                            color:
-                                AppColors.blue.withValues(alpha: 0.3)),
+                          color: AppColors.blue.withValues(alpha: 0.3),
+                        ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           _PulsingDot(),
                           const SizedBox(width: 6),
-                          Text('Good evening',
-                              style: GoogleFonts.inter(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white70,
-                                  letterSpacing: 0.3)),
+                          Text(
+                            'Good evening',
+                            style: GoogleFonts.inter(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white70,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 14),
-                    Text('Welcome back, John!',
-                        style: GoogleFonts.playfairDisplay(
-                            fontSize: 28,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white)),
+                    Text(
+                      'Welcome back, John!',
+                      style: GoogleFonts.playfairDisplay(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     Text(
-                        'You have 2 upcoming appointments and 3 medication reminders today.',
-                        style: GoogleFonts.inter(
-                            fontSize: 14,
-                            color: Colors.white54,
-                            height: 1.6)),
+                      'You have 2 upcoming appointments and 3 medication reminders today.',
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: Colors.white54,
+                        height: 1.6,
+                      ),
+                    ),
                     const SizedBox(height: 20),
                     Row(
                       children: [
@@ -621,14 +936,18 @@ class _BannerStat extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(number,
-            style: GoogleFonts.inter(
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                color: AppColors.blueMid)),
-        Text(label,
-            style: GoogleFonts.inter(
-                fontSize: 11, color: Colors.white38)),
+        Text(
+          number,
+          style: GoogleFonts.inter(
+            fontSize: 22,
+            fontWeight: FontWeight.w800,
+            color: AppColors.blueMid,
+          ),
+        ),
+        Text(
+          label,
+          style: GoogleFonts.inter(fontSize: 11, color: Colors.white38),
+        ),
       ],
     );
   }
@@ -650,35 +969,41 @@ class _BannerDivider extends StatelessWidget {
 class _QuickActions extends StatelessWidget {
   static const _actions = [
     _ActionData(
-        emoji: '🚑',
-        label: 'Emergency\nAmbulance',
-        color: Color(0xFFFFEBEE),
-        route: '/ambulance'),
+      icon: Icons.emergency_rounded,
+      label: 'Emergency\nAmbulance',
+      color: Color(0xFFFFEBEE),
+      route: '/ambulance',
+    ),
     _ActionData(
-        emoji: '🩺',
-        label: 'Consult a\nDoctor',
-        color: Color(0xFFE8F4FD),
-        route: '/hospitals'),
+      icon: Icons.medical_services_outlined,
+      label: 'Consult a\nDoctor',
+      color: Color(0xFFE8F4FD),
+      route: '/hospitals',
+    ),
     _ActionData(
-        emoji: '🔬',
-        label: 'Book\nLab Test',
-        color: Color(0xFFEDF7ED),
-        route: '/lab-tests'),
+      icon: Icons.science_outlined,
+      label: 'Book\nLab Test',
+      color: Color(0xFFEDF7ED),
+      route: '/lab-tests',
+    ),
     _ActionData(
-        emoji: '💊',
-        label: 'Order\nMedicine',
-        color: Color(0xFFFFF3E0),
-        route: '/pharmacy'),
+      icon: Icons.medication_outlined,
+      label: 'Order\nMedicine',
+      color: Color(0xFFFFF3E0),
+      route: '/pharmacy',
+    ),
     _ActionData(
-        emoji: '🏥',
-        label: 'Find\nHospital',
-        color: Color(0xFFF3E8FF),
-        route: '/hospitals'),
+      icon: Icons.local_hospital_outlined,
+      label: 'Find\nHospital',
+      color: Color(0xFFF3E8FF),
+      route: '/hospitals',
+    ),
     _ActionData(
-        emoji: '🩸',
-        label: 'Blood\nBank',
-        color: Color(0xFFFFEBEE),
-        route: '/blood-bank'),
+      icon: Icons.bloodtype_outlined,
+      label: 'Blood\nBank',
+      color: Color(0xFFFFEBEE),
+      route: '/blood-bank',
+    ),
   ];
 
   const _QuickActions();
@@ -688,11 +1013,14 @@ class _QuickActions extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Quick Actions',
-            style: GoogleFonts.inter(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textDark)),
+        Text(
+          'Quick Actions',
+          style: GoogleFonts.inter(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textDark,
+          ),
+        ),
         const SizedBox(height: 16),
         LayoutBuilder(
           builder: (_, constraints) {
@@ -701,12 +1029,12 @@ class _QuickActions extends StatelessWidget {
               spacing: 14,
               runSpacing: 14,
               children: _actions
-                  .map((a) => SizedBox(
-                        width: (constraints.maxWidth -
-                                (cols - 1) * 14) /
-                            cols,
-                        child: _QuickActionCard(action: a),
-                      ))
+                  .map(
+                    (a) => SizedBox(
+                      width: (constraints.maxWidth - (cols - 1) * 14) / cols,
+                      child: _QuickActionCard(action: a),
+                    ),
+                  )
                   .toList(),
             );
           },
@@ -717,13 +1045,15 @@ class _QuickActions extends StatelessWidget {
 }
 
 class _ActionData {
-  final String emoji, label, route;
+  final IconData icon;
+  final String label, route;
   final Color color;
-  const _ActionData(
-      {required this.emoji,
-      required this.label,
-      required this.color,
-      required this.route});
+  const _ActionData({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.route,
+  });
 }
 
 class _QuickActionCard extends StatefulWidget {
@@ -751,21 +1081,24 @@ class _QuickActionCardState extends State<_QuickActionCard> {
             color: Colors.white,
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
-                color: _hovered
-                    ? AppColors.blue.withValues(alpha: 0.3)
-                    : AppColors.border),
+              color: _hovered
+                  ? AppColors.blue.withValues(alpha: 0.3)
+                  : AppColors.border,
+            ),
             boxShadow: _hovered
                 ? [
                     BoxShadow(
-                        color: AppColors.blue.withValues(alpha: 0.1),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8))
+                      color: AppColors.blue.withValues(alpha: 0.1),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
                   ]
                 : [
                     BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.03),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2))
+                      color: Colors.black.withValues(alpha: 0.03),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
                   ],
           ),
           child: Column(
@@ -783,17 +1116,24 @@ class _QuickActionCardState extends State<_QuickActionCard> {
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Center(
-                    child: Text(widget.action.emoji,
-                        style: const TextStyle(fontSize: 24))),
+                  child: Icon(
+                    widget.action.icon,
+                    size: 25,
+                    color: AppColors.textDark,
+                  ),
+                ),
               ),
               const SizedBox(height: 10),
-              Text(widget.action.label,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.inter(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textDark,
-                      height: 1.3)),
+              Text(
+                widget.action.label,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textDark,
+                  height: 1.3,
+                ),
+              ),
             ],
           ),
         ),
@@ -814,40 +1154,48 @@ class _HealthOverviewCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                  child: _VitalChip(
-                      label: 'Blood Pressure',
-                      value: '120/80',
-                      unit: 'mmHg',
-                      icon: Icons.favorite,
-                      color: const Color(0xFF4ADE80))),
+                child: _VitalChip(
+                  label: 'Blood Pressure',
+                  value: '120/80',
+                  unit: 'mmHg',
+                  icon: Icons.favorite,
+                  color: const Color(0xFF4ADE80),
+                ),
+              ),
               const SizedBox(width: 12),
               Expanded(
-                  child: _VitalChip(
-                      label: 'Heart Rate',
-                      value: '72',
-                      unit: 'bpm',
-                      icon: Icons.monitor_heart,
-                      color: AppColors.accent)),
+                child: _VitalChip(
+                  label: 'Heart Rate',
+                  value: '72',
+                  unit: 'bpm',
+                  icon: Icons.monitor_heart,
+                  color: AppColors.accent,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
-                  child: _VitalChip(
-                      label: 'Blood Sugar',
-                      value: '95',
-                      unit: 'mg/dL',
-                      icon: Icons.bloodtype,
-                      color: const Color(0xFFFBBF24))),
+                child: _VitalChip(
+                  label: 'Blood Sugar',
+                  value: '95',
+                  unit: 'mg/dL',
+                  icon: Icons.bloodtype,
+                  color: const Color(0xFFFBBF24),
+                ),
+              ),
               const SizedBox(width: 12),
               Expanded(
-                  child: _VitalChip(
-                      label: 'SpO2',
-                      value: '98',
-                      unit: '%',
-                      icon: Icons.air,
-                      color: AppColors.blueMid)),
+                child: _VitalChip(
+                  label: 'SpO2',
+                  value: '98',
+                  unit: '%',
+                  icon: Icons.air,
+                  color: AppColors.blueMid,
+                ),
+              ),
             ],
           ),
         ],
@@ -860,12 +1208,13 @@ class _VitalChip extends StatefulWidget {
   final String label, value, unit;
   final IconData icon;
   final Color color;
-  const _VitalChip(
-      {required this.label,
-      required this.value,
-      required this.unit,
-      required this.icon,
-      required this.color});
+  const _VitalChip({
+    required this.label,
+    required this.value,
+    required this.unit,
+    required this.icon,
+    required this.color,
+  });
 
   @override
   State<_VitalChip> createState() => _VitalChipState();
@@ -882,14 +1231,13 @@ class _VitalChipState extends State<_VitalChip> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: _hovered
-              ? widget.color.withValues(alpha: 0.08)
-              : AppColors.bg,
+          color: _hovered ? widget.color.withValues(alpha: 0.08) : AppColors.bg,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-              color: _hovered
-                  ? widget.color.withValues(alpha: 0.3)
-                  : AppColors.border),
+            color: _hovered
+                ? widget.color.withValues(alpha: 0.3)
+                : AppColors.border,
+          ),
         ),
         child: Row(
           children: [
@@ -907,25 +1255,34 @@ class _VitalChipState extends State<_VitalChip> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(widget.label,
-                      style: GoogleFonts.inter(
-                          fontSize: 11,
-                          color: AppColors.textSoft,
-                          fontWeight: FontWeight.w500)),
+                  Text(
+                    widget.label,
+                    style: GoogleFonts.inter(
+                      fontSize: 11,
+                      color: AppColors.textSoft,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text(widget.value,
-                          style: GoogleFonts.inter(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.textDark,
-                              height: 1)),
+                      Text(
+                        widget.value,
+                        style: GoogleFonts.inter(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.textDark,
+                          height: 1,
+                        ),
+                      ),
                       const SizedBox(width: 3),
-                      Text(widget.unit,
-                          style: GoogleFonts.inter(
-                              fontSize: 10,
-                              color: AppColors.textSoft)),
+                      Text(
+                        widget.unit,
+                        style: GoogleFonts.inter(
+                          fontSize: 10,
+                          color: AppColors.textSoft,
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -973,12 +1330,13 @@ class _UpcomingAppointments extends StatelessWidget {
 class _AppointmentTile extends StatefulWidget {
   final String doctor, specialty, time, type;
   final Color color;
-  const _AppointmentTile(
-      {required this.doctor,
-      required this.specialty,
-      required this.time,
-      required this.type,
-      required this.color});
+  const _AppointmentTile({
+    required this.doctor,
+    required this.specialty,
+    required this.time,
+    required this.type,
+    required this.color,
+  });
 
   @override
   State<_AppointmentTile> createState() => _AppointmentTileState();
@@ -995,13 +1353,13 @@ class _AppointmentTileState extends State<_AppointmentTile> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color:
-              _hovered ? widget.color.withValues(alpha: 0.05) : AppColors.bg,
+          color: _hovered ? widget.color.withValues(alpha: 0.05) : AppColors.bg,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-              color: _hovered
-                  ? widget.color.withValues(alpha: 0.2)
-                  : AppColors.border),
+            color: _hovered
+                ? widget.color.withValues(alpha: 0.2)
+                : AppColors.border,
+          ),
         ),
         child: Row(
           children: [
@@ -1010,53 +1368,73 @@ class _AppointmentTileState extends State<_AppointmentTile> {
               height: 44,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                    colors: [widget.color, widget.color.withValues(alpha: 0.7)]),
+                  colors: [widget.color, widget.color.withValues(alpha: 0.7)],
+                ),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Center(
-                  child: Text(widget.doctor.split(' ').map((w) => w[0]).take(2).join(),
-                      style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white))),
+                child: Text(
+                  widget.doctor.split(' ').map((w) => w[0]).take(2).join(),
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(widget.doctor,
-                      style: GoogleFonts.inter(
-                          fontSize: 13.5,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textDark)),
-                  Text(widget.specialty,
-                      style: GoogleFonts.inter(
-                          fontSize: 11.5, color: AppColors.textSoft)),
+                  Text(
+                    widget.doctor,
+                    style: GoogleFonts.inter(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textDark,
+                    ),
+                  ),
+                  Text(
+                    widget.specialty,
+                    style: GoogleFonts.inter(
+                      fontSize: 11.5,
+                      color: AppColors.textSoft,
+                    ),
+                  ),
                 ],
               ),
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(widget.time,
-                    style: GoogleFonts.inter(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textMid)),
+                Text(
+                  widget.time,
+                  style: GoogleFonts.inter(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textMid,
+                  ),
+                ),
                 const SizedBox(height: 2),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: widget.color.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Text(widget.type,
-                      style: GoogleFonts.inter(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: widget.color)),
+                  child: Text(
+                    widget.type,
+                    style: GoogleFonts.inter(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: widget.color,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -1077,25 +1455,28 @@ class _MedicationReminders extends StatelessWidget {
       child: Column(
         children: [
           _MedTile(
-              name: 'Metformin 500mg',
-              time: '8:00 AM · Before breakfast',
-              emoji: '💊',
-              status: 'taken',
-              color: const Color(0xFF4ADE80)),
+            name: 'Metformin 500mg',
+            time: '8:00 AM · Before breakfast',
+            icon: Icons.medication_outlined,
+            status: 'taken',
+            color: const Color(0xFF4ADE80),
+          ),
           const SizedBox(height: 8),
           _MedTile(
-              name: 'Atorvastatin 20mg',
-              time: '9:00 PM · After dinner',
-              emoji: '💊',
-              status: 'due',
-              color: const Color(0xFFFBBF24)),
+            name: 'Atorvastatin 20mg',
+            time: '9:00 PM · After dinner',
+            icon: Icons.medication_outlined,
+            status: 'due',
+            color: const Color(0xFFFBBF24),
+          ),
           const SizedBox(height: 8),
           _MedTile(
-              name: 'Amlodipine 5mg',
-              time: '8:00 AM · With water',
-              emoji: '💊',
-              status: 'taken',
-              color: const Color(0xFF4ADE80)),
+            name: 'Amlodipine 5mg',
+            time: '8:00 AM · With water',
+            icon: Icons.medication_outlined,
+            status: 'taken',
+            color: const Color(0xFF4ADE80),
+          ),
           const SizedBox(height: 14),
           _SeeAllLink(label: 'Manage medications'),
         ],
@@ -1105,14 +1486,16 @@ class _MedicationReminders extends StatelessWidget {
 }
 
 class _MedTile extends StatefulWidget {
-  final String name, time, emoji, status;
+  final String name, time, status;
+  final IconData icon;
   final Color color;
-  const _MedTile(
-      {required this.name,
-      required this.time,
-      required this.emoji,
-      required this.status,
-      required this.color});
+  const _MedTile({
+    required this.name,
+    required this.time,
+    required this.icon,
+    required this.status,
+    required this.color,
+  });
   @override
   State<_MedTile> createState() => _MedTileState();
 }
@@ -1141,28 +1524,34 @@ class _MedTileState extends State<_MedTile> {
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Center(
-                  child: Text(widget.emoji,
-                      style: const TextStyle(fontSize: 18))),
+                child: Icon(widget.icon, size: 20, color: widget.color),
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(widget.name,
-                      style: GoogleFonts.inter(
-                          fontSize: 13.5,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textDark)),
-                  Text(widget.time,
-                      style: GoogleFonts.inter(
-                          fontSize: 11.5, color: AppColors.textSoft)),
+                  Text(
+                    widget.name,
+                    style: GoogleFonts.inter(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textDark,
+                    ),
+                  ),
+                  Text(
+                    widget.time,
+                    style: GoogleFonts.inter(
+                      fontSize: 11.5,
+                      color: AppColors.textSoft,
+                    ),
+                  ),
                 ],
               ),
             ),
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
                 color: widget.status == 'taken'
                     ? const Color(0xFFEDF7ED)
@@ -1170,11 +1559,13 @@ class _MedTileState extends State<_MedTile> {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                  widget.status == 'taken' ? '✓ Taken' : '⏰ Due',
-                  style: GoogleFonts.inter(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: widget.color)),
+                widget.status == 'taken' ? 'Taken' : 'Due',
+                style: GoogleFonts.inter(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: widget.color,
+                ),
+              ),
             ),
           ],
         ),
@@ -1193,22 +1584,25 @@ class _FamilyGlance extends StatelessWidget {
       child: Column(
         children: [
           _FamilyMember(
-              name: 'Sarah Doe',
-              relation: 'Spouse',
-              avatar: 'SD',
-              color: const Color(0xFF9333EA)),
+            name: 'Sarah Doe',
+            relation: 'Spouse',
+            avatar: 'SD',
+            color: const Color(0xFF9333EA),
+          ),
           const SizedBox(height: 8),
           _FamilyMember(
-              name: 'Tommy Doe',
-              relation: 'Child',
-              avatar: 'TD',
-              color: const Color(0xFF3B82F6)),
+            name: 'Tommy Doe',
+            relation: 'Child',
+            avatar: 'TD',
+            color: const Color(0xFF3B82F6),
+          ),
           const SizedBox(height: 8),
           _FamilyMember(
-              name: 'Mary Doe',
-              relation: 'Parent',
-              avatar: 'MD',
-              color: const Color(0xFFF59E0B)),
+            name: 'Mary Doe',
+            relation: 'Parent',
+            avatar: 'MD',
+            color: const Color(0xFFF59E0B),
+          ),
           const SizedBox(height: 14),
           _SeeAllLink(label: 'Manage family'),
         ],
@@ -1220,11 +1614,12 @@ class _FamilyGlance extends StatelessWidget {
 class _FamilyMember extends StatefulWidget {
   final String name, relation, avatar;
   final Color color;
-  const _FamilyMember(
-      {required this.name,
-      required this.relation,
-      required this.avatar,
-      required this.color});
+  const _FamilyMember({
+    required this.name,
+    required this.relation,
+    required this.avatar,
+    required this.color,
+  });
   @override
   State<_FamilyMember> createState() => _FamilyMemberState();
 }
@@ -1250,37 +1645,50 @@ class _FamilyMemberState extends State<_FamilyMember> {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                gradient: LinearGradient(colors: [
-                  widget.color,
-                  widget.color.withValues(alpha: 0.7)
-                ]),
+                gradient: LinearGradient(
+                  colors: [widget.color, widget.color.withValues(alpha: 0.7)],
+                ),
                 shape: BoxShape.circle,
               ),
               child: Center(
-                  child: Text(widget.avatar,
-                      style: GoogleFonts.inter(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white))),
+                child: Text(
+                  widget.avatar,
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(widget.name,
-                      style: GoogleFonts.inter(
-                          fontSize: 13.5,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textDark)),
-                  Text(widget.relation,
-                      style: GoogleFonts.inter(
-                          fontSize: 11.5, color: AppColors.textSoft)),
+                  Text(
+                    widget.name,
+                    style: GoogleFonts.inter(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textDark,
+                    ),
+                  ),
+                  Text(
+                    widget.relation,
+                    style: GoogleFonts.inter(
+                      fontSize: 11.5,
+                      color: AppColors.textSoft,
+                    ),
+                  ),
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded,
-                size: 18, color: AppColors.textSoft),
+            Icon(
+              Icons.chevron_right_rounded,
+              size: 18,
+              color: AppColors.textSoft,
+            ),
           ],
         ),
       ),
@@ -1290,6 +1698,8 @@ class _FamilyMemberState extends State<_FamilyMember> {
 
 // ── Recent Activity
 class _RecentActivity extends StatelessWidget {
+  const _RecentActivity({super.key});
+
   @override
   Widget build(BuildContext context) {
     return _DashCard(
@@ -1298,25 +1708,29 @@ class _RecentActivity extends StatelessWidget {
       child: Column(
         children: [
           _ActivityItem(
-              icon: Icons.science_outlined,
-              text: 'Lab Report: Complete Blood Count',
-              time: '2 hours ago',
-              color: const Color(0xFF2E7D32)),
+            icon: Icons.science_outlined,
+            text: 'Lab Report: Complete Blood Count',
+            time: '2 hours ago',
+            color: const Color(0xFF2E7D32),
+          ),
           _ActivityItem(
-              icon: Icons.medication_outlined,
-              text: 'Medicine ordered: Metformin 500mg',
-              time: 'Yesterday',
-              color: const Color(0xFFE65100)),
+            icon: Icons.medication_outlined,
+            text: 'Medicine ordered: Metformin 500mg',
+            time: 'Yesterday',
+            color: const Color(0xFFE65100),
+          ),
           _ActivityItem(
-              icon: Icons.video_call_outlined,
-              text: 'Video consultation with Dr. Priya Sharma',
-              time: '3 days ago',
-              color: AppColors.blue),
+            icon: Icons.video_call_outlined,
+            text: 'Video consultation with Dr. Priya Sharma',
+            time: '3 days ago',
+            color: AppColors.blue,
+          ),
           _ActivityItem(
-              icon: Icons.bloodtype_outlined,
-              text: 'Blood request: O+ fulfilled',
-              time: '5 days ago',
-              color: AppColors.accent),
+            icon: Icons.bloodtype_outlined,
+            text: 'Blood request: O+ fulfilled',
+            time: '5 days ago',
+            color: AppColors.accent,
+          ),
         ],
       ),
     );
@@ -1327,11 +1741,12 @@ class _ActivityItem extends StatelessWidget {
   final IconData icon;
   final String text, time;
   final Color color;
-  const _ActivityItem(
-      {required this.icon,
-      required this.text,
-      required this.time,
-      required this.color});
+  const _ActivityItem({
+    required this.icon,
+    required this.text,
+    required this.time,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1350,13 +1765,15 @@ class _ActivityItem extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(text,
-                style: GoogleFonts.inter(
-                    fontSize: 13, color: AppColors.textMid)),
+            child: Text(
+              text,
+              style: GoogleFonts.inter(fontSize: 13, color: AppColors.textMid),
+            ),
           ),
-          Text(time,
-              style: GoogleFonts.inter(
-                  fontSize: 11, color: AppColors.textSoft)),
+          Text(
+            time,
+            style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSoft),
+          ),
         ],
       ),
     );
@@ -1368,8 +1785,11 @@ class _DashCard extends StatelessWidget {
   final String title;
   final IconData icon;
   final Widget child;
-  const _DashCard(
-      {required this.title, required this.icon, required this.child});
+  const _DashCard({
+    required this.title,
+    required this.icon,
+    required this.child,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1381,9 +1801,10 @@ class _DashCard extends StatelessWidget {
         border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 12,
-              offset: const Offset(0, 4)),
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
         ],
       ),
       child: Column(
@@ -1393,11 +1814,14 @@ class _DashCard extends StatelessWidget {
             children: [
               Icon(icon, size: 18, color: AppColors.blue),
               const SizedBox(width: 8),
-              Text(title,
-                  style: GoogleFonts.inter(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textDark)),
+              Text(
+                title,
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textDark,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 18),
@@ -1428,16 +1852,22 @@ class _SeeAllLinkState extends State<_SeeAllLink> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(widget.label,
-                style: GoogleFonts.inter(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.blue)),
+            Text(
+              widget.label,
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppColors.blue,
+              ),
+            ),
             AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               margin: EdgeInsets.only(left: _hovered ? 8 : 4),
-              child: const Icon(Icons.arrow_forward_rounded,
-                  size: 14, color: AppColors.blue),
+              child: const Icon(
+                Icons.arrow_forward_rounded,
+                size: 14,
+                color: AppColors.blue,
+              ),
             ),
           ],
         ),
@@ -1459,8 +1889,9 @@ class _PulsingDotState extends State<_PulsingDot>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 1400))
-      ..repeat(reverse: true);
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    )..repeat(reverse: true);
     _opacity = Tween<double>(begin: 1.0, end: 0.2).animate(_ctrl);
   }
 
@@ -1472,11 +1903,14 @@ class _PulsingDotState extends State<_PulsingDot>
 
   @override
   Widget build(BuildContext context) => FadeTransition(
-        opacity: _opacity,
-        child: Container(
-            width: 7,
-            height: 7,
-            decoration: const BoxDecoration(
-                color: AppColors.blueMid, shape: BoxShape.circle)),
-      );
+    opacity: _opacity,
+    child: Container(
+      width: 7,
+      height: 7,
+      decoration: const BoxDecoration(
+        color: AppColors.blueMid,
+        shape: BoxShape.circle,
+      ),
+    ),
+  );
 }

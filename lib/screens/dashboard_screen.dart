@@ -162,17 +162,15 @@ class _DashboardScreenState extends State<DashboardScreen>
           ),
         ],
       ),
-      bottomNavigationBar: isWide
-          ? null
-          : MobileBottomNavigation(
-              onHome: _showDashboardHome,
-              onScanQr: _scanQrCode,
-              onFamily: () => Navigator.of(context).pushNamed('/family'),
-              onEmergency: _showEmergencyActions,
-              onBloodBank: () => Navigator.of(context).pushNamed('/blood-bank'),
-              onDocuments: () => Navigator.of(context).pushNamed('/profile'),
-              onHistory: _showRecentActivity,
-            ),
+      bottomNavigationBar: MobileBottomNavigation(
+        onHome: _showDashboardHome,
+        onScanQr: _scanQrCode,
+        onFamily: () => Navigator.of(context).pushNamed('/family'),
+        onEmergency: _showEmergencyActions,
+        onBloodBank: () => Navigator.of(context).pushNamed('/blood-bank'),
+        onDocuments: () => Navigator.of(context).pushNamed('/profile'),
+        onHistory: _showRecentActivity,
+      ),
     );
   }
 
@@ -408,25 +406,31 @@ class _SideNav extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'MyHospital',
-                      style: GoogleFonts.playfairDisplay(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'MyHospital',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.playfairDisplay(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
                       ),
-                    ),
-                    Text(
-                      'Patient Portal',
-                      style: GoogleFonts.inter(
-                        fontSize: 10,
-                        color: Colors.white38,
+                      Text(
+                        'Patient Portal',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.inter(
+                          fontSize: 10,
+                          color: Colors.white38,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
